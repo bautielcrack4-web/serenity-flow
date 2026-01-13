@@ -8,13 +8,22 @@ import 'package:serenity_flow/services/revenue_cat_service.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  await Supabase.initialize(
-    url: 'https://ggurnxgfbdetqzcizeun.supabase.co',
-    anonKey: 'sb_publishable_nXIIb_p4hxt3qVcn-7-0Zg_amh60p4I',
-  );
-  
-  // Initialize RevenueCat
-  await RevenueCatService().init();
+  try {
+    await Supabase.initialize(
+      url: 'https://ggurnxgfbdetqzcizeun.supabase.co',
+      anonKey: 'sb_publishable_nXIIb_p4hxt3qVcn-7-0Zg_amh60p4I',
+    );
+    
+    // Ensure anonymous sign-in right away
+    final supabaseService = SupabaseService();
+    await supabaseService.signInAnonymously();
+    
+    // Initialize RevenueCat
+    await RevenueCatService().init();
+  } catch (e) {
+    debugPrint("Initialization Error: $e");
+    // We continue to allow the app to run, but services might be null
+  }
 
   runApp(const SerenityFlowApp());
 }
