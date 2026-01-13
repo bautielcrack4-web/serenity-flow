@@ -1,0 +1,6 @@
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/brand/app_logo.png"
+  adaptive_icon_background: "#FFF9F2" # Matching Yuna's Cream color
+  adaptive_icon_foreground: "assets/brand/app_logo.png"
