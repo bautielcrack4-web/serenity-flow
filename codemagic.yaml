@@ -46,13 +46,17 @@ workflows:
       ios_signing:
         distribution_type: app_store
         bundle_identifier: com.yuna.yoga.bauti
+        strategy: automatic
+        # Change 'codemagic' to your actual integration name if it's different
+        integration: codemagic 
     scripts:
       - name: Fetch signing files
         script: |
+          # This fetch script is a fallback, ios_signing: automatic usually handles it.
           app-store-connect fetch-signing-files "$BUNDLE_ID" --type IOS_APP_STORE --create
       - name: Set up code signing settings on Xcode project
         script: |
-          xcode-project use-profiles
+          xcode-project use-profiles --bundle-identifier "$BUNDLE_ID"
       - name: Get Flutter dependencies
         script: |
           flutter packages pub get
