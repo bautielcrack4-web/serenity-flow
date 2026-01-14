@@ -46,9 +46,6 @@ workflows:
       ios_signing:
         distribution_type: app_store
         bundle_identifier: com.yuna.yoga.bauti
-        strategy: automatic
-        # Change 'codemagic' to your actual integration name if it's different
-        integration: codemagic 
     scripts:
       - name: Fetch signing files
         script: |
