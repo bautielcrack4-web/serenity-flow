@@ -1,7 +1,39 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  // Vibrant Palette
+  // --- New Theme System ---
+
+  // 🌅 Theme 1: Serene Dawn (Light)
+  static const Color dawnBackground = Color(0xFFFFFCF8);
+  static const List<Color> dawnBlobs = [
+    Color(0xFFFFD700), // Solar Gold
+    Color(0xFFFFB7B2), // Soft Peach
+    Color(0xFFB2EBF2), // Mist Turquoise
+    Color(0xFFFFE082), // Amber Light
+    Color(0xFFE1BEE7), // Soft Lilac
+  ];
+
+  // 🌌 Theme 2: Midnight Zen (Dark - DEFAULT/PREMIUM)
+  static const Color midnightBackground = Color(0xFF141118); // Deep Void
+  static const List<Color> midnightBlobs = [
+    Color(0xFF4A148C), // Deep Purple
+    Color(0xFF311B92), // Deep Indigo
+    Color(0xFF6A1B9A), // Purple Accent
+    Color(0xFF283593), // Blue Depth
+    Color(0xFFD84315), // Burnt Orange (Subtle warmth)
+  ];
+
+  // 🌇 Theme 3: Golden Hour (Sunset)
+  static const Color duskBackground = Color(0xFF2D2424);
+  static const List<Color> duskBlobs = [
+    Color(0xFFFF7043), // Sunset Orange
+    Color(0xFF8E24AA), // Deep Magenta
+    Color(0xFF5E35B1), // Royal Purple
+    Color(0xFFFFCA28), // Amber
+    Color(0xFFEF5350), // Red
+  ];
+
+  // --- Legacy/Shared Colors ---
   static const Color coral = Color(0xFFFF7A65); 
   static const Color lavender = Color(0xFFA88DD0);
   static const Color turquoise = Color(0xFF5DBBB3);
@@ -14,7 +46,7 @@ class AppColors {
   // Text
   static const Color dark = Color(0xFF2D3142); 
   static const Color gray = Color(0xFF9E9E9E);
-  static const Color lightGray = Color(0xFFF5F5F5); // Softer light gray
+  static const Color lightGray = Color(0xFFF5F5F5);
   
   // Routine Gradients
   static const LinearGradient peachGradient = LinearGradient(
@@ -55,7 +87,7 @@ class AppColors {
   );
 
   static const LinearGradient primaryGradient = coralStatusGradient;
-  static const LinearGradient organicGradient = coralStatusGradient; // Added for compatibility
+  static const LinearGradient organicGradient = coralStatusGradient;
 }
 
 class AppShadows {

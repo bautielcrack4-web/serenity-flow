@@ -11,26 +11,36 @@ class RevenueCatService {
   bool get isPro => _isPro;
 
   Future<void> init() async {
-    // Enable debug logging for development
-    await Purchases.setLogLevel(LogLevel.debug);
+    try {
+      // Enable debug logging for development
+      await Purchases.setLogLevel(LogLevel.debug);
 
-    PurchasesConfiguration configuration;
-    if (Platform.isAndroid) {
-      // Add Google key here when available
-      configuration = PurchasesConfiguration("appl_mlpCXPpLqHeoIdyPyneUwxHqvCx"); 
-    } else if (Platform.isIOS) {
-      configuration = PurchasesConfiguration("appl_mlpCXPpLqHeoIdyPyneUwxHqvCx");
-    } else {
-      return;
+      PurchasesConfiguration configuration;
+      if (Platform.isAndroid) {
+        // Add Google key here when available
+        configuration = PurchasesConfiguration("goog_placeholder_key"); 
+      } else if (Platform.isIOS) {
+        configuration = PurchasesConfiguration("appl_mlpCXPpLqHeoIdyPyneUwxHqvCx");
+      } else {
+        return;
+      }
+
+      await Purchases.configure(configuration);
+      await updatePurchaseStatus();
+    } catch (e) {
+      print("RevenueCat initialization failed: $e");
+      // Continue without RevenueCat - app will work but purchases won't
     }
-
-    await Purchases.configure(configuration);
-    await updatePurchaseStatus();
   }
 
   Future<void> updatePurchaseStatus() async {
-    final customerInfo = await Purchases.getCustomerInfo();
-    _isPro = customerInfo.entitlements.all['pro_access']?.isActive ?? false;
+    try {
+      final customerInfo = await Purchases.getCustomerInfo();
+      _isPro = customerInfo.entitlements.all['pro_access']?.isActive ?? false;
+    } catch (e) {
+      print("Failed to update purchase status: $e");
+      _isPro = false;
+    }
   }
 
   Future<List<Package>> getOfferings() async {

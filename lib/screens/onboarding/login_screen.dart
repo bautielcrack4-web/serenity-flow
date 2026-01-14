@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:serenity_flow/core/design_system.dart';
 import 'package:serenity_flow/components/mesh_gradient_background.dart';
@@ -54,7 +55,7 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Logo
+                // Logo with error handling
                 Container(
                   width: 120,
                   height: 120,
@@ -65,7 +66,12 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(20),
-                    child: Image.asset('assets/brand/app_logo.png'),
+                    child: Image.asset(
+                      'assets/brand/app_logo.png',
+                      errorBuilder: (context, error, stackTrace) {
+                        return Icon(Icons.self_improvement, size: 60, color: AppColors.coral);
+                      },
+                    ),
                   ),
                 ),
                 const SizedBox(height: 48),
@@ -91,12 +97,15 @@ class _LoginScreenState extends State<LoginScreen> {
                 if (_isLoading)
                   const CircularProgressIndicator(color: AppColors.coral)
                 else ...[
-                  SignInWithAppleButton(
-                    onPressed: _handleAppleSignIn,
-                    style: SignInWithAppleButtonStyle.black,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  const SizedBox(height: 20),
+                  // Only show Apple Sign In on iOS
+                  if (Platform.isIOS) ...[
+                    SignInWithAppleButton(
+                      onPressed: _handleAppleSignIn,
+                      style: SignInWithAppleButtonStyle.black,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    const SizedBox(height: 20),
+                  ],
                   TextButton(
                     onPressed: () {
                       Navigator.pushAndRemoveUntil(

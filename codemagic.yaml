@@ -1,4 +1,5 @@
 workflows:
+  # Android Release Build
   android-release:
     name: Android Release Build
     max_build_duration: 60
@@ -7,7 +8,7 @@ workflows:
       flutter: stable
       xcode: latest
       groups:
-        - revenuecat # Optional: if you add environment variables there
+        - revenuecat
     scripts:
       - name: Get Flutter dependencies
         script: |
@@ -20,7 +21,61 @@ workflows:
     publishing:
       email:
         recipients:
-          - bauti@example.com # Change this to your email
+          - bagasystudio@gmail.com
         notify:
           success: true
           failure: true
+
+  # iOS App Store Release
+  ios-release:
+    name: iOS App Store Release
+    max_build_duration: 120
+    instance_type: mac_mini_m1
+    integrations:
+      app_store_connect: codemagic # Use your App Store Connect integration name
+    environment:
+      flutter: stable
+      xcode: latest
+      groups:
+        - app_store_credentials # Group containing certificates and provisioning profiles
+        - revenuecat
+      vars:
+        BUNDLE_ID: "com.yuna.yoga.bauti"
+        XCODE_WORKSPACE: "Runner.xcworkspace"
+        XCODE_SCHEME: "Runner"
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.yuna.yoga.bauti
+    scripts:
+      - name: Set up code signing settings on Xcode project
+        script: |
+          xcode-project use-profiles
+      - name: Get Flutter dependencies
+        script: |
+          flutter packages pub get
+      - name: Install pods
+        script: |
+          find . -name "Podfile" -execdir pod install \;
+      - name: Flutter build ipa
+        script: |
+          flutter build ipa --release \
+            --build-name=1.0.1 \
+            --build-number=$(($(app-store-connect get-latest-testflight-build-number "$BUNDLE_ID") + 1)) \
+            --export-options-plist=/Users/builder/export_options.plist
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+      - flutter_drive.log
+    publishing:
+      email:
+        recipients:
+          - bagasystudio@gmail.com
+        notify:
+          success: true
+          failure: true
+      app_store_connect:
+        auth: integration
+        # Submit to TestFlight
+        submit_to_testflight: true
+        # Uncomment to auto-submit to App Store review
+        # submit_to_app_store: true

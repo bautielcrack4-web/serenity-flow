@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:serenity_flow/core/design_system.dart';
-import 'dart:ui' as api_ui; // Import needed for ImageFilter
-
+import 'dart:ui' as api_ui;
 import 'dart:math';
 
 class MeshGradientBackground extends StatefulWidget {
@@ -15,28 +14,39 @@ class MeshGradientBackground extends StatefulWidget {
 class _MeshGradientBackgroundState extends State<MeshGradientBackground> with TickerProviderStateMixin {
   late AnimationController _controller;
   
-  // Independent movements for blobs
-  late Animation<double> _move1;
-  late Animation<double> _move2;
-  late Animation<double> _move3;
+  // Independent movements for 5 blobs
+  late List<Animation<double>> _movements;
+  late List<Animation<double>> _scales;
+
+  // Configuration for "Midnight Zen" (Default)
+  final Color backgroundColor = AppColors.midnightBackground;
+  final List<Color> blobColors = AppColors.midnightBlobs;
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 10), // Slow, organic movement
+      duration: const Duration(seconds: 15), // Very slow, ambient movement
     )..repeat(reverse: true);
 
-    _move1 = Tween<double>(begin: -50, end: 50).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOutSine),
-    );
-    _move2 = Tween<double>(begin: 30, end: -30).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOutQuad),
-    );
-    _move3 = Tween<double>(begin: -20, end: 40).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOutCubic),
-    );
+    // Initialize 5 distinct movement patterns
+    _movements = [
+      Tween<double>(begin: -30, end: 30).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOutSine)),
+      Tween<double>(begin: 40, end: -40).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOutQuad)),
+      Tween<double>(begin: -20, end: 50).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOutCubic)),
+      Tween<double>(begin: 20, end: -30).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOutQuart)),
+      Tween<double>(begin: 0, end: 40).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOutSine)),
+    ];
+
+    // Breathing animations (Scaling up/down)
+    _scales = [
+      Tween<double>(begin: 1.0, end: 1.2).animate(CurvedAnimation(parent: _controller, curve: const Interval(0.0, 0.5, curve: Curves.easeInOut))),
+      Tween<double>(begin: 1.2, end: 1.0).animate(CurvedAnimation(parent: _controller, curve: const Interval(0.2, 0.7, curve: Curves.easeInOut))),
+      Tween<double>(begin: 0.9, end: 1.1).animate(CurvedAnimation(parent: _controller, curve: const Interval(0.4, 0.9, curve: Curves.easeInOut))),
+      Tween<double>(begin: 1.1, end: 0.8).animate(CurvedAnimation(parent: _controller, curve: const Interval(0.1, 0.6, curve: Curves.easeInOut))),
+      Tween<double>(begin: 1.0, end: 1.3).animate(CurvedAnimation(parent: _controller, curve: const Interval(0.3, 0.8, curve: Curves.easeInOut))),
+    ];
   }
 
   @override
@@ -47,37 +57,55 @@ class _MeshGradientBackgroundState extends State<MeshGradientBackground> with Ti
 
   @override
   Widget build(BuildContext context) {
+    if (blobColors.length < 5) return Container(color: backgroundColor, child: widget.child);
+
+    final size = MediaQuery.of(context).size;
+
     return Stack(
       children: [
         // Base Background
-        Container(color: AppColors.cream),
+        Container(color: backgroundColor),
         
-        // Animated Blobs (OPTIMIZED: Isolated with RepaintBoundary)
+        // Animated Blobs
         RepaintBoundary(
           child: AnimatedBuilder(
             animation: _controller,
             builder: (context, child) {
               return Stack(
                 children: [
-                  // Blob 1: Coral (Top Left)
+                  // Blob 1: Top Left (Large Foundation)
                   Positioned(
-                    top: -100 + _move1.value,
-                    left: -50 + _move2.value,
-                    child: _buildBlob(300, AppColors.coral.withOpacity(0.2)),
+                    top: -100 + _movements[0].value,
+                    left: -100 + _movements[1].value,
+                    child: _buildBlob(400 * _scales[0].value, blobColors[0]),
                   ),
                   
-                  // Blob 2: Lavender (Middle Right)
+                  // Blob 2: Bottom Right (Large Foundation)
                   Positioned(
-                    top: MediaQuery.of(context).size.height * 0.3 + _move2.value,
-                    right: -80 + _move3.value,
-                    child: _buildBlob(350, AppColors.lavender.withOpacity(0.2)),
+                    bottom: -150 + _movements[1].value,
+                    right: -100 + _movements[2].value,
+                    child: _buildBlob(450 * _scales[1].value, blobColors[1]),
                   ),
                   
-                  // Blob 3: Turquoise (Bottom Left)
+                  // Blob 3: Center Right (Accent)
                   Positioned(
-                    bottom: -50 + _move3.value,
-                    left: -20 + _move1.value,
-                    child: _buildBlob(320, AppColors.turquoise.withOpacity(0.15)),
+                    top: size.height * 0.3 + _movements[2].value,
+                    right: -50 + _movements[3].value,
+                    child: _buildBlob(300 * _scales[2].value, blobColors[2]),
+                  ),
+
+                  // Blob 4: Bottom Left (Accent)
+                  Positioned(
+                    bottom: 100 + _movements[3].value,
+                    left: -50 + _movements[4].value,
+                    child: _buildBlob(350 * _scales[3].value, blobColors[3]),
+                  ),
+
+                  // Blob 5: Top Center/Right (Highlight)
+                  Positioned(
+                    top: 50 + _movements[4].value,
+                    right: 80 + _movements[0].value,
+                    child: _buildBlob(250 * _scales[4].value, blobColors[4].withOpacity(0.4)),
                   ),
                 ],
               );
@@ -85,14 +113,27 @@ class _MeshGradientBackgroundState extends State<MeshGradientBackground> with Ti
           ),
         ),
         
-        // Unified Glass Blur (OPTIMIZED: Lower Sigma for smoothness)
+        // Unified Atmosphere Blur (High Sigma for Dreamy Effect)
         BackdropFilter(
-          filter: api_ui.ImageFilter.blur(sigmaX: 18, sigmaY: 18), 
-          child: Container(color: Colors.white.withOpacity(0.1)), 
+          filter: api_ui.ImageFilter.blur(sigmaX: 60, sigmaY: 60), 
+          child: Container(color: Colors.transparent), 
         ),
 
+        // Subtle Noise/Grain (Optional, simulate with low opacity white overlay)
+        Container(color: Colors.white.withOpacity(0.02)),
+
         // Child Content
-        widget.child,
+        Theme(
+           // Force Dark Mode text for Midnight Theme
+          data: AppTypography.theme.copyWith(
+            brightness: Brightness.dark,
+            textTheme: AppTypography.theme.textTheme.apply(
+              bodyColor: Colors.white,
+              displayColor: Colors.white,
+            ),
+          ),
+          child: widget.child,
+        ),
       ],
     );
   }
@@ -102,7 +143,7 @@ class _MeshGradientBackgroundState extends State<MeshGradientBackground> with Ti
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: color,
+        color: color.withOpacity(0.5), // Higher opacity before blur
         shape: BoxShape.circle,
       ),
     );

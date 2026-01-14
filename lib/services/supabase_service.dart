@@ -12,8 +12,13 @@ class SupabaseService {
   // --- Auth ---
 
   Future<void> signInAnonymously() async {
-    if (_supabase.auth.currentUser == null) {
-      await _supabase.auth.signInAnonymously();
+    try {
+      if (_supabase.auth.currentUser == null) {
+        await _supabase.auth.signInAnonymously();
+      }
+    } catch (e) {
+      print('Error signing in anonymously: $e');
+      // Continue without auth - app will work in offline mode
     }
   }
 
