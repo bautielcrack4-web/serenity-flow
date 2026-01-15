@@ -43,9 +43,6 @@ workflows:
         BUNDLE_ID: "com.yuna.yoga.bauti"
         XCODE_WORKSPACE: "Runner.xcworkspace"
         XCODE_SCHEME: "Runner"
-      ios_signing:
-        distribution_type: app_store
-        bundle_identifier: com.yuna.yoga.bauti
     scripts:
       - name: Fetch signing files
         script: |
