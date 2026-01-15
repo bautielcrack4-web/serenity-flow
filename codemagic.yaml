@@ -32,7 +32,7 @@ workflows:
     max_build_duration: 120
     instance_type: mac_mini_m1
     integrations:
-      app_store_connect: codemagic # Use your App Store Connect integration name
+      app_store_connect: Codemagic Build Key # Updated from 'codemagic' to match your integration name
     environment:
       flutter: stable
       xcode: latest
