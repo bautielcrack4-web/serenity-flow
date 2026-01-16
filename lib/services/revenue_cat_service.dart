@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
+import 'package:serenity_flow/services/supabase_service.dart';
 
 class RevenueCatService {
   static final RevenueCatService _instance = RevenueCatService._internal();
@@ -37,9 +38,14 @@ class RevenueCatService {
     try {
       final customerInfo = await Purchases.getCustomerInfo();
       _isPro = customerInfo.entitlements.all['pro_access']?.isActive ?? false;
+      
+      // Auto-Sync: Keep Supabase source of truth updated with Apple/Google status
+      // This removes the need for complex server-side webhooks for the MVP
+      await SupabaseService().updateProStatus(_isPro);
+      
     } catch (e) {
       print("Failed to update purchase status: $e");
-      _isPro = false;
+      // If error (offline), we keep previous state or default to false safely
     }
   }
 
