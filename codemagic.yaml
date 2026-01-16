@@ -32,7 +32,7 @@ workflows:
     max_build_duration: 120
     instance_type: mac_mini_m1
     integrations:
-      app_store_connect: Codemagic Build Key # Updated from 'codemagic' to match your integration name
+      app_store_connect: Lume AI Key # Switching to a key with verified Admin access
     environment:
       flutter: stable
       xcode: latest
