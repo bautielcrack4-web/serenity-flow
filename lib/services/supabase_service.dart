@@ -59,19 +59,61 @@ class SupabaseService {
     }).eq('id', userId!);
   }
 
-  Future<void> incrementStreak() async {
+  Future<void> updateStreak() async {
     if (userId == null) return;
     
-    final profile = await getProfile();
-    if (profile == null) return;
+    try {
+      final profile = await getProfile();
+      if (profile == null) return;
 
-    final currentStreak = profile['streak_days'] as int? ?? 0;
-    // Logic to verify if streak continues would go here (check last_session_at)
-    // For MVP, we simply increment if requested (Integration Layer will handle logic)
+      final int currentStreak = profile['streak_days'] as int? ?? 0;
+      final String? lastSessionStr = profile['last_session_at'] as String?;
+      
+      int newStreak = currentStreak;
+      final now = DateTime.now();
+      
+      if (lastSessionStr != null) {
+        final lastSession = DateTime.parse(lastSessionStr);
+        final difference = now.difference(lastSession).inDays;
+        
+        // Check if it's the same day (ignore)
+        final isSameDay = now.year == lastSession.year && 
+                          now.month == lastSession.month && 
+                          now.day == lastSession.day;
+                          
+        if (isSameDay) {
+          // Already practiced today, keep streak same
+          return; 
+        } else if (difference == 1 || (difference == 0 && !isSameDay)) { 
+          // Consecutive day (yesterday or just across midnight header)
+          // Note: difference inDays truncates, so we might want more robust "calendar day" check
+          // Better logic: Check if lastSession was yesterday
+          
+          final yesterday = now.subtract(const Duration(days: 1));
+          final isYesterday = yesterday.year == lastSession.year && 
+                              yesterday.month == lastSession.month && 
+                              yesterday.day == lastSession.day;
+
+          if (isYesterday || difference <= 1) { //Allow grace period of < 24h gap across days
+             newStreak++;
+          } else {
+             newStreak = 1; // Broken streak
+          }
+        } else {
+          newStreak = 1; // Broken streak (> 1 day gap)
+        }
+      } else {
+        newStreak = 1; // First session ever
+      }
     
-    await _supabase.from('profiles').update({
-      'streak_days': currentStreak + 1,
-    }).eq('id', userId!);
+      await _supabase.from('profiles').update({
+        'streak_days': newStreak,
+        'last_session_at': now.toIso8601String(),
+      }).eq('id', userId!);
+      
+    } catch (e) {
+      print('Error updating streak: $e');
+    }
   }
 
   // --- Sessions (History & Calendar) ---
@@ -86,6 +128,9 @@ class SupabaseService {
       'xp_earned': LevelSystem.xpPerSession, // Base XP
       'completed_at': DateTime.now().toIso8601String(),
     });
+
+    // Update streak logic (checks dates)
+    await updateStreak();
 
     await updateXP(LevelSystem.xpPerSession);
 
