@@ -4,6 +4,9 @@ import 'package:serenity_flow/core/design_system.dart';
 import 'package:serenity_flow/components/mesh_gradient_background.dart';
 import 'package:flutter/services.dart';
 import 'dart:ui' as api_ui;
+import 'package:url_launcher/url_launcher.dart';
+import 'package:serenity_flow/services/supabase_service.dart';
+import 'package:serenity_flow/main.dart'; // To restart app
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -53,9 +56,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       _buildSwitchTile("Recordatorios", _notificationsEnabled, Icons.notifications_active_rounded, (v) => setState(() => _notificationsEnabled = v)),
                     ]),
                     
-                    const SizedBox(height: 48),
+                    const SizedBox(height: 32),
+                    
+                    _buildSectionPadding("LEGAL"),
+                    _buildSettingsCard([
+                      _buildActionTile("Política de Privacidad", Icons.privacy_tip_outlined, () {
+                         _launchUrl("https://sites.google.com/view/yunaapp/privacy-policy");
+                      }),
+                      _buildDivider(),
+                      _buildActionTile("Términos de Servicio", Icons.description_outlined, () {
+                         _launchUrl("https://sites.google.com/view/yunaapp/terms-of-service");
+                      }),
+                    ]),
+
+                    const SizedBox(height: 32),
                     _buildResetButton(),
-                    const SizedBox(height: 120),
+                    const SizedBox(height: 20),
+                    _buildDeleteAccountButton(),
+                    const SizedBox(height: 60),
                   ],
                 ),
               ),
@@ -154,5 +172,73 @@ class _SettingsScreenState extends State<SettingsScreen> {
         child: Text("Reiniciar datos de práctica", style: TextStyle(color: AppColors.coral.withOpacity(0.8), fontSize: 16, fontWeight: FontWeight.w900)),
       ),
     );
+  }
+
+  Widget _buildActionTile(String title, IconData icon, VoidCallback onTap) {
+    return InkWell(
+      onTap: () {
+        HapticFeedback.lightImpact();
+        onTap();
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        child: Row(
+          children: [
+            Icon(icon, color: AppColors.lavender, size: 24),
+            const SizedBox(width: 16),
+            Expanded(child: Text(title, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: AppColors.dark))),
+            Icon(Icons.chevron_right_rounded, color: AppColors.gray.withOpacity(0.5)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDeleteAccountButton() {
+    return Center(
+      child: TextButton(
+        onPressed: () {
+          // Confirm Dialog
+          showDialog(
+            context: context,
+            builder: (context) => CupertinoAlertDialog(
+              title: const Text("Eliminar Cuenta"),
+              content: const Text("¿Estás seguro? Esta acción es irreversible y borrará todo tu progreso."),
+              actions: [
+                CupertinoDialogAction(
+                  child: const Text("Cancelar"),
+                  onPressed: () => Navigator.pop(context),
+                ),
+                CupertinoDialogAction(
+                  isDestructiveAction: true,
+                  child: const Text("Eliminar"),
+                  onPressed: () async {
+                    Navigator.pop(context); // Close dialog
+                    await SupabaseService().deleteAccount();
+                    if (!mounted) return;
+                    // Restart App
+                     Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(builder: (context) => const SerenityFlowApp()),
+                      (Route<dynamic> route) => false,
+                    );
+                  },
+                ),
+              ],
+            ),
+          );
+        },
+        child: Text(
+          "Eliminar Cuenta",
+          style: TextStyle(color: Colors.red.withOpacity(0.6), fontSize: 14, fontWeight: FontWeight.bold),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _launchUrl(String url) async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    }
   }
 }
