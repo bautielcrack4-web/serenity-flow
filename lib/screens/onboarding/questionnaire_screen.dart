@@ -203,27 +203,27 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> with TickerPr
 
   String _getQuestionText() {
     switch (_currentStep) {
-      case 1: return "¿Cuál es tu objetivo principal?";
-      case 2: return "¿Con qué frecuencia practicas yoga?";
-      case 3: return "¿Cómo está tu nivel de energía hoy?";
-      case 4: return "¿Tienes alguna molestia física?";
-      case 5: return "¿Tu nivel de estrés actual?";
-      case 6: return "¿Cuánto tiempo tienes hoy?";
-      case 7: return "¿Qué tipo de sesión prefieres?";
-      default: return "¿Listo para comenzar?";
+      case 1: return "What is your main goal?";
+      case 2: return "How often do you practice yoga?";
+      case 3: return "How is your energy today?";
+      case 4: return "Any physical discomfort?";
+      case 5: return "Current stress level?";
+      case 6: return "How much time do you have?";
+      case 7: return "Session preference?";
+      default: return "Ready to start?";
     }
   }
 
   List<String> _getOptions() {
      switch (_currentStep) {
-      case 1: return ["Flexibilidad", "Fuerza", "Relajación", "Meditación"];
-      case 2: return ["Nunca", "Ocasionalmente", "Regularmente", "Diario"];
-      case 3: return ["Baja", "Media", "Alta", "Mucha energía"];
-      case 4: return ["Espalda", "Cuello", "Rodillas", "Ninguna"];
-      case 5: return ["Bajo", "Medio", "Alto"];
+      case 1: return ["Flexibility", "Strength", "Relaxation", "Meditation"];
+      case 2: return ["Never", "Occasionally", "Regularly", "Daily"];
+      case 3: return ["Low", "Medium", "High", "Lots of energy"];
+      case 4: return ["Back", "Neck", "Knees", "None"];
+      case 5: return ["Low", "Medium", "High"];
       case 6: return ["5-10 min", "15-20 min", "30+ min"];
-      case 7: return ["Guiada", "Silenciosa", "Música suave"];
-      default: return ["¡Comenzar ahora!"];
+      case 7: return ["Guided", "Silent", "Soft Music"];
+      default: return ["Start Now!"];
     }
   }
 }

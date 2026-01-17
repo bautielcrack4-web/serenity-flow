@@ -35,17 +35,17 @@ class _HomeScreenContentState extends State<HomeScreenContent> with SingleTicker
 
   String _getGreeting() {
     final hour = DateTime.now().hour;
-    if (hour < 12) return "Buenos días";
-    if (hour < 18) return "Buenas tardes";
-    return "Buenas noches";
+    if (hour < 12) return "Good morning";
+    if (hour < 18) return "Good afternoon";
+    return "Good evening";
   }
 
   String _getRecommendation() {
     final hour = DateTime.now().hour;
-    if (hour < 10) return "Despertar Suave";
-    if (hour < 14) return "Alivio de Tensión";
-    if (hour < 20) return "Alivio de Tensión";
-    return "Sueño Reparador";
+    if (hour < 10) return "Gentle Wake Up";
+    if (hour < 14) return "Tension Relief";
+    if (hour < 20) return "Tension Relief";
+    return "Deep Sleep";
   }
 
   @override
@@ -69,7 +69,7 @@ class _HomeScreenContentState extends State<HomeScreenContent> with SingleTicker
                 const SizedBox(height: 32),
                 
                 // Section Header
-                Text("Todas las Rutinas", style: Theme.of(context).textTheme.headlineSmall),
+                Text("All Routines", style: Theme.of(context).textTheme.headlineSmall),
                 const SizedBox(height: 20),
                 
                 // Routine Cards with Staggered Animation
@@ -120,12 +120,12 @@ class _HomeScreenContentState extends State<HomeScreenContent> with SingleTicker
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          "${_getGreeting()}, María ☀️",
+          "${_getGreeting()}, Maria ☀️",
           style: AppTextStyles.headline.copyWith(color: AppColors.dark),
         ),
         const SizedBox(height: 8),
         Text(
-          "¿Lista para tu práctica de hoy?",
+          "Ready for your practice today?",
           style: AppTextStyles.caption.copyWith(color: AppColors.dark.withOpacity(0.6)),
         ),
       ],
@@ -162,7 +162,7 @@ class _HomeScreenContentState extends State<HomeScreenContent> with SingleTicker
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Text(
-                  "SUGERIDO PARA TI",
+                  "SUGGESTED FOR YOU",
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w900,
@@ -224,7 +224,7 @@ class _HomeScreenContentState extends State<HomeScreenContent> with SingleTicker
                 elevation: 0,
               ),
               child: const Text(
-                "EMPEZAR AHORA",
+                "START NOW",
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w900,

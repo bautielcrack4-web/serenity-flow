@@ -32,39 +32,39 @@ class _SettingsScreenState extends State<SettingsScreen> {
             children: [
               Padding(
                 padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
-                child: Text("Ajustes", style: Theme.of(context).textTheme.displayLarge),
+                child: Text("Settings", style: Theme.of(context).textTheme.displayLarge),
               ),
               Expanded(
                 child: ListView(
                   physics: const BouncingScrollPhysics(),
                   padding: const EdgeInsets.symmetric(horizontal: 24),
                   children: [
-                    _buildSectionPadding("SESIÓN"),
+                    _buildSectionPadding("SESSION"),
                     _buildPillSelector(),
                     const SizedBox(height: 32),
                     
-                    _buildSectionPadding("PREFERENCIAS"),
+                    _buildSectionPadding("PREFERENCES"),
                     _buildSettingsCard([
-                      _buildSwitchTile("Sonido", _soundEnabled, Icons.volume_up_rounded, (v) => setState(() => _soundEnabled = v)),
+                      _buildSwitchTile("Sound", _soundEnabled, Icons.volume_up_rounded, (v) => setState(() => _soundEnabled = v)),
                       _buildDivider(),
                       _buildSwitchTile("Haptics", _vibrationEnabled, Icons.vibration_rounded, (v) => setState(() => _vibrationEnabled = v)),
                     ]),
                     const SizedBox(height: 32),
                     
-                    _buildSectionPadding("NOTIFICACIONES"),
+                    _buildSectionPadding("NOTIFICATIONS"),
                     _buildSettingsCard([
-                      _buildSwitchTile("Recordatorios", _notificationsEnabled, Icons.notifications_active_rounded, (v) => setState(() => _notificationsEnabled = v)),
+                      _buildSwitchTile("Reminders", _notificationsEnabled, Icons.notifications_active_rounded, (v) => setState(() => _notificationsEnabled = v)),
                     ]),
                     
                     const SizedBox(height: 32),
                     
                     _buildSectionPadding("LEGAL"),
                     _buildSettingsCard([
-                      _buildActionTile("Política de Privacidad", Icons.privacy_tip_outlined, () {
+                      _buildActionTile("Privacy Policy", Icons.privacy_tip_outlined, () {
                          _launchUrl("https://sites.google.com/view/yunaapp/privacy-policy");
                       }),
                       _buildDivider(),
-                      _buildActionTile("Términos de Servicio", Icons.description_outlined, () {
+                      _buildActionTile("Terms of Service", Icons.description_outlined, () {
                          _launchUrl("https://sites.google.com/view/yunaapp/terms-of-service");
                       }),
                     ]),
@@ -98,7 +98,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text("Duración por pose", style: TextStyle(fontWeight: FontWeight.w900, fontSize: 17, color: AppColors.dark)),
+          const Text("Pose Duration", style: TextStyle(fontWeight: FontWeight.w900, fontSize: 17, color: AppColors.dark)),
           const SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -169,7 +169,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Center(
       child: TextButton(
         onPressed: () => HapticFeedback.heavyImpact(),
-        child: Text("Reiniciar datos de práctica", style: TextStyle(color: AppColors.coral.withOpacity(0.8), fontSize: 16, fontWeight: FontWeight.w900)),
+        child: Text("Reset Practice Data", style: TextStyle(color: AppColors.coral.withOpacity(0.8), fontSize: 16, fontWeight: FontWeight.w900)),
       ),
     );
   }
@@ -202,16 +202,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
           showDialog(
             context: context,
             builder: (context) => CupertinoAlertDialog(
-              title: const Text("Eliminar Cuenta"),
-              content: const Text("¿Estás seguro? Esta acción es irreversible y borrará todo tu progreso."),
+              title: const Text("Delete Account"),
+              content: const Text("Are you sure? This action is irreversible and will delete all your progress."),
               actions: [
                 CupertinoDialogAction(
-                  child: const Text("Cancelar"),
+                  child: const Text("Cancel"),
                   onPressed: () => Navigator.pop(context),
                 ),
                 CupertinoDialogAction(
                   isDestructiveAction: true,
-                  child: const Text("Eliminar"),
+                  child: const Text("Delete"),
                   onPressed: () async {
                     Navigator.pop(context); // Close dialog
                     await SupabaseService().deleteAccount();
@@ -228,7 +228,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           );
         },
         child: Text(
-          "Eliminar Cuenta",
+          "Delete Account",
           style: TextStyle(color: Colors.red.withOpacity(0.6), fontSize: 14, fontWeight: FontWeight.bold),
         ),
       ),

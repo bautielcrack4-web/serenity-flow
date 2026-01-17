@@ -85,7 +85,7 @@ class _CompletionScreenState extends State<CompletionScreen> with TickerProvider
                     end: Alignment.bottomRight,
                   ).createShader(bounds),
                   child: const Text(
-                    "¡SESIÓN COMPLETADA!",
+                    "SESSION COMPLETED!",
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 36,
@@ -97,7 +97,7 @@ class _CompletionScreenState extends State<CompletionScreen> with TickerProvider
                   ),
                 ),
                 const SizedBox(height: 12),
-                Text("Cuerpo y mente en equilibrio", style: AppTextStyles.caption.copyWith(color: AppColors.dark.withOpacity(0.5))),
+                Text("Body and mind in balance", style: AppTextStyles.caption.copyWith(color: AppColors.dark.withOpacity(0.5))),
                 
                 const Spacer(),
                 
@@ -106,16 +106,16 @@ class _CompletionScreenState extends State<CompletionScreen> with TickerProvider
                   padding: const EdgeInsets.symmetric(horizontal: 24),
                   child: Row(
                     children: [
-                      Expanded(child: _buildStaggeredStat("Minutos", "08", 0, AppColors.coral)),
+                      Expanded(child: _buildStaggeredStat("Minutes", "08", 0, AppColors.coral)),
                       const SizedBox(width: 16),
-                      Expanded(child: _buildStaggeredStat("Racha", "04", 1, AppColors.lavender)),
+                      Expanded(child: _buildStaggeredStat("Streak", "04", 1, AppColors.lavender)),
                     ],
                   ),
                 ),
                 const SizedBox(height: 16),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: _buildStaggeredStat("Meta Diaria", "100%", 2, AppColors.turquoise),
+                  child: _buildStaggeredStat("Daily Goal", "100%", 2, AppColors.turquoise),
                 ),
                 
                 const Spacer(),
@@ -197,7 +197,7 @@ class _CompletionScreenState extends State<CompletionScreen> with TickerProvider
                children: [
                  Icon(Icons.share_rounded, size: 20, color: AppColors.dark),
                  SizedBox(width: 8),
-                 Text("COMPARTIR VICTORIA", style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.dark)),
+                 Text("SHARE VICTORY", style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.dark)),
                ],
              ),
           ),
@@ -216,7 +216,7 @@ class _CompletionScreenState extends State<CompletionScreen> with TickerProvider
                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(36)),
                  elevation: 10,
               ),
-              child: const Text("VOLVER AL INICIO", style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1.5)),
+              child: const Text("BACK TO HOME", style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1.5)),
             ),
           ),
         ),
@@ -229,10 +229,9 @@ class _CompletionScreenState extends State<CompletionScreen> with TickerProvider
     // For now, we will use the share_plus text share which is cleaner for the MVP
     // If screenshot package was fully configured with native permissions for Android/iOS, we'd use that.
     
-    const String shareText = "¡Acabo de completar mi sesión de hoy en Yuna! 🔥\n\n🎯 8 Minutos de Flow\n⚡ Racha de 4 días\n\nDescarga Yuna y únete al flow.";
-    // await Share.share(shareText); // This would require valid import and implementation
+    // Future implementation: await Share.share("Just completed my session today on Yuna! 🔥\n\n🎯 8 Minutes of Flow\n⚡ 4 Day Streak\n\nDownload Yuna and join the flow.");
     // Since we are mocking the dependency setup for this speedrun:
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Abriendo menú de compartir... (Simulado)")));
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Opening share menu... (Simulated)")));
   }
 }
 

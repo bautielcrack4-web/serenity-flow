@@ -259,7 +259,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
                         if (isAnnual) ...[
                           const SizedBox(height: 4),
                           Text(
-                            "US\$ 29.99 USD 14.99",
+                            "US\$ 29.99  US\$ 14.99",
                             style: TextStyle(
                               fontSize: 14, 
                               color: AppColors.dark.withOpacity(0.4),

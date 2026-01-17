@@ -54,8 +54,11 @@ class _PoseScreenState extends State<PoseScreen> with TickerProviderStateMixin {
         setState(() {
           if (_timeLeft > 0) {
             _timeLeft--;
-            if (_timeLeft <= 5) HapticFeedback.mediumImpact();
-            else HapticFeedback.selectionClick();
+            if (_timeLeft <= 5) {
+              HapticFeedback.mediumImpact();
+            } else {
+              HapticFeedback.selectionClick();
+            }
           } else {
             _onTimerFinished();
           }
@@ -111,7 +114,7 @@ class _PoseScreenState extends State<PoseScreen> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final currentPose = widget.routine.poses[_currentPoseIndex];
-    String sideLabel = currentPose.perSide ? (_isRightSide ? "Lado Derecho" : "Lado Izquierdo") : "";
+    String sideLabel = currentPose.perSide ? (_isRightSide ? "Right Side" : "Left Side") : "";
 
     return Scaffold(
       backgroundColor: AppColors.cream,
@@ -247,7 +250,7 @@ class _PoseScreenState extends State<PoseScreen> with TickerProviderStateMixin {
             children: [
               IconButton(icon: const Icon(Icons.close_rounded, size: 28), onPressed: () => Navigator.pop(context)),
               Text(
-                "Pose ${_currentPoseIndex + 1} de ${widget.routine.poses.length}",
+                "Pose ${_currentPoseIndex + 1} of ${widget.routine.poses.length}",
                 style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: AppColors.dark),
               ),
               const SizedBox(width: 48),
@@ -344,7 +347,7 @@ class _PoseScreenState extends State<PoseScreen> with TickerProviderStateMixin {
             
             Positioned(
               bottom: 60,
-              child: Text("SEGUNDOS", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: _dynamicColor.withOpacity(0.6), letterSpacing: 2)),
+              child: Text("SECONDS", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: _dynamicColor.withOpacity(0.6), letterSpacing: 2)),
             ),
           ],
         ),
@@ -361,7 +364,7 @@ class _PoseScreenState extends State<PoseScreen> with TickerProviderStateMixin {
           children: [
             Icon(Icons.pause_circle_filled_rounded, size: 100, color: Colors.white),
             SizedBox(height: 20),
-            Text("Pausa", style: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w900)),
+            Text("Paused", style: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w900)),
           ],
         ),
       ),

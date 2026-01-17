@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:serenity_flow/services/supabase_service.dart';
@@ -29,7 +30,7 @@ class RevenueCatService {
       await Purchases.configure(configuration);
       await updatePurchaseStatus();
     } catch (e) {
-      print("RevenueCat initialization failed: $e");
+      debugPrint("RevenueCat initialization failed: $e");
       // Continue without RevenueCat - app will work but purchases won't
     }
   }
@@ -44,7 +45,7 @@ class RevenueCatService {
       await SupabaseService().updateProStatus(_isPro);
       
     } catch (e) {
-      print("Failed to update purchase status: $e");
+      debugPrint("Failed to update purchase status: $e");
       // If error (offline), we keep previous state or default to false safely
     }
   }
@@ -56,7 +57,7 @@ class RevenueCatService {
         return offerings.current!.availablePackages;
       }
     } on PlatformException catch (e) {
-      print("Error fetching offerings: $e");
+      debugPrint("Error fetching offerings: $e");
     }
     return [];
   }
@@ -69,7 +70,7 @@ class RevenueCatService {
     } on PlatformException catch (e) {
       var errorCode = PurchasesErrorHelper.getErrorCode(e);
       if (errorCode != PurchasesErrorCode.purchaseCancelledError) {
-        print("Error purchasing package: $e");
+        debugPrint("Error purchasing package: $e");
       }
       return false;
     }
@@ -80,7 +81,7 @@ class RevenueCatService {
       CustomerInfo customerInfo = await Purchases.restorePurchases();
       _isPro = customerInfo.entitlements.all['pro_access']?.isActive ?? false;
     } on PlatformException catch (e) {
-      print("Error restoring purchases: $e");
+      debugPrint("Error restoring purchases: $e");
     }
   }
 }

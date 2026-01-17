@@ -76,7 +76,7 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
                           end: Alignment.bottomRight,
                         ).createShader(bounds),
                         child: Text(
-                          "Tu Progreso",
+                          "Your Progress",
                           style: AppTextStyles.headline.copyWith(color: Colors.white),
                         ),
                       ),
@@ -97,20 +97,20 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
                       
                       Row(
                         children: [
-                           Expanded(child: _buildDopamineStatCard("Minutos", "${stats['minutes']}", AppColors.coralStatusGradient, Icons.timer_outlined)),
+                           Expanded(child: _buildDopamineStatCard("Minutes", "${stats['minutes']}", AppColors.coralStatusGradient, Icons.timer_outlined)),
                            const SizedBox(width: 16),
-                           Expanded(child: _buildDopamineStatCard("Sesiones", "${stats['sessions']}", AppColors.turquoiseStatusGradient, Icons.bolt_rounded)),
+                           Expanded(child: _buildDopamineStatCard("Sessions", "${stats['sessions']}", AppColors.turquoiseStatusGradient, Icons.bolt_rounded)),
                         ],
                       ),
                       
                       const SizedBox(height: AppSpacings.betweenSections),
                       
-                      Text("Actividad Semanal", style: Theme.of(context).textTheme.headlineSmall),
+                      Text("Weekly Activity", style: Theme.of(context).textTheme.headlineSmall),
                       const SizedBox(height: 20),
                       _buildWeeklyChart(),
                       
                       const SizedBox(height: AppSpacings.betweenSections),
-                      Text("Insignias Brillantes", style: Theme.of(context).textTheme.headlineSmall),
+                      Text("Shiny Badges", style: Theme.of(context).textTheme.headlineSmall),
                       const SizedBox(height: 20),
                       _buildBadgesGrid(),
                     ],
@@ -144,11 +144,11 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text("Enero 2026", style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: AppColors.dark)),
+                  const Text("January 2026", style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: AppColors.dark)),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(color: AppColors.turquoise.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
-                    child: Text("$totalDays DÍAS TOTAL", style: const TextStyle(color: AppColors.turquoise, fontWeight: FontWeight.w900, fontSize: 12)),
+                    child: Text("$totalDays DAYS TOTAL", style: const TextStyle(color: AppColors.turquoise, fontWeight: FontWeight.w900, fontSize: 12)),
                   ),
                 ],
               ),
@@ -156,7 +156,7 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
               // Days Header
               Row(
                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                 children: ["L", "M", "M", "J", "V", "S", "D"].map((d) => SizedBox(width: 40, child: Text(d, textAlign: TextAlign.center, style: TextStyle(color: AppColors.gray.withOpacity(0.5), fontWeight: FontWeight.w900, fontSize: 12)))).toList(),
+                 children: ["M", "T", "W", "T", "F", "S", "S"].map((d) => SizedBox(width: 40, child: Text(d, textAlign: TextAlign.center, style: TextStyle(color: AppColors.gray.withOpacity(0.5), fontWeight: FontWeight.w900, fontSize: 12)))).toList(),
               ),
               const SizedBox(height: 12),
               // Grid (Dynamic for Jan 2026)
@@ -242,13 +242,13 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          _buildChartBar("Lun", 0.4, AppColors.coral),
-          _buildChartBar("Mar", 0.7, AppColors.lavender),
-          _buildChartBar("Mie", 0.9, AppColors.turquoise),
-          _buildChartBar("Jue", 0.6, AppColors.coral),
-          _buildChartBar("Vie", 1.0, AppColors.turquoise),
-          _buildChartBar("Sab", 0.3, AppColors.lavender),
-          _buildChartBar("Dom", 0.5, AppColors.coral),
+          _buildChartBar("Mon", 0.4, AppColors.coral),
+          _buildChartBar("Tue", 0.7, AppColors.lavender),
+          _buildChartBar("Wed", 0.9, AppColors.turquoise),
+          _buildChartBar("Thu", 0.6, AppColors.coral),
+          _buildChartBar("Fri", 1.0, AppColors.turquoise),
+          _buildChartBar("Sat", 0.3, AppColors.lavender),
+          _buildChartBar("Sun", 0.5, AppColors.coral),
         ],
       ),
     );
@@ -275,7 +275,7 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
-        _buildBadge(Icons.emoji_events_rounded, Colors.amber, true, "Guerrero"),
+        _buildBadge(Icons.emoji_events_rounded, Colors.amber, true, "Warrior"),
         _buildBadge(Icons.auto_awesome_rounded, const Color(0xFF7B61FF), true, "Flow"),
         _buildBadge(Icons.diamond_rounded, const Color(0xFF00D1FF), false, "Elite"),
       ],
@@ -352,7 +352,7 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
                         border: Border.all(color: AppColors.coral.withOpacity(0.3), width: 1),
                       ),
                       child: const Text(
-                        "RACHA ACTIVA",
+                        "ACTIVE STREAK",
                         style: TextStyle(
                           color: AppColors.coral,
                           fontSize: 11,
@@ -365,7 +365,7 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  "$streak Días",
+                  "$streak Days",
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 48,
@@ -376,7 +376,7 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  "¡Sigue así!",
+                  "Keep it up!",
                   style: TextStyle(
                     color: Colors.white.withOpacity(0.5),
                     fontSize: 14,

@@ -72,8 +72,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               _buildNavItem(0, Icons.spa_outlined, "Home"),
-              _buildNavItem(1, Icons.bar_chart_rounded, "Progreso"),
-              _buildNavItem(2, Icons.settings_rounded, "Ajustes"),
+              _buildNavItem(1, Icons.bar_chart_rounded, "Progress"),
+              _buildNavItem(2, Icons.settings_rounded, "Settings"),
             ],
           ),
         ],

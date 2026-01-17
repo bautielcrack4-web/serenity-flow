@@ -25,12 +25,12 @@ class LevelSystem {
   }
   
   static String getLevelTitle(int level) {
-    if (level < 5) return "Novato";
-    if (level < 10) return "Aprendiz";
-    if (level < 20) return "Practicante";
-    if (level < 30) return "Experto";
-    if (level < 50) return "Maestro";
-    return "Gurú";
+    if (level < 5) return "Novice";
+    if (level < 10) return "Apprentice";
+    if (level < 20) return "Practitioner";
+    if (level < 30) return "Expert";
+    if (level < 50) return "Master";
+    return "Guru";
   }
   
   static Color getLevelColor(int level) {
@@ -74,8 +74,8 @@ enum AchievementType {
 final List<Achievement> achievements = [
   Achievement(
     id: 'first_session',
-    name: 'Primera Sesión',
-    description: 'Completa tu primera sesión',
+    name: 'First Session',
+    description: 'Complete your first session',
     icon: Icons.star_rounded,
     color: AppColors.coral,
     requiredValue: 1,
@@ -83,8 +83,8 @@ final List<Achievement> achievements = [
   ),
   Achievement(
     id: 'streak_3',
-    name: 'Racha de Fuego',
-    description: '3 días consecutivos',
+    name: 'Fire Streak',
+    description: '3 consecutive days',
     icon: Icons.local_fire_department_rounded,
     color: Colors.orange,
     requiredValue: 3,
@@ -92,8 +92,8 @@ final List<Achievement> achievements = [
   ),
   Achievement(
     id: 'streak_7',
-    name: 'Semana Perfecta',
-    description: '7 días consecutivos',
+    name: 'Perfect Week',
+    description: '7 consecutive days',
     icon: Icons.emoji_events_rounded,
     color: Colors.amber,
     requiredValue: 7,
@@ -101,8 +101,8 @@ final List<Achievement> achievements = [
   ),
   Achievement(
     id: 'sessions_10',
-    name: 'Dedicación',
-    description: '10 sesiones completadas',
+    name: 'Dedication',
+    description: '10 sessions completed',
     icon: Icons.auto_awesome_rounded,
     color: AppColors.lavender,
     requiredValue: 10,
@@ -110,8 +110,8 @@ final List<Achievement> achievements = [
   ),
   Achievement(
     id: 'sessions_50',
-    name: 'Guerrero',
-    description: '50 sesiones completadas',
+    name: 'Warrior',
+    description: '50 sessions completed',
     icon: Icons.shield_rounded,
     color: AppColors.turquoise,
     requiredValue: 50,
@@ -119,8 +119,8 @@ final List<Achievement> achievements = [
   ),
   Achievement(
     id: 'level_10',
-    name: 'Maestro',
-    description: 'Alcanza nivel 10',
+    name: 'Master',
+    description: 'Reach level 10',
     icon: Icons.diamond_rounded,
     color: const Color(0xFF00D1FF),
     requiredValue: 10,

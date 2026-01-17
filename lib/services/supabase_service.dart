@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:serenity_flow/models/gamification_model.dart';
 import 'package:serenity_flow/models/routine_model.dart';
@@ -17,7 +18,7 @@ class SupabaseService {
         await _supabase.auth.signInAnonymously();
       }
     } catch (e) {
-      print('Error signing in anonymously: $e');
+      debugPrint('Error signing in anonymously: $e');
       // Continue without auth - app will work in offline mode
     }
   }
@@ -49,7 +50,7 @@ class SupabaseService {
           .single();
       return response;
     } catch (e) {
-      print('Error getting profile: $e');
+      debugPrint('Error getting profile: $e');
       return null;
     }
   }
@@ -125,7 +126,7 @@ class SupabaseService {
       }).eq('id', userId!);
       
     } catch (e) {
-      print('Error updating streak: $e');
+      debugPrint('Error updating streak: $e');
     }
   }
 
@@ -167,7 +168,7 @@ class SupabaseService {
       
       return (response as List).map((e) => DateTime.parse(e['completed_at'])).toList();
     } catch (e) {
-      print('Error getting sessions: $e');
+      debugPrint('Error getting sessions: $e');
       return [];
     }
   }
@@ -191,7 +192,7 @@ class SupabaseService {
         'sessions': sessions,
       };
     } catch (e) {
-      print ('Error getting stats: $e');
+      debugPrint ('Error getting stats: $e');
       return {'minutes': 0, 'sessions': 0};
     }
   }

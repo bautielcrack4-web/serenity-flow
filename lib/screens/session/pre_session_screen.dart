@@ -178,7 +178,7 @@ class _PreSessionScreenState extends State<PreSessionScreen> with SingleTickerPr
             child: const Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text("COMENZAR PRÁCTICA", style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1.2)),
+                Text("START PRACTICE", style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1.2)),
                 SizedBox(width: 12),
                 Icon(Icons.play_arrow_rounded, color: Colors.white, size: 28),
               ],
