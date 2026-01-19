@@ -4,6 +4,8 @@ import 'package:serenity_flow/screens/onboarding/questionnaire_screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:serenity_flow/services/supabase_service.dart';
 import 'package:serenity_flow/services/revenue_cat_service.dart';
+import 'package:serenity_flow/screens/home/main_navigation_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,7 +39,23 @@ class SerenityFlowApp extends StatelessWidget {
       title: 'Serenity Flow',
       debugShowCheckedModeBanner: false,
       theme: AppTypography.theme,
-      home: const QuestionnaireScreen(), // Direct to Quiz
+      home: FutureBuilder<bool>(
+        future: _checkOnboarding(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Scaffold(body: Center(child: CircularProgressIndicator(color: AppColors.turquoise)));
+          }
+          if (snapshot.data == true) {
+            return const MainNavigationScreen();
+          }
+          return const QuestionnaireScreen();
+        },
+      ), 
     );
+  }
+
+  Future<bool> _checkOnboarding() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool('onboarding_complete') ?? false;
   }
 }

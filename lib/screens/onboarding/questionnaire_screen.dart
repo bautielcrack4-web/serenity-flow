@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:serenity_flow/core/design_system.dart';
 import 'package:serenity_flow/screens/home/main_navigation_screen.dart';
 import 'package:serenity_flow/screens/monetization/paywall_screen.dart';
-import 'package:serenity_flow/screens/onboarding/login_screen.dart';
+import 'package:serenity_flow/screens/auth/auth_screen.dart';
 import 'package:serenity_flow/components/mesh_gradient_background.dart';
 import 'package:serenity_flow/services/audio_service.dart';
 import 'package:serenity_flow/services/haptic_service.dart';
@@ -58,6 +59,12 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> with TickerPr
       });
     } else {
       HapticFeedback.heavyImpact();
+      
+      // Save completion flag
+      SharedPreferences.getInstance().then((prefs) {
+        prefs.setBool('onboarding_complete', true);
+      });
+
       Navigator.pushReplacement(
         context, 
         MaterialPageRoute(
@@ -66,7 +73,8 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> with TickerPr
             onFinish: () {
               Navigator.pushReplacement(
                 context, 
-                MaterialPageRoute(builder: (context) => const LoginScreen())
+                // Navigate to AuthScreen instead of legacy LoginScreen
+                MaterialPageRoute(builder: (context) => const AuthScreen())
               );
             },
           )
