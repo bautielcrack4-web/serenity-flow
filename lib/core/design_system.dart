@@ -4,13 +4,13 @@ class AppColors {
   // --- New Theme System ---
 
   // 🌅 Theme 1: Serene Dawn (Light)
-  static const Color dawnBackground = Color(0xFFFFFFFF); // Pure White for better contrast
+  static const Color dawnBackground = Color(0xFFFAFAFA); // Very light gray instead of pure white
   static const List<Color> dawnBlobs = [
-    Color(0xFFFFD700), // Solar Gold
-    Color(0xFFFFB7B2), // Soft Peach
-    Color(0xFFB2EBF2), // Mist Turquoise
-    Color(0xFFFFE082), // Amber Light
-    Color(0xFFE1BEE7), // Soft Lilac
+    Color(0xFFFFF9E6), // Pale Cream (instead of Solar Gold)
+    Color(0xFFFFE5E5), // Soft Blush (instead of Soft Peach)
+    Color(0xFFE3F5F7), // Pale Aqua (instead of Mist Turquoise)
+    Color(0xFFFFF4E0), // Pale Vanilla (instead of Amber Light)
+    Color(0xFFF3E5F5), // Pale Lavender (instead of Soft Lilac)
   ];
 
   // 🌌 Theme 2: Midnight Zen (Dark - DEFAULT/PREMIUM)
