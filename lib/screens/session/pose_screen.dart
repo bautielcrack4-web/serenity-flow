@@ -18,9 +18,10 @@ class PoseScreen extends StatefulWidget {
 class _PoseScreenState extends State<PoseScreen> with TickerProviderStateMixin {
   int _currentPoseIndex = 0;
   bool _isRightSide = false;
-  
   late int _timeLeft;
   Timer? _timer;
+  int _countdown = 3;
+  Timer? _countdownTimer;
   bool _isPaused = false;
   
   late AnimationController _pulseController;
@@ -30,8 +31,7 @@ class _PoseScreenState extends State<PoseScreen> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    _initializePose();
-    audioService.playBowl();
+    _startCountdown();
     
     // Per-second pulse (1.0 -> 1.08)
     _pulseController = AnimationController(vsync: this, duration: const Duration(seconds: 1))..repeat(reverse: true);
@@ -39,6 +39,28 @@ class _PoseScreenState extends State<PoseScreen> with TickerProviderStateMixin {
 
     // Aura Breathing
     _auraController = AnimationController(vsync: this, duration: const Duration(seconds: 3))..repeat(reverse: true);
+    
+    // Initialize pose data so UI has values during countdown
+    final pose = widget.routine.poses[_currentPoseIndex];
+    _timeLeft = pose.duration;
+  }
+
+  void _startCountdown() {
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (mounted) {
+        setState(() {
+          if (_countdown > 1) {
+            _countdown--;
+            HapticFeedback.lightImpact();
+          } else {
+            _countdown = 0;
+            _countdownTimer?.cancel();
+            _startTimer(); // Start the actual pose timer
+            audioService.playBowl();
+          }
+        });
+      }
+    });
   }
 
   void _initializePose() {
@@ -100,6 +122,7 @@ class _PoseScreenState extends State<PoseScreen> with TickerProviderStateMixin {
   @override
   void dispose() {
     _timer?.cancel();
+    _countdownTimer?.cancel();
     _pulseController.dispose();
     _auraController.dispose();
     super.dispose();
@@ -234,7 +257,41 @@ class _PoseScreenState extends State<PoseScreen> with TickerProviderStateMixin {
           ),
           
           if (_isPaused) _buildPauseOverlay(),
+          if (_countdown > 0) _buildCountdownOverlay(),
         ],
+      ),
+    );
+  }
+
+  Widget _buildCountdownOverlay() {
+    return Container(
+      color: AppColors.dawnBackground.withOpacity(0.9),
+      width: double.infinity,
+      height: double.infinity,
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              "GET READY",
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w900,
+                color: AppColors.coral,
+                letterSpacing: 4,
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              "$_countdown",
+              style: const TextStyle(
+                fontSize: 120,
+                fontWeight: FontWeight.w900,
+                color: AppColors.dark,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -357,14 +414,60 @@ class _PoseScreenState extends State<PoseScreen> with TickerProviderStateMixin {
 
   Widget _buildPauseOverlay() {
     return Container(
-      color: Colors.black.withOpacity(0.4),
-      child: const Center(
+      color: Colors.black.withOpacity(0.6),
+      child: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.pause_circle_filled_rounded, size: 100, color: Colors.white),
-            SizedBox(height: 20),
-            Text("Paused", style: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w900)),
+            const Icon(Icons.pause_circle_filled_rounded, size: 80, color: Colors.white),
+            const SizedBox(height: 24),
+            const Text(
+              "PAUSED",
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 32,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 2,
+              ),
+            ),
+            const SizedBox(height: 48),
+            // Resume Button
+            GestureDetector(
+              onTap: () {
+                HapticFeedback.mediumImpact();
+                setState(() => _isPaused = false);
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
+                decoration: BoxDecoration(
+                  color: AppColors.coral,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.coral.withOpacity(0.3),
+                      blurRadius: 20,
+                      offset: const Offset(0, 10),
+                    ),
+                  ],
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.play_arrow_rounded, color: Colors.white, size: 28),
+                    SizedBox(width: 12),
+                    Text(
+                      "RESUME",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ],
         ),
       ),

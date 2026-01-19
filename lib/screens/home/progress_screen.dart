@@ -177,7 +177,10 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
                     s.day == currentDate.day
                   );
                   
-                  bool isToday = currentDate.day == 11; // Hardcoded to current simulated date for demo stability
+                  final now = DateTime.now();
+                  bool isToday = currentDate.year == now.year && 
+                                 currentDate.month == now.month && 
+                                 currentDate.day == now.day;
                   
                   return InkWell(
                     onTap: () {
@@ -235,22 +238,54 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
   }
 
   Widget _buildWeeklyChart() {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(32), boxShadow: AppShadows.card),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          _buildChartBar("Mon", 0.4, AppColors.coral),
-          _buildChartBar("Tue", 0.7, AppColors.lavender),
-          _buildChartBar("Wed", 0.9, AppColors.turquoise),
-          _buildChartBar("Thu", 0.6, AppColors.coral),
-          _buildChartBar("Fri", 1.0, AppColors.turquoise),
-          _buildChartBar("Sat", 0.3, AppColors.lavender),
-          _buildChartBar("Sun", 0.5, AppColors.coral),
-        ],
-      ),
+    return FutureBuilder<List<DateTime>>(
+      future: SupabaseService().getSessionDates(),
+      builder: (context, snapshot) {
+        final sessions = snapshot.data ?? [];
+        
+        // Calculate sessions per day of week for the last 7 days
+        final now = DateTime.now();
+        final weekAgo = now.subtract(const Duration(days: 7));
+        
+        // Count sessions for each day of the week (Mon=1, Sun=7)
+        final Map<int, int> sessionsPerDay = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0};
+        
+        for (var session in sessions) {
+          if (session.isAfter(weekAgo)) {
+            final weekday = session.weekday; // 1=Mon, 7=Sun
+            sessionsPerDay[weekday] = (sessionsPerDay[weekday] ?? 0) + 1;
+          }
+        }
+        
+        // Find max to normalize
+        final maxSessions = sessionsPerDay.values.reduce((a, b) => a > b ? a : b);
+        final normalizer = maxSessions > 0 ? maxSessions : 1;
+        
+        // Build bars
+        final days = [
+          ("Mon", 1, AppColors.coral),
+          ("Tue", 2, AppColors.lavender),
+          ("Wed", 3, AppColors.turquoise),
+          ("Thu", 4, AppColors.coral),
+          ("Fri", 5, AppColors.turquoise),
+          ("Sat", 6, AppColors.lavender),
+          ("Sun", 7, AppColors.coral),
+        ];
+        
+        return Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(32), boxShadow: AppShadows.card),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: days.map((day) {
+              final count = sessionsPerDay[day.$2] ?? 0;
+              final percent = count / normalizer;
+              return _buildChartBar(day.$1, percent, day.$3);
+            }).toList(),
+          ),
+        );
+      },
     );
   }
 

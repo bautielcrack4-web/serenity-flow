@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:serenity_flow/core/design_system.dart';
 import 'package:serenity_flow/components/mesh_gradient_background.dart';
@@ -97,8 +98,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 if (_isLoading)
                   const CircularProgressIndicator(color: AppColors.coral)
                 else ...[
-                  // Only show Apple Sign In on iOS
-                  if (Platform.isIOS) ...[
+                  // Only show Apple Sign In on iOS (Native only)
+                  if (!kIsWeb && Platform.isIOS) ...[
                     SignInWithAppleButton(
                       onPressed: _handleAppleSignIn,
                       style: SignInWithAppleButtonStyle.black,

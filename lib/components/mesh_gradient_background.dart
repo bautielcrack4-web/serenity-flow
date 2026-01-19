@@ -18,9 +18,9 @@ class _MeshGradientBackgroundState extends State<MeshGradientBackground> with Ti
   late List<Animation<double>> _movements;
   late List<Animation<double>> _scales;
 
-  // Configuration for "Midnight Zen" (Default)
-  final Color backgroundColor = AppColors.midnightBackground;
-  final List<Color> blobColors = AppColors.midnightBlobs;
+  // Configuration for "Serene Dawn" (Restored as Default)
+  final Color backgroundColor = AppColors.dawnBackground;
+  final List<Color> blobColors = AppColors.dawnBlobs;
 
   @override
   void initState() {
@@ -120,20 +120,11 @@ class _MeshGradientBackgroundState extends State<MeshGradientBackground> with Ti
         ),
 
         // Subtle Noise/Grain (Optional, simulate with low opacity white overlay)
-        Container(color: Colors.white.withOpacity(0.02)),
+        Container(color: Colors.white.withOpacity(0.01)),
 
         // Child Content
-        Theme(
-           // Force Dark Mode text for Midnight Theme
-          data: AppTypography.theme.copyWith(
-            brightness: Brightness.dark,
-            textTheme: AppTypography.theme.textTheme.apply(
-              bodyColor: Colors.white,
-              displayColor: Colors.white,
-            ),
-          ),
-          child: widget.child,
-        ),
+        // Child Content
+        widget.child,
       ],
     );
   }
@@ -143,7 +134,7 @@ class _MeshGradientBackgroundState extends State<MeshGradientBackground> with Ti
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: color.withOpacity(0.5), // Higher opacity before blur
+        color: color.withOpacity(0.2), // Lower opacity for subtler effect
         shape: BoxShape.circle,
       ),
     );

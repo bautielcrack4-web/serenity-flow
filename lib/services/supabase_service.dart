@@ -1,7 +1,9 @@
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:serenity_flow/models/gamification_model.dart';
 import 'package:serenity_flow/models/routine_model.dart';
+import 'package:serenity_flow/core/design_system.dart';
 
 class SupabaseService {
   static final SupabaseService _instance = SupabaseService._internal();
@@ -240,23 +242,141 @@ class SupabaseService {
     }).eq('id', userId!);
   }
 
-  // --- Free Tier Logic ---
+  // --- Custom Routines ---
 
-  Future<int> getFreeSessionsCount() async {
-    if (userId == null) return 0;
+  Future<List<Routine>> getCustomRoutines() async {
+    if (userId == null) return [];
     try {
-      final profile = await getProfile();
-      return profile?['free_sessions_count'] as int? ?? 0;
+      final response = await _supabase
+          .from('user_routines')
+          .select()
+          .eq('user_id', userId!)
+          .order('created_at', ascending: false);
+
+      return (response as List).map((data) {
+        final List<dynamic> posesJson = data['poses'] ?? [];
+        final poses = posesJson.map((p) => Pose.fromMap(p)).toList();
+
+        return Routine(
+          id: data['id'],
+          name: data['name'],
+          description: data['description'] ?? 'Custom Routine',
+          duration: data['duration'] ?? '0 min',
+          poseCount: poses.length,
+          difficulty: data['difficulty'] ?? 1,
+          icon: data['icon'] ?? 'assets/images/poses/pose_montana.png',
+          themeGradient: AppColors.organicGradient, // Default theme for custom
+          poses: poses,
+          isCustom: true,
+        );
+      }).toList();
     } catch (e) {
-      return 0;
+      debugPrint('Error fetching custom routines: $e');
+      return [];
     }
   }
 
+  Future<bool> saveCustomRoutine(String name, List<Pose> poses) async {
+    if (userId == null) return false;
+
+    // 1. Check Limits for Free Users
+    final profile = await getProfile();
+    final bool isPro = profile?['is_pro'] ?? false;
+
+    if (!isPro) {
+      final currentRoutines = await getCustomRoutines();
+      if (currentRoutines.length >= 3) {
+        return false; // Limit reached
+      }
+    }
+
+    // 2. Calculate Metadata
+    final durationSeconds = poses.fold(0, (sum, p) => sum + p.duration);
+    final durationMin = (durationSeconds / 60).ceil();
+
+    // 3. Save to DB
+    try {
+      await _supabase.from('user_routines').insert({
+        'user_id': userId,
+        'name': name,
+        'description': 'My personal flow',
+        'duration': '$durationMin min',
+        'difficulty': 1, // Default
+        'icon': poses.isNotEmpty ? poses.first.image : 'assets/images/poses/pose_montana.png',
+        'poses': poses.map((p) => p.toMap()).toList(),
+      });
+      return true;
+    } catch (e) {
+      debugPrint('Error saving custom routine: $e');
+      return false;
+    }
+  }
+
+  Future<void> deleteCustomRoutine(String routineId) async {
+    try {
+      await _supabase
+          .from('user_routines')
+          .delete()
+          .eq('id', routineId)
+          .eq('user_id', userId!); // Extra safety
+    } catch (e) {
+      debugPrint('Error deleting routine: $e');
+    }
+  }
+
+  // --- Free Tier Logic ---
+  
+  static const String _localFreeCountKey = 'free_sessions_count';
+
+  Future<int> getFreeSessionsCount() async {
+    // 1. Check Local Fallback (Guest mode or offline)
+    final prefs = await SharedPreferences.getInstance();
+    final localCount = prefs.getInt(_localFreeCountKey) ?? 0;
+
+    // 2. If Auth is available, sync and use DB
+    if (userId != null) {
+      try {
+        final profile = await getProfile();
+        final dbCount = profile?['free_sessions_count'] as int? ?? 0;
+        
+        // Use the higher value to prevent exploits
+        final finalCount = dbCount > localCount ? dbCount : localCount;
+        
+        // Keep synced
+        if (dbCount != finalCount) {
+           await _supabase.from('profiles').update({
+            'free_sessions_count': finalCount,
+          }).eq('id', userId!);
+        }
+        if (localCount != finalCount) {
+          await prefs.setInt(_localFreeCountKey, finalCount);
+        }
+        
+        return finalCount;
+      } catch (e) {
+        return localCount;
+      }
+    }
+    
+    return localCount;
+  }
+
   Future<void> incrementFreeSessionsCount() async {
-    if (userId == null) return;
-    final currentCount = await getFreeSessionsCount();
-    await _supabase.from('profiles').update({
-      'free_sessions_count': currentCount + 1,
-    }).eq('id', userId!);
+    // 1. Update Local
+    final prefs = await SharedPreferences.getInstance();
+    final currentLocal = prefs.getInt(_localFreeCountKey) ?? 0;
+    final newCount = currentLocal + 1;
+    await prefs.setInt(_localFreeCountKey, newCount);
+
+    // 2. Update DB if logged in
+    if (userId != null) {
+      try {
+        await _supabase.from('profiles').update({
+          'free_sessions_count': newCount,
+        }).eq('id', userId!);
+      } catch (e) {
+        debugPrint('Error syncing free count to DB: $e');
+      }
+    }
   }
 }

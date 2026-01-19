@@ -6,6 +6,7 @@ import 'package:serenity_flow/components/routine_card.dart';
 import 'package:serenity_flow/components/mesh_gradient_background.dart';
 import 'package:serenity_flow/services/supabase_service.dart';
 import 'package:serenity_flow/screens/monetization/paywall_screen.dart';
+import 'package:serenity_flow/screens/home/create_routine_screen.dart';
 import 'package:flutter/services.dart';
 
 class HomeScreenContent extends StatefulWidget {
@@ -18,6 +19,8 @@ class HomeScreenContent extends StatefulWidget {
 class _HomeScreenContentState extends State<HomeScreenContent> with SingleTickerProviderStateMixin {
   late AnimationController _entranceController;
 
+  List<Routine> _customRoutines = [];
+
   @override
   void initState() {
     super.initState();
@@ -25,6 +28,16 @@ class _HomeScreenContentState extends State<HomeScreenContent> with SingleTicker
       vsync: this,
       duration: const Duration(milliseconds: 800),
     )..forward();
+    _loadCustomRoutines();
+  }
+  
+  void _loadCustomRoutines() async {
+    final routines = await SupabaseService().getCustomRoutines();
+    if (mounted) {
+      setState(() {
+        _customRoutines = routines;
+      });
+    }
   }
 
   @override
@@ -33,6 +46,7 @@ class _HomeScreenContentState extends State<HomeScreenContent> with SingleTicker
     super.dispose();
   }
 
+  // ... (GREETING & RECOMMENDATION HELPERS KEEP THE SAME) ...
   String _getGreeting() {
     final hour = DateTime.now().hour;
     if (hour < 12) return "Good morning";
@@ -67,6 +81,41 @@ class _HomeScreenContentState extends State<HomeScreenContent> with SingleTicker
                 // Intelligent Recommendation
                 _buildRecommendationCard(),
                 const SizedBox(height: 32),
+
+                // --- NEW: Custom Routines Section ---
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text("My Routines", style: Theme.of(context).textTheme.headlineSmall),
+                    IconButton(
+                      icon: const Icon(Icons.add_circle, color: AppColors.dark, size: 28),
+                      onPressed: () async {
+                        final result = await Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const CreateRoutineScreen()),
+                        );
+                        if (result == true) {
+                          _loadCustomRoutines(); // Refresh list if saved
+                        }
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                
+                if (_customRoutines.isEmpty)
+                  _buildEmptyState()
+                else
+                  ..._customRoutines.map((routine) => Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: RoutineCard(
+                      routine: routine,
+                      index: 0,
+                      onTap: () => _handleRoutineStart(routine),
+                    ),
+                  )),
+
+                const SizedBox(height: 24),
                 
                 // Section Header
                 Text("All Routines", style: Theme.of(context).textTheme.headlineSmall),
@@ -74,15 +123,15 @@ class _HomeScreenContentState extends State<HomeScreenContent> with SingleTicker
                 
                 // Routine Cards with Staggered Animation
                 ...routinesData.asMap().entries.map((entry) {
+                  final delay = entry.key * 0.08;
+                  final start = (0.1 + delay).clamp(0.0, 0.9);
+                  final end = (start + 0.3).clamp(0.0, 1.0);
+                  
                   return FadeTransition(
                     opacity: Tween<double>(begin: 0.0, end: 1.0).animate(
                       CurvedAnimation(
                         parent: _entranceController,
-                        curve: Interval(
-                          0.2 + (entry.key * 0.15),
-                          0.8 + (entry.key * 0.05),
-                          curve: Curves.easeOut,
-                        ),
+                        curve: Interval(start, end, curve: Curves.easeOut),
                       ),
                     ),
                     child: SlideTransition(
@@ -92,11 +141,7 @@ class _HomeScreenContentState extends State<HomeScreenContent> with SingleTicker
                       ).animate(
                         CurvedAnimation(
                           parent: _entranceController,
-                          curve: Interval(
-                            0.2 + (entry.key * 0.15),
-                            0.8 + (entry.key * 0.05),
-                            curve: Curves.easeOutQuart,
-                          ),
+                          curve: Interval(start, end, curve: Curves.easeOutQuart),
                         ),
                       ),
                       child: RoutineCard(
@@ -116,19 +161,29 @@ class _HomeScreenContentState extends State<HomeScreenContent> with SingleTicker
   }
 
   Widget _buildGreeting() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          "${_getGreeting()}, Maria ☀️",
-          style: AppTextStyles.headline.copyWith(color: AppColors.dark),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          "Ready for your practice today?",
-          style: AppTextStyles.caption.copyWith(color: AppColors.dark.withOpacity(0.6)),
-        ),
-      ],
+    return FutureBuilder<Map<String, dynamic>?>(
+      future: SupabaseService().getProfile(),
+      builder: (context, snapshot) {
+        final profile = snapshot.data;
+        // Try to get name from metadata if not in profile, or default to empty
+        final String? name = profile?['full_name'] as String?;
+        final displayName = (name != null && name.isNotEmpty) ? ", $name" : "";
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "${_getGreeting()}$displayName ☀️",
+              style: AppTextStyles.headline.copyWith(color: AppColors.dark),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              "Ready for your practice today?",
+              style: AppTextStyles.caption.copyWith(color: AppColors.dark.withOpacity(0.6)),
+            ),
+          ],
+        );
+      }
     );
   }
 
@@ -245,7 +300,7 @@ class _HomeScreenContentState extends State<HomeScreenContent> with SingleTicker
     final supabase = SupabaseService();
     final profile = await supabase.getProfile();
     final bool isPro = profile?['is_pro'] ?? false;
-    final int freeSessions = profile?['free_sessions_count'] ?? 0;
+    final int freeSessions = await supabase.getFreeSessionsCount();
 
     if (!isPro && freeSessions >= 3) {
       if (!mounted) return;
@@ -266,5 +321,36 @@ class _HomeScreenContentState extends State<HomeScreenContent> with SingleTicker
         ),
       );
     }
+  }
+
+
+  Widget _buildEmptyState() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.6),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(color: AppColors.peachGradient.colors.first.withOpacity(0.3), shape: BoxShape.circle),
+            child: const Icon(Icons.fitness_center, color: AppColors.dark),
+          ),
+          const SizedBox(width: 16),
+          const Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("Your Personal Flows", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                Text("Tap + to create your own routine", style: TextStyle(color: AppColors.gray, fontSize: 12)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

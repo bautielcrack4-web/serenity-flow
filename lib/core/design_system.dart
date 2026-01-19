@@ -4,7 +4,7 @@ class AppColors {
   // --- New Theme System ---
 
   // 🌅 Theme 1: Serene Dawn (Light)
-  static const Color dawnBackground = Color(0xFFFFFCF8);
+  static const Color dawnBackground = Color(0xFFFFFFFF); // Pure White for better contrast
   static const List<Color> dawnBlobs = [
     Color(0xFFFFD700), // Solar Gold
     Color(0xFFFFB7B2), // Soft Peach
@@ -63,6 +63,30 @@ class AppColors {
   
   static const LinearGradient turquoiseSoftGradient = LinearGradient(
     colors: [Color(0xFFD0EAE8), Color(0xFFB8DCD9)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  static const LinearGradient oceanGradient = LinearGradient(
+    colors: [Color(0xFFE0F7FA), Color(0xFF80DEEA)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  static const LinearGradient sunsetGradient = LinearGradient(
+    colors: [Color(0xFFFFF3E0), Color(0xFFFFCC80)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  static const LinearGradient forestGradient = LinearGradient(
+    colors: [Color(0xFFE8F5E9), Color(0xFFA5D6A7)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  static const LinearGradient royalGradient = LinearGradient(
+    colors: [Color(0xFFF3E5F5), Color(0xFFCE93D8)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );

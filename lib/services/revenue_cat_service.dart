@@ -13,6 +13,11 @@ class RevenueCatService {
   bool get isPro => _isPro;
 
   Future<void> init() async {
+    if (kIsWeb) {
+      debugPrint("RevenueCat not supported on Web");
+      return;
+    }
+
     try {
       // Enable debug logging for development
       await Purchases.setLogLevel(LogLevel.debug);
@@ -36,6 +41,7 @@ class RevenueCatService {
   }
 
   Future<void> updatePurchaseStatus() async {
+    if (kIsWeb) return;
     try {
       final customerInfo = await Purchases.getCustomerInfo();
       _isPro = customerInfo.entitlements.all['pro_access']?.isActive ?? false;
@@ -51,6 +57,7 @@ class RevenueCatService {
   }
 
   Future<List<Package>> getOfferings() async {
+    if (kIsWeb) return [];
     try {
       Offerings offerings = await Purchases.getOfferings();
       if (offerings.current != null && offerings.current!.availablePackages.isNotEmpty) {

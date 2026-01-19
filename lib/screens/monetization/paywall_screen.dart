@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:serenity_flow/core/design_system.dart';
 import 'package:serenity_flow/services/revenue_cat_service.dart';
@@ -26,32 +27,53 @@ class _PaywallScreenState extends State<PaywallScreen> {
   }
 
   Future<void> _loadOfferings() async {
-    final packages = await RevenueCatService().getOfferings();
+    List<Package> packages = await RevenueCatService().getOfferings();
+    
+    // Web Fallback / Demo mode
+    if (kIsWeb && packages.isEmpty) {
+      // Manual creation of mock packages for UI demonstration on Web
+      // Since we can't easily instantiate 'Package' from RevenueCat without complex mocking,
+      // we'll just handle the UI specifically for the Web empty state or use a flag.
+      debugPrint("Simulating demo packages for Web");
+    }
+
     if (mounted) {
       setState(() {
         _packages = packages;
-        // Default to annual if available
-        _selectedPackage = packages.firstWhere(
-          (p) => p.packageType == PackageType.annual,
-          orElse: () => packages.isNotEmpty ? packages.first : packages.first, // fallback
-        );
+        
+        if (packages.isNotEmpty) {
+          _selectedPackage = packages.firstWhere(
+            (p) => p.packageType == PackageType.annual,
+            orElse: () => packages.first,
+          );
+        }
         _isLoading = false;
       });
     }
   }
 
   Future<void> _handlePurchase() async {
-    if (_selectedPackage == null) return;
-    
     HapticPatterns.buttonPress();
     setState(() => _isLoading = true);
     
-    bool success = await RevenueCatService().purchasePackage(_selectedPackage!);
+    bool success = false;
+
+    if (kIsWeb) {
+      // Direct simulation for Web demo
+      await Future.delayed(const Duration(seconds: 2));
+      success = true;
+    } else {
+      if (_selectedPackage == null) {
+        setState(() => _isLoading = false);
+        return;
+      }
+      success = await RevenueCatService().purchasePackage(_selectedPackage!);
+    }
     
     if (mounted) {
       setState(() => _isLoading = false);
       if (success) {
-        // Sync with Supabase
+        // Sync with Supabase (will work local-only if guest)
         await SupabaseService().updateProStatus(true);
         
         if (widget.onFinish != null) {
@@ -220,6 +242,10 @@ class _PaywallScreenState extends State<PaywallScreen> {
   }
 
   Widget _buildSubscriptionOptions() {
+    if (kIsWeb && _packages.isEmpty) {
+      return _buildDemoOptions();
+    }
+
     return Column(
       children: _packages.map((package) {
         bool isAnnual = package.packageType == PackageType.annual;
@@ -303,6 +329,52 @@ class _PaywallScreenState extends State<PaywallScreen> {
           ),
         );
       }).toList(),
+    );
+  }
+
+  Widget _buildDemoOptions() {
+    return Column(
+      children: [
+        _buildDemoCard("Annual (Simulated)", "US\$ 14.99", "US\$ 1.24 / mo", true),
+        _buildDemoCard("Monthly (Simulated)", "US\$ 4.99", "US\$ 4.99 / mo", false),
+      ],
+    );
+  }
+
+  Widget _buildDemoCard(String title, String price, String monthly, bool isSelected) {
+    return GestureDetector(
+      onTap: () => setState(() {}), // Just for interaction feedback in demo
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(
+            color: isSelected ? AppColors.turquoise : Colors.transparent, 
+            width: 2.5
+          ),
+          boxShadow: [
+            if (isSelected) 
+              BoxShadow(color: AppColors.turquoise.withOpacity(0.1), blurRadius: 20, offset: const Offset(0, 8)),
+            BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10, offset: const Offset(0, 4)),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: AppColors.dark)),
+                const SizedBox(height: 4),
+                Text(price, style: TextStyle(fontSize: 14, color: AppColors.dark.withOpacity(0.4))),
+              ],
+            ),
+            Text(monthly, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.dark)),
+          ],
+        ),
+      ),
     );
   }
 
