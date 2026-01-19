@@ -297,21 +297,41 @@ class _HomeScreenContentState extends State<HomeScreenContent> with SingleTicker
   void _handleRoutineStart(Routine routine) async {
     HapticFeedback.mediumImpact();
     
+    // Check RevenueCat local state first (fastest source of truth after purchase)
+    bool isPro = RevenueCatService().isPro;
+    
     final supabase = SupabaseService();
-    final profile = await supabase.getProfile();
-    final bool isPro = profile?['is_pro'] ?? false;
+    
+    // Fallback to DB if local says false (e.g. fresh install, restores)
+    if (!isPro) {
+       final profile = await supabase.getProfile();
+       isPro = profile?['is_pro'] ?? false;
+    }
+    
     final int freeSessions = await supabase.getFreeSessionsCount();
 
     if (!isPro && freeSessions >= 3) {
       if (!mounted) return;
-      Navigator.push(
+      
+      // Show Paywall and wait for result
+      final bool? purchased = await Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => PaywallScreen(
-            onFinish: () => Navigator.pop(context),
-          ),
+          // Don't pass onFinish, rely on default pop(true)
+          builder: (context) => const PaywallScreen(showCloseButton: true), 
         ),
       );
+      
+      // If they bought it, start the routine immediately!
+      if (purchased == true) {
+         if (!mounted) return;
+         Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PreSessionScreen(routine: routine),
+          ),
+        );
+      }
     } else {
       if (!mounted) return;
       Navigator.push(

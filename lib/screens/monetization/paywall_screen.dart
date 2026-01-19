@@ -92,7 +92,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
           if (widget.onFinish != null) {
             widget.onFinish!();
           } else {
-            Navigator.pop(context);
+            Navigator.pop(context, true);
           }
         }
       }
