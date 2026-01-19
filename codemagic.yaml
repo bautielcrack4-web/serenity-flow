@@ -37,8 +37,7 @@ workflows:
       flutter: stable
       xcode: latest
       groups:
-        - app_store_credentials # Group containing certificates and provisioning profiles
-        - revenuecat
+        - revenuecat # Removed app_store_credentials to avoid conflicts with manual profiles
       vars:
         BUNDLE_ID: "com.yuna.yoga.bauti"
         XCODE_WORKSPACE: "Runner.xcworkspace"
@@ -47,9 +46,6 @@ workflows:
         distribution_type: app_store
         bundle_identifier: com.yuna.yoga.bauti
     scripts:
-      - name: Set up code signing settings on Xcode project
-        script: |
-          xcode-project use-profiles
       - name: Get Flutter dependencies
         script: |
           flutter packages pub get
@@ -58,6 +54,7 @@ workflows:
           find . -name "Podfile" -execdir pod install \;
       - name: Flutter build ipa
         script: |
+          # Codemagic will now automatically manage certificates and profiles via App Store Connect API
           flutter build ipa --release \
             --export-options-plist=/Users/builder/export_options.plist
     artifacts:
