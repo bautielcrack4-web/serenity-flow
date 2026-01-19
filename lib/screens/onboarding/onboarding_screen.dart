@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:serenity_flow/core/design_system.dart';
+import 'package:serenity_flow/screens/auth/auth_screen.dart';
 import 'package:serenity_flow/screens/onboarding/questionnaire_screen.dart';
 
 class OnboardingScreen extends StatefulWidget {
@@ -65,18 +66,38 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 ),
                 const SizedBox(height: 40),
                 if (_currentPage == _pages.length - 1)
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => const QuestionnaireScreen()),
-                      );
-                    },
-                    style: Theme.of(context).elevatedButtonTheme.style?.copyWith(
-                      shadowColor: WidgetStateProperty.all(AppColors.coral.withOpacity(0.4)),
-                      elevation: WidgetStateProperty.all(8),
-                    ),
-                    child: const Text("Comenzar mi viaje"),
+                  Column(
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder: (context) => const QuestionnaireScreen()),
+                          );
+                        },
+                        style: Theme.of(context).elevatedButtonTheme.style?.copyWith(
+                          shadowColor: WidgetStateProperty.all(AppColors.coral.withOpacity(0.4)),
+                          elevation: WidgetStateProperty.all(8),
+                        ),
+                        child: const Text("Comenzar mi viaje"),
+                      ),
+                      const SizedBox(height: 16),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const AuthScreen()),
+                          );
+                        },
+                        child: Text(
+                          "Ya tengo cuenta / Entrar",
+                          style: TextStyle(
+                            color: AppColors.dark.withOpacity(0.7),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
                   )
                 else
                   TextButton(

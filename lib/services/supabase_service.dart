@@ -25,6 +25,21 @@ class SupabaseService {
     }
   }
 
+  Future<AuthResponse> signUpWithEmail(String email, String password, String name) async {
+    return await _supabase.auth.signUp(
+      email: email,
+      password: password,
+      data: {'full_name': name},
+    );
+  }
+
+  Future<AuthResponse> signInWithEmail(String email, String password) async {
+    return await _supabase.auth.signInWithPassword(
+      email: email,
+      password: password,
+    );
+  }
+
   String? get userId => _supabase.auth.currentUser?.id;
 
   Future<void> signOut() async {
