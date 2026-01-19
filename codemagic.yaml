@@ -46,6 +46,9 @@ workflows:
         distribution_type: app_store
         bundle_identifier: com.yuna.yoga.bauti
     scripts:
+      - name: Set up code signing settings on Xcode project
+        script: |
+          xcode-project use-profiles
       - name: Get Flutter dependencies
         script: |
           flutter packages pub get
