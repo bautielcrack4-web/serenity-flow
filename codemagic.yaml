@@ -46,9 +46,6 @@ workflows:
         distribution_type: app_store
         bundle_identifier: com.yuna.yoga.bauti
     scripts:
-      - name: Set up code signing settings on Xcode project
-        script: |
-          xcode-project use-profiles
       - name: Get Flutter dependencies
         script: |
           flutter packages pub get
@@ -57,9 +54,8 @@ workflows:
           find . -name "Podfile" -execdir pod install \;
       - name: Flutter build ipa
         script: |
-          # Codemagic will now automatically manage certificates and profiles via App Store Connect API
-          flutter build ipa --release \
-            --export-options-plist=/Users/builder/export_options.plist
+          # Let Flutter handle code signing automatically via App Store Connect integration
+          flutter build ipa --release
     artifacts:
       - build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
