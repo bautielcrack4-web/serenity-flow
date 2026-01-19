@@ -46,10 +46,9 @@ workflows:
         distribution_type: app_store
         bundle_identifier: com.yuna.yoga.bauti
     scripts:
-      - name: Fetch signing files from App Store Connect
+      - name: Set up code signing settings on Xcode project
         script: |
-          # This will automatically CREATE certificates and profiles in Apple Developer Portal
-          xcode-project fetch-signing-files
+          xcode-project use-profiles
       - name: Get Flutter dependencies
         script: |
           flutter packages pub get
@@ -58,9 +57,8 @@ workflows:
           find . -name "Podfile" -execdir pod install \;
       - name: Flutter build ipa
         script: |
-          # Build with auto-generated signing files
           flutter build ipa --release \
-            --export-options-plist=$CM_EXPORT_OPTIONS
+            --export-options-plist=/Users/builder/export_options.plist
     artifacts:
       - build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
