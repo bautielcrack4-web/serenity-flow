@@ -1,3 +1,4 @@
+import 'package:confetti/confetti.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:serenity_flow/core/design_system.dart';
@@ -16,6 +17,7 @@ class PaywallScreen extends StatefulWidget {
 }
 
 class _PaywallScreenState extends State<PaywallScreen> {
+  late ConfettiController _confettiController;
   List<Package> _packages = [];
   Package? _selectedPackage;
   bool _isLoading = true;
@@ -23,7 +25,14 @@ class _PaywallScreenState extends State<PaywallScreen> {
   @override
   void initState() {
     super.initState();
+    _confettiController = ConfettiController(duration: const Duration(seconds: 3));
     _loadOfferings();
+  }
+
+  @override
+  void dispose() {
+    _confettiController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadOfferings() async {
@@ -31,9 +40,6 @@ class _PaywallScreenState extends State<PaywallScreen> {
     
     // Web Fallback / Demo mode
     if (kIsWeb && packages.isEmpty) {
-      // Manual creation of mock packages for UI demonstration on Web
-      // Since we can't easily instantiate 'Package' from RevenueCat without complex mocking,
-      // we'll just handle the UI specifically for the Web empty state or use a flag.
       debugPrint("Simulating demo packages for Web");
     }
 
@@ -73,13 +79,21 @@ class _PaywallScreenState extends State<PaywallScreen> {
     if (mounted) {
       setState(() => _isLoading = false);
       if (success) {
+        _confettiController.play();
+        HapticPatterns.success();
+        
         // Sync with Supabase (will work local-only if guest)
         await SupabaseService().updateProStatus(true);
         
-        if (widget.onFinish != null) {
-          widget.onFinish!();
-        } else {
-          Navigator.pop(context);
+        // Delay to show celebration
+        await Future.delayed(const Duration(seconds: 2));
+        
+        if (mounted) {
+          if (widget.onFinish != null) {
+            widget.onFinish!();
+          } else {
+            Navigator.pop(context);
+          }
         }
       }
     }
@@ -147,6 +161,21 @@ class _PaywallScreenState extends State<PaywallScreen> {
             
           if (_isLoading && _packages.isEmpty)
              const Center(child: CircularProgressIndicator(color: AppColors.turquoise)),
+
+          Align(
+            alignment: Alignment.topCenter,
+            child: ConfettiWidget(
+              confettiController: _confettiController,
+              blastDirectionality: BlastDirectionality.explosive,
+              shouldLoop: false,
+              colors: const [
+                AppColors.turquoise,
+                AppColors.coral,
+                AppColors.gold,
+                AppColors.lavender,
+              ],
+            ),
+          ),
         ],
       ),
     );
