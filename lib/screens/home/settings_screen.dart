@@ -47,21 +47,35 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ],
       );
       
-      // In a real app we would link this credential to the current anonymous user
-      // await Supabase.instance.client.auth.linkIdentity(OAuthProvider.apple)...
-      // For this MVP, we just refresh the UI state as "Signed In" simulation
+      // Link the Apple credential to the current anonymous Supabase user
+      final supabase = Supabase.instance.client;
       
-      setState(() {
-        _isAnonymous = false;
-      });
+      // Create the ID token for Supabase
+      final response = await supabase.auth.signInWithIdToken(
+        provider: OAuthProvider.apple,
+        idToken: credential.identityToken!,
+        nonce: credential.authorizationCode,
+      );
       
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Account successfully linked! Progress saved. ✅")),
-        );
+      if (response.user != null) {
+        // Update local state
+        setState(() {
+          _isAnonymous = false;
+        });
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Account successfully linked! Progress saved. ✅")),
+          );
+        }
       }
     } catch (e) {
       debugPrint("Sign in error: $e");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Sign in failed: ${e.toString()}")),
+        );
+      }
     }
   }
 

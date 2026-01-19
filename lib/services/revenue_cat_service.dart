@@ -33,6 +33,15 @@ class RevenueCatService {
       }
 
       await Purchases.configure(configuration);
+      
+      // Add listener for subscription changes
+      Purchases.addCustomerInfoUpdateListener((customerInfo) {
+        _isPro = customerInfo.entitlements.all['pro_access']?.isActive ?? false;
+        // Sync to Supabase whenever RevenueCat detects a change
+        SupabaseService().updateProStatus(_isPro);
+        debugPrint("RevenueCat listener: Pro status updated to $_isPro");
+      });
+      
       await updatePurchaseStatus();
     } catch (e) {
       debugPrint("RevenueCat initialization failed: $e");
