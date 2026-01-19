@@ -35,6 +35,7 @@ class AppColors {
 
   // --- Legacy/Shared Colors ---
   static const Color coral = Color(0xFFFF7A65); 
+  static const Color primary = coral; // Alias for AuthScreen compatibility
   static const Color lavender = Color(0xFFA88DD0);
   static const Color turquoise = Color(0xFF5DBBB3);
   static const Color gold = Color(0xFFFFD700);

@@ -5,6 +5,7 @@ import 'package:serenity_flow/screens/session/pre_session_screen.dart';
 import 'package:serenity_flow/components/routine_card.dart';
 import 'package:serenity_flow/components/mesh_gradient_background.dart';
 import 'package:serenity_flow/services/supabase_service.dart';
+import 'package:serenity_flow/services/revenue_cat_service.dart';
 import 'package:serenity_flow/screens/monetization/paywall_screen.dart';
 import 'package:serenity_flow/screens/home/create_routine_screen.dart';
 import 'package:flutter/services.dart';

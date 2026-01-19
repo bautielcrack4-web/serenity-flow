@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:serenity_flow/core/design_system.dart';
 import 'package:serenity_flow/screens/home/main_navigation_screen.dart';
 import 'package:serenity_flow/services/supabase_service.dart';
