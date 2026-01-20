@@ -7,6 +7,8 @@ import 'dart:ui' as api_ui;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'dart:convert';
+import 'package:crypto/crypto.dart';
 import 'package:serenity_flow/services/supabase_service.dart';
 import 'package:serenity_flow/main.dart'; // To restart app
 
@@ -40,21 +42,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _handleAppleSignIn() async {
     try {
+      final supabase = Supabase.instance.client;
+      
+      // Generate a secure nonce for the Apple ID Token
+      final rawNonce = supabase.auth.generateRawNonce();
+      final hashedNonce = sha256.convert(utf8.encode(rawNonce)).toString();
+
       final credential = await SignInWithApple.getAppleIDCredential(
         scopes: [
           AppleIDAuthorizationScopes.email,
           AppleIDAuthorizationScopes.fullName,
         ],
+        nonce: hashedNonce,
       );
       
-      // Link the Apple credential to the current anonymous Supabase user
-      final supabase = Supabase.instance.client;
-      
-      // Create the ID token for Supabase
+      // Link/Sign in with the Apple credential
       final response = await supabase.auth.signInWithIdToken(
         provider: OAuthProvider.apple,
         idToken: credential.identityToken!,
-        nonce: credential.authorizationCode,
+        nonce: rawNonce,
       );
       
       if (response.user != null) {

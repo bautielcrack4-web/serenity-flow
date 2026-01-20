@@ -4,6 +4,8 @@ import 'package:serenity_flow/screens/home/main_navigation_screen.dart';
 import 'package:serenity_flow/services/supabase_service.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'dart:convert';
+import 'package:crypto/crypto.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -81,18 +83,24 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
   Future<void> _handleAppleSignIn() async {
     setState(() => _isLoading = true);
     try {
+      final supabase = Supabase.instance.client;
+      
+      // Generate a secure nonce for the Apple ID Token
+      final rawNonce = supabase.auth.generateRawNonce();
+      final hashedNonce = sha256.convert(utf8.encode(rawNonce)).toString();
+
       final credential = await SignInWithApple.getAppleIDCredential(
         scopes: [
           AppleIDAuthorizationScopes.email,
           AppleIDAuthorizationScopes.fullName,
         ],
+        nonce: hashedNonce,
       );
 
-      final supabase = Supabase.instance.client;
       await supabase.auth.signInWithIdToken(
         provider: OAuthProvider.apple,
         idToken: credential.identityToken!,
-        nonce: credential.authorizationCode,
+        nonce: rawNonce,
       );
 
       if (mounted) {
