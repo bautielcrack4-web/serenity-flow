@@ -110,7 +110,18 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
         );
       }
     } catch (e) {
-      _showError("Apple Sign In failed: $e");
+      debugPrint("Apple Sign In Error: $e");
+      String errorMessage = "Sign in failed";
+      
+      if (e is SignInWithAppleAuthorizationException) {
+        errorMessage = "Apple Auth Error: ${e.message} (Code: ${e.code})";
+      } else if (e is AuthException) {
+        errorMessage = "Supabase Auth Error: ${e.message}";
+      } else {
+        errorMessage = "Error: $e";
+      }
+      
+      _showError(errorMessage);
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }

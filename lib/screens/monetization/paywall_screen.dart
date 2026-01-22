@@ -280,6 +280,12 @@ class _PaywallScreenState extends State<PaywallScreen> {
         bool isAnnual = package.packageType == PackageType.annual;
         bool isSelected = _selectedPackage == package;
         
+        // Define price strings based on package type
+        String mainPrice = package.storeProduct.priceString; // e.g. "$14.99"
+        String secondaryPrice = isAnnual 
+            ? "${package.storeProduct.currencyCode} ${(package.storeProduct.price / 12).toStringAsFixed(2)} / mo" 
+            : "";
+        
         return GestureDetector(
           onTap: () => setState(() => _selectedPackage = package),
           child: Container(
@@ -304,35 +310,42 @@ class _PaywallScreenState extends State<PaywallScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          isAnnual ? "Annual" : "Monthly",
-                          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: AppColors.dark),
-                        ),
-                        if (isAnnual) ...[
-                          const SizedBox(height: 4),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
                           Text(
-                            "US\$ 29.99  US\$ 14.99",
+                            isAnnual ? "Annual Plan" : "Monthly Plan",
                             style: TextStyle(
-                              fontSize: 14, 
-                              color: AppColors.dark.withOpacity(0.4),
-                              decoration: TextDecoration.lineThrough
+                              fontSize: 16, 
+                              fontWeight: FontWeight.w700, 
+                              color: AppColors.dark.withOpacity(0.6)
                             ),
                           ),
+                          const SizedBox(height: 4),
+                          // Primary Price (Billed Amount) - MUST BE LARGEST
+                          Text(
+                            mainPrice,
+                            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: AppColors.dark),
+                          ),
+                          if (isAnnual) ...[
+                            const SizedBox(height: 4),
+                             Text(
+                              "Just $secondaryPrice",
+                              style: TextStyle(
+                                fontSize: 14, 
+                                color: AppColors.turquoise,
+                                fontWeight: FontWeight.w600
+                              ),
+                            ),
+                          ],
                         ],
-                      ],
+                      ),
                     ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          isAnnual ? "US\$ 1.24 / mo" : "USD 4.99 / mo",
-                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.dark),
-                        ),
-                        Icon(Icons.chevron_right_rounded, color: AppColors.dark.withOpacity(0.2)),
-                      ],
+                    Icon(
+                        isSelected ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
+                        color: isSelected ? AppColors.turquoise : AppColors.lightGray,
+                        size: 28
                     ),
                   ],
                 ),
@@ -343,13 +356,13 @@ class _PaywallScreenState extends State<PaywallScreen> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: AppColors.coral,
                         borderRadius: BorderRadius.circular(12),
-                        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 8)],
+                        boxShadow: [BoxShadow(color: AppColors.coral.withOpacity(0.3), blurRadius: 8)],
                       ),
                       child: const Text(
-                        "Most Popular",
-                        style: TextStyle(color: AppColors.turquoise, fontWeight: FontWeight.w900, fontSize: 12),
+                        "BEST VALUE",
+                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 10),
                       ),
                     ),
                   ),
@@ -364,15 +377,15 @@ class _PaywallScreenState extends State<PaywallScreen> {
   Widget _buildDemoOptions() {
     return Column(
       children: [
-        _buildDemoCard("Annual (Simulated)", "US\$ 14.99", "US\$ 1.24 / mo", true),
-        _buildDemoCard("Monthly (Simulated)", "US\$ 4.99", "US\$ 4.99 / mo", false),
+        _buildDemoCard("Annual Plan", "US\$ 14.99", "US\$ 1.24 / mo", true),
+        _buildDemoCard("Monthly Plan", "US\$ 4.99", "", false),
       ],
     );
   }
 
-  Widget _buildDemoCard(String title, String price, String monthly, bool isSelected) {
+  Widget _buildDemoCard(String title, String mainPrice, String secondaryPrice, bool isSelected) {
     return GestureDetector(
-      onTap: () => setState(() {}), // Just for interaction feedback in demo
+      onTap: () => setState(() {}),
       child: Container(
         margin: const EdgeInsets.only(bottom: 16),
         padding: const EdgeInsets.all(20),
@@ -395,12 +408,21 @@ class _PaywallScreenState extends State<PaywallScreen> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: AppColors.dark)),
+                Text(title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.dark.withOpacity(0.6))),
                 const SizedBox(height: 4),
-                Text(price, style: TextStyle(fontSize: 14, color: AppColors.dark.withOpacity(0.4))),
+                // Main Price big
+                Text(mainPrice, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: AppColors.dark)),
+                if (secondaryPrice.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Text("Just $secondaryPrice", style: const TextStyle(fontSize: 14, color: AppColors.turquoise, fontWeight: FontWeight.w600)),
+                ]
               ],
             ),
-            Text(monthly, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.dark)),
+             Icon(
+                isSelected ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
+                color: isSelected ? AppColors.turquoise : AppColors.lightGray,
+                size: 28
+            ),
           ],
         ),
       ),
@@ -426,7 +448,31 @@ class _PaywallScreenState extends State<PaywallScreen> {
               style: TextStyle(color: AppColors.dark.withOpacity(0.5), fontWeight: FontWeight.w700, decoration: TextDecoration.underline),
             ),
           ),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _buildLegalLink("Privacy Policy", "https://sites.google.com/view/yunaapp/privacy-policy"),
+              Text(" • ", style: TextStyle(color: AppColors.dark.withOpacity(0.3))),
+              _buildLegalLink("Terms of Use", "https://sites.google.com/view/yunaapp/terms-of-service"),
+            ],
+          ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildLegalLink(String text, String url) {
+    return GestureDetector(
+      onTap: () async {
+        final uri = Uri.parse(url);
+         if (await canLaunchUrl(uri)) {
+           await launchUrl(uri);
+         }
+      },
+      child: Text(
+        text,
+        style: TextStyle(color: AppColors.dark.withOpacity(0.4), fontSize: 11, fontWeight: FontWeight.w600),
       ),
     );
   }
