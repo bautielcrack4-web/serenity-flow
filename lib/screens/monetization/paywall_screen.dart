@@ -450,12 +450,21 @@ class _PaywallScreenState extends State<PaywallScreen> {
             ),
           ),
           const SizedBox(height: 16),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+            child: Text(
+              "A purchase will be applied to your iTunes account on confirmation. Subscriptions will automatically renew unless canceled within 24-hours before the end of the current period. You can cancel anytime with your iTunes account settings. Any unused portion of a free trial will be forfeited if you purchase a subscription.",
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 10, color: Color(0xFF9E9E9E)),
+            ),
+          ),
+          const SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               _buildLegalLink("Privacy Policy", "https://sites.google.com/view/yunaapp/privacy-policy"),
               Text(" • ", style: TextStyle(color: AppColors.dark.withOpacity(0.3))),
-              _buildLegalLink("Terms of Use", "https://sites.google.com/view/yunaapp/terms-of-service"),
+              _buildLegalLink("Terms of Use (EULA)", "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/"),
             ],
           ),
         ],
