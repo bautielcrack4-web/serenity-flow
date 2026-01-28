@@ -106,4 +106,14 @@ class RevenueCatService {
       debugPrint("Error restoring purchases: $e");
     }
   }
+
+  Future<void> logIn(String userId) async {
+    if (kIsWeb) return;
+    try {
+      await Purchases.logIn(userId);
+      debugPrint("RevenueCat logIn successful for: $userId");
+    } catch (e) {
+      debugPrint("RevenueCat logIn error: $e");
+    }
+  }
 }

@@ -3,6 +3,7 @@ import 'package:serenity_flow/core/design_system.dart';
 import 'package:serenity_flow/screens/home/main_navigation_screen.dart';
 import 'package:serenity_flow/services/supabase_service.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+import 'package:serenity_flow/services/revenue_cat_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
@@ -107,11 +108,10 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
       try {
         final userId = supabase.auth.currentUser?.id;
         if (userId != null) {
-          await Purchases.logIn(userId);
-          debugPrint("RevenueCat sync successful for user: $userId");
+          await RevenueCatService().logIn(userId);
         }
       } catch (rcError) {
-        debugPrint("RevenueCat logIn error (non-fatal): $rcError");
+        debugPrint("RevenueCat sync error (non-fatal): $rcError");
       }
 
       if (mounted) {
