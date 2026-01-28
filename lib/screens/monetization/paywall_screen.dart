@@ -194,7 +194,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
           ),
           const SizedBox(height: 16),
           Text(
-            "Only US\$ 1.24 per month billed annually.\nThat's 50x cheaper than a personal trainer.",
+            "Billed annually. Start your journey today.\nFeel great with only 5 minutes a day.",
             textAlign: TextAlign.center,
             style: TextStyle(fontSize: 14, color: AppColors.dark.withOpacity(0.5), fontWeight: FontWeight.w600, height: 1.4),
           ),
@@ -329,16 +329,25 @@ class _PaywallScreenState extends State<PaywallScreen> {
                             mainPrice,
                             style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: AppColors.dark),
                           ),
+                          const SizedBox(height: 4),
                           if (isAnnual) ...[
-                            const SizedBox(height: 4),
                              Text(
-                              "Just $secondaryPrice",
-                              style: TextStyle(
-                                fontSize: 14, 
-                                color: AppColors.turquoise,
-                                fontWeight: FontWeight.w600
-                              ),
-                            ),
+                               "Calculated at Just $secondaryPrice",
+                               style: TextStyle(
+                                 fontSize: 13, 
+                                 color: AppColors.dark.withOpacity(0.4),
+                                 fontWeight: FontWeight.w500
+                               ),
+                             ),
+                          ] else ...[
+                            Text(
+                               "Billed monthly",
+                               style: TextStyle(
+                                 fontSize: 13, 
+                                 color: AppColors.dark.withOpacity(0.4),
+                                 fontWeight: FontWeight.w500
+                               ),
+                             ),
                           ],
                         ],
                       ),
@@ -413,9 +422,11 @@ class _PaywallScreenState extends State<PaywallScreen> {
                 const SizedBox(height: 4),
                 // Main Price big
                 Text(mainPrice, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: AppColors.dark)),
+                const SizedBox(height: 4),
                 if (secondaryPrice.isNotEmpty) ...[
-                  const SizedBox(height: 4),
-                  Text("Just $secondaryPrice", style: const TextStyle(fontSize: 14, color: AppColors.turquoise, fontWeight: FontWeight.w600)),
+                  Text("Calculated at $secondaryPrice", style: TextStyle(fontSize: 13, color: AppColors.dark.withOpacity(0.4), fontWeight: FontWeight.w500)),
+                ] else ...[
+                  Text("Billed monthly", style: TextStyle(fontSize: 13, color: AppColors.dark.withOpacity(0.4), fontWeight: FontWeight.w500)),
                 ]
               ],
             ),

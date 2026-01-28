@@ -103,6 +103,17 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
         nonce: rawNonce,
       );
 
+      // Sync with RevenueCat
+      try {
+        final userId = supabase.auth.currentUser?.id;
+        if (userId != null) {
+          await Purchases.logIn(userId);
+          debugPrint("RevenueCat sync successful for user: $userId");
+        }
+      } catch (rcError) {
+        debugPrint("RevenueCat logIn error (non-fatal): $rcError");
+      }
+
       if (mounted) {
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (context) => const MainNavigationScreen()),

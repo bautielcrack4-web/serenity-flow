@@ -37,8 +37,8 @@ if __name__ == "__main__":
     TEAM_ID = "KXVAN4J7F3" 
     # Using the Services ID as the subject for the JWT
     CLIENT_ID = "com.yuna.yoga.bauti.signin" 
-    KEY_ID = "UZ3W6BA49U"
-    KEY_FILE = "AuthKey_UZ3W6BA49U.p8"
+    KEY_ID = "CYMA73GRPV"
+    KEY_FILE = "AuthKey_CYMA73GRPV.p8"
 
     try:
         secret = generate_client_secret(KEY_FILE, TEAM_ID, CLIENT_ID, KEY_ID)
