@@ -43,10 +43,12 @@ workflows:
           openssl genrsa -out /tmp/cert_key.pem 2048
           echo "✓ RSA key generated"
 
+          # Export key as env var (required by app-store-connect CLI)
+          export CERTIFICATE_PRIVATE_KEY=$(cat /tmp/cert_key.pem)
+
           # Fetch or create signing files from App Store Connect
           app-store-connect fetch-signing-files com.yuna.yoga.bauti \
             --type IOS_APP_STORE \
-            --certificate-key /tmp/cert_key.pem \
             --create
           echo "✓ Signing files fetched"
 
