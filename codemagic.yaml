@@ -46,6 +46,12 @@ workflows:
         distribution_type: app_store
         bundle_identifier: com.yuna.yoga.bauti
     scripts:
+      - name: Clean old certificates from keychain
+        script: |
+          # Remove any cached/old certificates to force fresh fetch
+          security delete-certificate -c "Apple Distribution: Bautista Moran" ~/Library/Keychains/login.keychain-db 2>/dev/null || true
+          security delete-certificate -c "Apple Distribution" /Library/Keychains/System.keychain 2>/dev/null || true
+          echo "Old certificates cleaned"
       - name: Set up code signing settings on Xcode project
         script: |
           xcode-project use-profiles
@@ -72,7 +78,4 @@ workflows:
           failure: true
       app_store_connect:
         auth: integration
-        # Submit to TestFlight
         submit_to_testflight: true
-        # Uncomment to auto-submit to App Store review
-        # submit_to_app_store: true
