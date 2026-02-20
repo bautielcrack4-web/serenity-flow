@@ -37,20 +37,35 @@ workflows:
     scripts:
       - name: Set up code signing
         script: |
+          set -e
+
           # Generate RSA 2048 private key (required by Apple)
           openssl genrsa -out /tmp/cert_key.pem 2048
+          echo "✓ RSA key generated"
 
           # Fetch or create signing files from App Store Connect
           app-store-connect fetch-signing-files com.yuna.yoga.bauti \
             --type IOS_APP_STORE \
             --certificate-key /tmp/cert_key.pem \
             --create
+          echo "✓ Signing files fetched"
 
-          # Install certificates into the keychain (this step was missing before!)
+          echo "=== Installed profiles ==="
+          ls ~/Library/MobileDevice/Provisioning\ Profiles/ 2>/dev/null || echo "NONE"
+
+          # Install certificates into the keychain
           keychain add-certificates
+          echo "✓ Certificates added to keychain"
+
+          echo "=== Code signing identities ==="
+          security find-identity -v -p codesigning || true
 
           # Configure Xcode project to use the profiles
           xcode-project use-profiles
+          echo "✓ Profiles applied to Xcode project"
+
+          echo "=== Export options plist ==="
+          cat /Users/builder/export_options.plist || echo "NOT FOUND"
 
       - name: Get Flutter dependencies
         script: |
