@@ -48,11 +48,11 @@ workflows:
     scripts:
       - name: Generate private key and fetch signing files
         script: |
-          # Generate a fresh RSA private key for the certificate
-          openssl genrsa -out /tmp/cert_private_key.pem 2048
-          echo "Private key generated"
+          # Generate EC P-256 private key (required by Apple)
+          openssl ecparam -genkey -name prime256v1 | openssl pkcs8 -topk8 -nocrypt -out /tmp/cert_private_key.pem
+          echo "EC private key generated"
           
-          # Fetch signing files, providing the private key so it can create a new certificate
+          # Fetch signing files with the private key
           app-store-connect fetch-signing-files com.yuna.yoga.bauti \
             --type IOS_APP_STORE \
             --create \
