@@ -46,17 +46,20 @@ workflows:
         distribution_type: app_store
         bundle_identifier: com.yuna.yoga.bauti
     scripts:
-      - name: Generate private key and fetch signing files
+      - name: Generate certificate key and fetch signing files
         script: |
-          # Generate EC P-256 private key (required by Apple)
-          openssl ecparam -genkey -name prime256v1 | openssl pkcs8 -topk8 -nocrypt -out /tmp/cert_private_key.pem
+          # Generate EC P-256 private key for the signing certificate
+          openssl ecparam -genkey -name prime256v1 -noout -out /tmp/cert_key.pem
           echo "EC private key generated"
+          cat /tmp/cert_key.pem | head -1
           
-          # Fetch signing files with the private key
+          # Set the env var that Codemagic CLI uses internally
+          export CM_CERTIFICATE_PRIVATE_KEY="$(cat /tmp/cert_key.pem)"
+          
+          # Now fetch-signing-files will use CM_CERTIFICATE_PRIVATE_KEY automatically
           app-store-connect fetch-signing-files com.yuna.yoga.bauti \
             --type IOS_APP_STORE \
-            --create \
-            --certificate-key /tmp/cert_private_key.pem
+            --create
       - name: Set up code signing settings on Xcode project
         script: |
           xcode-project use-profiles
