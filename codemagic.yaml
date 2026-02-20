@@ -7,8 +7,6 @@ workflows:
     environment:
       flutter: stable
       xcode: latest
-      groups:
-        - revenuecat
     scripts:
       - name: Get Flutter dependencies
         script: |
@@ -36,9 +34,6 @@ workflows:
     environment:
       flutter: stable
       xcode: latest
-      groups:
-        - revenuecat
-        - certificate_key
       vars:
         BUNDLE_ID: "com.yuna.yoga.bauti"
         XCODE_WORKSPACE: "Runner.xcworkspace"
@@ -47,6 +42,15 @@ workflows:
         distribution_type: app_store
         bundle_identifier: com.yuna.yoga.bauti
     scripts:
+      - name: Generate key and fetch signing files
+        script: |
+          # Generate EC private key on the builder machine
+          openssl ecparam -genkey -name prime256v1 -noout -out /tmp/cert_key.pem
+          
+          # Set it as env var for Codemagic CLI
+          echo "CERTIFICATE_PRIVATE_KEY<<EOF" >> $CM_ENV
+          cat /tmp/cert_key.pem >> $CM_ENV
+          echo "EOF" >> $CM_ENV
       - name: Fetch signing files from App Store Connect
         script: |
           app-store-connect fetch-signing-files com.yuna.yoga.bauti \
