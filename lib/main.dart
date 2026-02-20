@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:serenity_flow/core/design_system.dart';
-import 'package:serenity_flow/screens/onboarding/questionnaire_screen.dart';
+import 'package:serenity_flow/screens/onboarding/onboarding_flow.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:serenity_flow/services/supabase_service.dart';
 import 'package:serenity_flow/services/revenue_cat_service.dart';
@@ -36,19 +36,22 @@ class SerenityFlowApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Serenity Flow',
+      title: 'Yuna',
       debugShowCheckedModeBanner: false,
       theme: AppTypography.theme,
+      routes: {
+        '/home': (context) => const MainNavigationScreen(),
+      },
       home: FutureBuilder<bool>(
         future: _checkOnboarding(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Scaffold(body: Center(child: CircularProgressIndicator(color: AppColors.turquoise)));
+            return const Scaffold(body: Center(child: CircularProgressIndicator(color: AppColors.coral)));
           }
           if (snapshot.data == true) {
             return const MainNavigationScreen();
           }
-          return const QuestionnaireScreen();
+          return const OnboardingFlow();
         },
       ), 
     );
@@ -56,6 +59,6 @@ class SerenityFlowApp extends StatelessWidget {
 
   Future<bool> _checkOnboarding() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool('onboarding_complete') ?? false;
+    return prefs.getBool('onboarding_completed') ?? false;
   }
 }

@@ -113,6 +113,7 @@ class _HomeScreenContentState extends State<HomeScreenContent> with SingleTicker
                       routine: routine,
                       index: 0,
                       onTap: () => _handleRoutineStart(routine),
+                      onLongPress: () => _confirmDeleteRoutine(routine),
                     ),
                   )),
 
@@ -341,6 +342,38 @@ class _HomeScreenContentState extends State<HomeScreenContent> with SingleTicker
           builder: (context) => PreSessionScreen(routine: routine),
         ),
       );
+    }
+  }
+
+  Future<void> _confirmDeleteRoutine(Routine routine) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: const Text("Delete Routine?", style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.dark)),
+        content: Text("Are you sure you want to delete '${routine.name}'? This action cannot be undone.", style: const TextStyle(color: AppColors.gray)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text("Cancel", style: TextStyle(color: AppColors.gray, fontWeight: FontWeight.bold)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text("Delete", style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      await SupabaseService().deleteCustomRoutine(routine.id);
+      _loadCustomRoutines();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Deleted '${routine.name}'"), backgroundColor: AppColors.dark),
+        );
+      }
     }
   }
 

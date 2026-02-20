@@ -3,8 +3,10 @@ import 'package:serenity_flow/core/design_system.dart';
 import 'package:serenity_flow/services/audio_service.dart';
 import 'package:serenity_flow/services/haptic_service.dart';
 import 'package:serenity_flow/services/supabase_service.dart';
+import 'package:serenity_flow/components/sentiment_review_dialog.dart';
 import 'package:serenity_flow/models/routine_model.dart';
 import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'dart:math' as math;
 
 class CompletionScreen extends StatefulWidget {
@@ -34,8 +36,8 @@ class _CompletionScreenState extends State<CompletionScreen> with TickerProvider
     
     _particles = List.generate(60, (i) => ConfettiParticle());
     
-    // Save Session to Backend
-    SupabaseService().saveSession(widget.routine, widget.durationSeconds);
+    // Process Session (Save & Check for Review)
+    _processCompletion();
 
     HapticPatterns.achievement();
     // Delay slightly to match the visual explosion
@@ -232,6 +234,62 @@ class _CompletionScreenState extends State<CompletionScreen> with TickerProvider
     // Future implementation: await Share.share("Just completed my session today on Yuna! 🔥\n\n🎯 8 Minutes of Flow\n⚡ 4 Day Streak\n\nDownload Yuna and join the flow.");
     // Since we are mocking the dependency setup for this speedrun:
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Opening share menu... (Simulated)")));
+  }
+
+  Future<void> _processCompletion() async {
+    // 1. Save Session
+    await SupabaseService().saveSession(widget.routine, widget.durationSeconds);
+    
+    // 2. Check if this was the First Session
+    final stats = await SupabaseService().getStats();
+    if (stats['sessions'] == 1) { // Exact match for first time
+      if (mounted) {
+         // Slight delay so it doesn't pop up over the confetti immediately
+         Future.delayed(const Duration(seconds: 2), _askForReview);
+      }
+    }
+  }
+
+  Future<void> _askForReview() async {
+    // Step 1: Ultra UI Sentiment Filter
+    // Returns true ONLY if they rated 9 or 10.
+    final bool? needsRating = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const SentimentReviewDialog(),
+    );
+
+    if (needsRating == true) {
+      if (!mounted) return;
+      // Step 2: "Rate Us" - Only shown if they love it (9-10)
+      
+      final bool? wantsToRate = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          title: const Text("Rate Us", style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.dark)),
+          content: const Text("Thank you! Being a 5-star app helps us reach more people. Would you help us out?", style: TextStyle(color: AppColors.gray)),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text("Later", style: TextStyle(color: AppColors.gray)),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text("Rate Now", style: TextStyle(color: AppColors.coral, fontWeight: FontWeight.bold)),
+            ),
+          ],
+        ),
+      );
+
+      if (wantsToRate == true) {
+        final Uri url = Uri.parse("https://apps.apple.com/app/id6739506690"); 
+        if (await canLaunchUrl(url)) {
+          await launchUrl(url, mode: LaunchMode.externalApplication);
+        }
+      }
+    }
   }
 }
 

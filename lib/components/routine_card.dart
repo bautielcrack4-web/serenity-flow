@@ -9,12 +9,14 @@ import 'dart:async';
 class RoutineCard extends StatefulWidget {
   final Routine routine;
   final VoidCallback onTap;
+  final VoidCallback? onLongPress; // Optional long press
   final int index; // For staggered entrance
 
   const RoutineCard({
     super.key,
     required this.routine,
     required this.onTap,
+    this.onLongPress,
     this.index = 0,
   });
 
@@ -106,15 +108,16 @@ class _RoutineCardState extends State<RoutineCard> with TickerProviderStateMixin
               );
             },
             child: GestureDetector(
-            onTapDown: (_) => _tapController.forward(),
-            onTapUp: (_) {
-               HapticFeedback.selectionClick();
-               audioService.playRise();
-               _tapController.reverse();
-               widget.onTap();
-            },
-            onTapCancel: () => _tapController.reverse(),
-            child: Container(
+              onTapDown: (_) => _tapController.forward(),
+              onTapUp: (_) {
+                 HapticFeedback.selectionClick();
+                 audioService.playRise();
+                 _tapController.reverse();
+                 widget.onTap();
+              },
+              onLongPress: widget.onLongPress, // Handled here
+              onTapCancel: () => _tapController.reverse(),
+              child: Container(
               margin: const EdgeInsets.only(bottom: 20),
               height: 180,
               decoration: BoxDecoration(

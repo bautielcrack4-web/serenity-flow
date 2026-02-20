@@ -11,6 +11,8 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:serenity_flow/services/supabase_service.dart';
 import 'package:serenity_flow/main.dart'; // To restart app
+import 'package:serenity_flow/services/revenue_cat_service.dart';
+import 'package:serenity_flow/screens/monetization/paywall_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -26,11 +28,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
   int _poseDuration = 30; // Restoring this missing variable
 
   bool _isAnonymous = false;
+  bool _isPro = false;
 
   @override
   void initState() {
     super.initState();
     _checkUserStatus();
+    _isPro = RevenueCatService().isPro;
   }
 
   void _checkUserStatus() {
@@ -108,6 +112,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       GestureDetector(
                         onTap: _handleAppleSignIn,
                         child: _buildSignInBanner(),
+                      ),
+                      const SizedBox(height: 24),
+                    ],
+
+                    // Upgrade to Pro Banner
+                    if (!_isPro) ...[
+                      GestureDetector(
+                        onTap: () async {
+                          final result = await Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const PaywallScreen()),
+                          );
+                          if (result == true) {
+                            setState(() {
+                              _isPro = true;
+                            });
+                          }
+                        },
+                        child: _buildUpgradeBanner(),
                       ),
                       const SizedBox(height: 24),
                     ],
@@ -343,6 +366,53 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 SizedBox(height: 4),
                 Text(
                   "Sign in with Apple to save your routines & progress in the cloud",
+                  style: TextStyle(fontSize: 12, color: AppColors.gray),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          const Icon(Icons.arrow_forward_ios, size: 16, color: AppColors.gray),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildUpgradeBanner() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [AppColors.gold.withOpacity(0.2), AppColors.coral.withOpacity(0.2)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.gold.withOpacity(0.5), width: 1.5),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              boxShadow: AppShadows.card,
+            ),
+            child: const Icon(Icons.star_rounded, color: AppColors.gold, size: 24),
+          ),
+          const SizedBox(width: 16),
+          const Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Unlock Pro Access",
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  "Get unlimited access to all advanced yoga routines & premium features",
                   style: TextStyle(fontSize: 12, color: AppColors.gray),
                 ),
               ],

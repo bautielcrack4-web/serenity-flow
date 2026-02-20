@@ -1,0 +1,1169 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'dart:math' as math;
+import 'package:serenity_flow/core/design_system.dart';
+import 'package:serenity_flow/models/onboarding_data.dart';
+import 'package:serenity_flow/screens/onboarding/widgets/onboarding_widgets.dart';
+import 'package:serenity_flow/screens/onboarding/widgets/onboarding_animations.dart';
+
+/// PHASE 5: Personalized Plan (9 pages)
+/// Purpose: Show the result, create ownership feeling ("this is MINE")
+List<Widget> buildPhase5Pages(
+  OnboardingData data,
+  VoidCallback next,
+  Function(String, dynamic) answer,
+) {
+  return [
+    // PAGE 28: Smart loading — shows each factor being analyzed
+    _PlanLoadingPage(onComplete: next),
+
+    // PAGE 29: Profile result with confetti
+    _ProfileResultPage(data: data, onContinue: next),
+
+    // PAGE 30: Animated projection graph
+    _ProjectionGraphPage(data: data, onContinue: next),
+
+    // PAGE 31: Social proof
+    InfoBreakCard(
+      emoji: '🏆',
+      title: 'Resultados reales',
+      fact: 'El 87% de las mujeres con un perfil similar al tuyo lograron su objetivo con Yuna en el tiempo estimado.',
+      onContinue: next,
+    ),
+
+    // PAGE 32: Plan summary WITH DATA ECHO
+    _PersonalizedPlanPage(data: data, onContinue: next),
+
+    // PAGE 33: Smart features based on responses
+    _SmartFeaturesPage(data: data, onContinue: next),
+
+    // PAGE 34: With vs Without comparison
+    _ComparisonPage(data: data, onContinue: next),
+
+    // PAGE 35: IKEA Effect — Confirm YOUR plan
+    _ConfirmPlanPage(data: data, onConfirm: next),
+
+    // PAGE 36: Name input
+    _NameInputPage(onSubmit: (name) => answer('display_name', name)),
+  ];
+}
+
+// ---- Internal widgets ----
+
+/// 🔥 Premium Plan Loading — Multi-ring scanning animation
+class _PlanLoadingPage extends StatefulWidget {
+  final VoidCallback onComplete;
+  const _PlanLoadingPage({required this.onComplete});
+
+  @override
+  State<_PlanLoadingPage> createState() => _PlanLoadingPageState();
+}
+
+class _PlanLoadingPageState extends State<_PlanLoadingPage>
+    with TickerProviderStateMixin {
+  late AnimationController _progressController;
+  late AnimationController _ringController;
+  final _factors = [
+    'Metabolismo', 'Nivel de estrés', 'Hábitos alimenticios',
+    'Ciclo hormonal', 'Nivel de actividad', 'Calidad de sueño',
+    'Tipo de cuerpo', 'Objetivos personales',
+  ];
+  int _currentFactor = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _ringController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    )..repeat();
+
+    _progressController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 6),
+    )..addListener(() {
+        final newFactor = (_progressController.value * _factors.length)
+            .floor()
+            .clamp(0, _factors.length - 1);
+        if (newFactor != _currentFactor) {
+          HapticFeedback.lightImpact();
+          setState(() => _currentFactor = newFactor);
+        }
+      });
+
+    _progressController.forward().then((_) {
+      if (mounted) widget.onComplete();
+    });
+  }
+
+  @override
+  void dispose() {
+    _progressController.dispose();
+    _ringController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        const Positioned.fill(
+          child: FloatingParticles(count: 12, color: AppColors.coral, maxSize: 4),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Spacer(flex: 2),
+              SizedBox(
+                width: 120, height: 120,
+                child: AnimatedBuilder(
+                  animation: Listenable.merge([_progressController, _ringController]),
+                  builder: (context, child) {
+                    return CustomPaint(
+                      painter: _ScanRingPainter(
+                        progress: _progressController.value,
+                        rotation: _ringController.value * math.pi * 2,
+                      ),
+                      child: Center(
+                        child: Text(
+                          '${(_progressController.value * 100).toInt()}%',
+                          style: const TextStyle(fontFamily: 'Outfit', fontSize: 28, fontWeight: FontWeight.w800, color: AppColors.coral),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(height: 32),
+              const Text('Analizando tu perfil...', textAlign: TextAlign.center,
+                  style: TextStyle(fontFamily: 'Outfit', fontSize: 24, fontWeight: FontWeight.w700, color: AppColors.dark)),
+              const SizedBox(height: 24),
+              // Factor checklist
+              ...List.generate(_factors.length, (i) {
+                final isAnalyzed = i < _currentFactor;
+                final isCurrent = i == _currentFactor;
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 6),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 200),
+                        child: isAnalyzed
+                            ? const Icon(Icons.check_circle, color: Color(0xFF4CAF50), size: 18, key: ValueKey('done'))
+                            : isCurrent
+                                ? const SizedBox(
+                                    key: ValueKey('loading'),
+                                    width: 18, height: 18,
+                                    child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.coral),
+                                  )
+                                : Icon(Icons.circle_outlined, color: Colors.grey.withValues(alpha: 0.3), size: 18, key: const ValueKey('pending')),
+                      ),
+                      const SizedBox(width: 10),
+                      Text(
+                        _factors[i],
+                        style: TextStyle(
+                          fontFamily: 'Outfit', fontSize: 14,
+                          color: isAnalyzed ? const Color(0xFF4CAF50) : isCurrent ? AppColors.coral : AppColors.dark.withValues(alpha: 0.3),
+                          fontWeight: isCurrent ? FontWeight.w600 : FontWeight.w400,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }),
+              const Spacer(flex: 3),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ScanRingPainter extends CustomPainter {
+  final double progress;
+  final double rotation;
+  _ScanRingPainter({required this.progress, required this.rotation});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = size.width / 2 - 8;
+    canvas.drawCircle(center, radius, Paint()
+      ..color = AppColors.coral.withValues(alpha: 0.08)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 6);
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: radius),
+      -math.pi / 2, progress * math.pi * 2, false,
+      Paint()
+        ..color = AppColors.coral
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 6
+        ..strokeCap = StrokeCap.round,
+    );
+    final dotAngle = rotation;
+    final dotX = center.dx + radius * math.cos(dotAngle);
+    final dotY = center.dy + radius * math.sin(dotAngle);
+    canvas.drawCircle(Offset(dotX, dotY), 5, Paint()
+      ..color = AppColors.coral
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4));
+  }
+
+  @override
+  bool shouldRepaint(covariant _ScanRingPainter old) => true;
+}
+
+/// Profile Result with staggered profile chips + confetti
+class _ProfileResultPage extends StatelessWidget {
+  final OnboardingData data;
+  final VoidCallback onContinue;
+  const _ProfileResultPage({required this.data, required this.onContinue});
+
+  @override
+  Widget build(BuildContext context) {
+    final chips = [
+      ('🎯', 'Objetivo', data.goalType == 'lose_weight' ? 'Perder peso' : data.goalType == 'tone' ? 'Tonificar' : 'Bienestar'),
+      ('⚖️', 'Peso actual', '${data.currentWeight?.toStringAsFixed(1) ?? "--"} kg'),
+      ('🎯', 'Peso objetivo', '${data.targetWeight?.toStringAsFixed(1) ?? "--"} kg'),
+      ('📏', 'Altura', '${data.height?.toStringAsFixed(0) ?? "--"} cm'),
+      ('😰', 'Estrés', '${data.stressLevel ?? "--"}/10'),
+      ('💪', 'Actividad', data.activityLevel ?? '--'),
+    ];
+
+    return Stack(
+      children: [
+        const Positioned.fill(child: ConfettiOverlay(count: 30)),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Column(
+            children: [
+              const SizedBox(height: 24),
+              FadeSlideIn(
+                child: const Text('Tu perfil Yuna', style: TextStyle(fontFamily: 'Outfit', fontSize: 28, fontWeight: FontWeight.w800, color: AppColors.dark)),
+              ),
+              const SizedBox(height: 8),
+              FadeSlideIn(
+                delay: const Duration(milliseconds: 100),
+                child: Text('Creado exclusivamente para vos ✨',
+                    style: TextStyle(fontFamily: 'Outfit', fontSize: 15, color: AppColors.dark.withValues(alpha: 0.5))),
+              ),
+              const SizedBox(height: 28),
+              ...chips.asMap().entries.map((e) {
+                return FadeSlideIn(
+                  delay: Duration(milliseconds: 200 + e.key * 100),
+                  child: _ProfileChip(e.value.$1, e.value.$2, e.value.$3),
+                );
+              }),
+              const Spacer(),
+              FadeSlideIn(
+                delay: const Duration(milliseconds: 900),
+                child: PremiumCTAButton(text: 'Ver mi plan', onPressed: onContinue),
+              ),
+              const SizedBox(height: 40),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ProfileChip extends StatelessWidget {
+  final String emoji, label, value;
+  const _ProfileChip(this.emoji, this.label, this.value);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 10)],
+        ),
+        child: Row(
+          children: [
+            Text(emoji, style: const TextStyle(fontSize: 22)),
+            const SizedBox(width: 14),
+            Text(label, style: TextStyle(fontFamily: 'Outfit', fontSize: 15, color: AppColors.dark.withValues(alpha: 0.6))),
+            const Spacer(),
+            Text(value, style: const TextStyle(fontFamily: 'Outfit', fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.dark)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// 📉 Animated Weight Projection Graph
+class _ProjectionGraphPage extends StatefulWidget {
+  final OnboardingData data;
+  final VoidCallback onContinue;
+  const _ProjectionGraphPage({required this.data, required this.onContinue});
+
+  @override
+  State<_ProjectionGraphPage> createState() => _ProjectionGraphPageState();
+}
+
+class _ProjectionGraphPageState extends State<_ProjectionGraphPage>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  double get _currentWeight => widget.data.currentWeight ?? 70;
+  double get _targetWeight => widget.data.targetWeight ?? 60;
+  int get _weeks {
+    final toLose = _currentWeight - _targetWeight;
+    return toLose > 0 ? (toLose / 0.75).ceil().clamp(4, 52) : 8;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2000),
+    );
+    Future.delayed(const Duration(milliseconds: 600), () {
+      if (mounted) _controller.forward();
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Column(
+        children: [
+          const SizedBox(height: 24),
+          FadeSlideIn(
+            child: const Text('Tu proyección', textAlign: TextAlign.center,
+                style: TextStyle(fontFamily: 'Outfit', fontSize: 28, fontWeight: FontWeight.w800, color: AppColors.dark)),
+          ),
+          const SizedBox(height: 8),
+          FadeSlideIn(
+            delay: const Duration(milliseconds: 100),
+            child: Text(
+              '${_currentWeight.toStringAsFixed(1)} kg → ${_targetWeight.toStringAsFixed(1)} kg en $_weeks semanas',
+              style: TextStyle(fontFamily: 'Outfit', fontSize: 15, color: AppColors.coral, fontWeight: FontWeight.w600),
+            ),
+          ),
+          const SizedBox(height: 32),
+          // Animated graph
+          FadeSlideIn(
+            delay: const Duration(milliseconds: 300),
+            child: Container(
+              height: 220,
+              width: double.infinity,
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 20)],
+              ),
+              child: AnimatedBuilder(
+                animation: _controller,
+                builder: (context, _) {
+                  return CustomPaint(
+                    painter: _WeightGraphPainter(
+                      progress: Curves.easeOutCubic.transform(_controller.value),
+                      currentWeight: _currentWeight,
+                      targetWeight: _targetWeight,
+                      weeks: _weeks,
+                    ),
+                    size: Size.infinite,
+                  );
+                },
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+          // Milestones
+          FadeSlideIn(
+            delay: const Duration(milliseconds: 800),
+            child: _Milestone('🌱', 'Semana 2', 'Primeros cambios visibles'),
+          ),
+          FadeSlideIn(
+            delay: const Duration(milliseconds: 1000),
+            child: _Milestone('🔥', 'Semana ${(_weeks * 0.5).round()}', 'Aceleración de resultados'),
+          ),
+          FadeSlideIn(
+            delay: const Duration(milliseconds: 1200),
+            child: _Milestone('🎯', 'Semana $_weeks', '${_targetWeight.toStringAsFixed(1)} kg — Meta alcanzada'),
+          ),
+          const Spacer(),
+          FadeSlideIn(
+            delay: const Duration(milliseconds: 1400),
+            child: PremiumCTAButton(text: 'Ver mi plan completo', onPressed: widget.onContinue),
+          ),
+          const SizedBox(height: 40),
+        ],
+      ),
+    );
+  }
+}
+
+class _Milestone extends StatelessWidget {
+  final String emoji, title, desc;
+  const _Milestone(this.emoji, this.title, this.desc);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(
+        children: [
+          Text(emoji, style: const TextStyle(fontSize: 20)),
+          const SizedBox(width: 12),
+          Text(title, style: const TextStyle(fontFamily: 'Outfit', fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.coral)),
+          const SizedBox(width: 8),
+          Expanded(child: Text(desc, style: TextStyle(fontFamily: 'Outfit', fontSize: 14, color: AppColors.dark.withValues(alpha: 0.6)))),
+        ],
+      ),
+    );
+  }
+}
+
+class _WeightGraphPainter extends CustomPainter {
+  final double progress;
+  final double currentWeight;
+  final double targetWeight;
+  final int weeks;
+
+  _WeightGraphPainter({
+    required this.progress,
+    required this.currentWeight,
+    required this.targetWeight,
+    required this.weeks,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final w = size.width;
+    final h = size.height;
+    final padding = 40.0;
+    final graphW = w - padding * 2;
+    final graphH = h - padding;
+
+    // Y axis labels
+    final textStyle = TextStyle(fontFamily: 'Outfit', fontSize: 11, color: Colors.grey.withValues(alpha: 0.6));
+    _drawText(canvas, '${currentWeight.toStringAsFixed(0)} kg', Offset(0, padding * 0.3), textStyle);
+    _drawText(canvas, '${targetWeight.toStringAsFixed(0)} kg', Offset(0, graphH), textStyle);
+
+    // X axis labels
+    _drawText(canvas, 'Hoy', Offset(padding, h - 10), textStyle);
+    _drawText(canvas, 'Sem $weeks', Offset(w - padding - 30, h - 10), textStyle);
+
+    // Grid lines
+    final gridPaint = Paint()
+      ..color = Colors.grey.withValues(alpha: 0.08)
+      ..strokeWidth = 1;
+    for (var i = 0; i < 4; i++) {
+      final y = padding + (graphH - padding) * i / 3;
+      canvas.drawLine(Offset(padding, y), Offset(w - padding, y), gridPaint);
+    }
+
+    // Curve path
+    final path = Path();
+    final totalPoints = 50;
+    final drawnPoints = (totalPoints * progress).round();
+    final weightRange = currentWeight - targetWeight;
+
+    for (var i = 0; i <= drawnPoints; i++) {
+      final t = i / totalPoints;
+      final x = padding + graphW * t;
+      // Exponential decay curve — fast start, plateau at end
+      final weightAtT = currentWeight - weightRange * (1 - math.pow(1 - t, 2.2));
+      final y = padding + (graphH - padding) * ((weightAtT - targetWeight) / weightRange).clamp(0, 1);
+
+      if (i == 0) {
+        path.moveTo(x, y);
+      } else {
+        path.lineTo(x, y);
+      }
+    }
+
+    // Gradient fill under curve
+    if (drawnPoints > 0) {
+      final fillPath = Path.from(path);
+      final lastX = padding + graphW * (drawnPoints / totalPoints);
+      fillPath.lineTo(lastX, graphH);
+      fillPath.lineTo(padding, graphH);
+      fillPath.close();
+
+      final fillPaint = Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [AppColors.coral.withValues(alpha: 0.15), AppColors.coral.withValues(alpha: 0.01)],
+        ).createShader(Rect.fromLTWH(0, 0, w, h));
+      canvas.drawPath(fillPath, fillPaint);
+    }
+
+    // Line
+    canvas.drawPath(path, Paint()
+      ..color = AppColors.coral
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round);
+
+    // Endpoint dot with glow
+    if (drawnPoints > 0) {
+      final endT = drawnPoints / totalPoints;
+      final endX = padding + graphW * endT;
+      final endWeight = currentWeight - weightRange * (1 - math.pow(1 - endT, 2.2));
+      final endY = padding + (graphH - padding) * ((endWeight - targetWeight) / weightRange).clamp(0, 1);
+
+      canvas.drawCircle(Offset(endX, endY), 8, Paint()
+        ..color = AppColors.coral.withValues(alpha: 0.2));
+      canvas.drawCircle(Offset(endX, endY), 5, Paint()..color = AppColors.coral);
+      canvas.drawCircle(Offset(endX, endY), 3, Paint()..color = Colors.white);
+    }
+
+    // Target line (dashed)
+    final targetY = graphH;
+    final dashPaint = Paint()
+      ..color = const Color(0xFF4CAF50).withValues(alpha: 0.4)
+      ..strokeWidth = 1.5;
+    for (var x = padding; x < w - padding; x += 8) {
+      canvas.drawLine(Offset(x, targetY), Offset(x + 4, targetY), dashPaint);
+    }
+  }
+
+  void _drawText(Canvas canvas, String text, Offset offset, TextStyle style) {
+    final tp = TextPainter(
+      text: TextSpan(text: text, style: style),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    tp.paint(canvas, offset);
+  }
+
+  @override
+  bool shouldRepaint(covariant _WeightGraphPainter old) => old.progress != progress;
+}
+
+/// 🪞 DATA ECHO — Personalized Plan Summary
+class _PersonalizedPlanPage extends StatelessWidget {
+  final OnboardingData data;
+  final VoidCallback onContinue;
+  const _PersonalizedPlanPage({required this.data, required this.onContinue});
+
+  List<(String, String, String, String)> _buildPhases() {
+    final stressHigh = (data.stressLevel ?? 5) >= 7;
+    final emotional = data.emotionalEating != null && data.emotionalEating != 'nunca';
+    final lowSleep = data.sleepHours == 'less_than_6' || data.sleepHours == '6_hours';
+
+    return [
+      ('🌱', 'Semana 1-2: Adaptación',
+        stressHigh
+            ? 'Técnicas de relajación para bajar tu estrés de ${data.stressLevel}/10'
+            : 'Tu cuerpo se ajusta al nuevo plan suavemente',
+        'Basado en tu perfil'),
+      ('🔥', 'Semana 3-6: Aceleración',
+        emotional
+            ? 'Herramientas para manejar la alimentación emocional'
+            : 'Resultados visibles y más energía cada día',
+        'Personalizado'),
+      ('🌙', 'Semana 3+: Descanso',
+        lowSleep
+            ? 'Rutinas de sueño porque dormís ${data.sleepHours == "less_than_6" ? "menos de 6hs" : "~6hs"}'
+            : 'Optimización del descanso para acelerar resultados',
+        'Adaptado a vos'),
+      ('💎', 'Semana 7+: Consolidación',
+        'Hábitos sólidos, peso estable en ${data.targetWeight?.toStringAsFixed(1) ?? "tu"} kg',
+        'Tu meta'),
+    ];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final phases = _buildPhases();
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 24),
+          FadeSlideIn(
+            child: const Text('Tu plan personalizado',
+                style: TextStyle(fontFamily: 'Outfit', fontSize: 28, fontWeight: FontWeight.w800, color: AppColors.dark)),
+          ),
+          const SizedBox(height: 6),
+          FadeSlideIn(
+            delay: const Duration(milliseconds: 100),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: AppColors.coral.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ShimmerGradient(
+                    child: const Icon(Icons.auto_awesome, size: 14, color: AppColors.coral),
+                  ),
+                  const SizedBox(width: 6),
+                  const Text('IA analizó tus 8 factores',
+                      style: TextStyle(fontFamily: 'Outfit', fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.coral)),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+          ...phases.asMap().entries.map((e) {
+            final p = e.value;
+            return FadeSlideIn(
+              delay: Duration(milliseconds: 200 + e.key * 200),
+              child: _PersonalizedPhaseTile(p.$1, p.$2, p.$3, p.$4),
+            );
+          }),
+          const SizedBox(height: 24),
+          FadeSlideIn(
+            delay: const Duration(milliseconds: 1000),
+            child: PremiumCTAButton(text: 'Continuar', onPressed: onContinue, showGlow: false),
+          ),
+          const SizedBox(height: 40),
+        ],
+      ),
+    );
+  }
+}
+
+class _PersonalizedPhaseTile extends StatelessWidget {
+  final String emoji, title, desc, tag;
+  const _PersonalizedPhaseTile(this.emoji, this.title, this.desc, this.tag);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Container(
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 12)],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 44, height: 44,
+                  decoration: BoxDecoration(
+                    color: AppColors.coral.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Center(child: Text(emoji, style: const TextStyle(fontSize: 24))),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Text(title, style: const TextStyle(fontFamily: 'Outfit', fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.dark)),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: AppColors.coral.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(tag, style: const TextStyle(fontFamily: 'Outfit', fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.coral)),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Text(desc, style: TextStyle(fontFamily: 'Outfit', fontSize: 14, color: AppColors.dark.withValues(alpha: 0.6), height: 1.4)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// 🎯 Smart Features — Dynamic based on user answers
+class _SmartFeaturesPage extends StatelessWidget {
+  final OnboardingData data;
+  final VoidCallback onContinue;
+  const _SmartFeaturesPage({required this.data, required this.onContinue});
+
+  List<(String, String, String, bool)> _buildFeatures() {
+    final features = <(String, String, String, bool)>[];
+    final stressHigh = (data.stressLevel ?? 5) >= 6;
+    final emotional = data.emotionalEating != null && data.emotionalEating != 'nunca';
+    final hasRestrictions = data.dietaryRestrictions.isNotEmpty;
+    final lowActivity = data.activityLevel == 'sedentary' || data.activityLevel == 'light';
+
+    // Always show core features, but personalize descriptions
+    if (stressHigh) {
+      features.add(('🧘', 'Meditaciones anti-estrés', 'Tu estrés es ${data.stressLevel}/10 — incluimos sesiones para bajarlo', true));
+    } else {
+      features.add(('🧘', 'Meditaciones guiadas', 'Sesiones de relajación para tu bienestar', false));
+    }
+
+    if (emotional) {
+      features.add(('🧠', 'Control de hambre emocional', 'Dijiste que comés por estrés/emociones — tenemos técnicas para eso', true));
+    }
+
+    if (hasRestrictions) {
+      final restr = data.dietaryRestrictions.take(2).join(', ');
+      features.add(('🥗', 'Recetas adaptadas', 'Sin $restr — todas las recetas respetan tus restricciones', true));
+    } else {
+      features.add(('🥗', 'Recetas saludables', 'Platos fáciles adaptados a tu estilo de cocina', false));
+    }
+
+    features.add(('📊', 'Tracking inteligente', 'Peso, agua, hábitos y progreso en un solo lugar', false));
+
+    if (lowActivity) {
+      features.add(('💪', 'Workouts para principiantes', 'Empezamos suave porque tu nivel es ${data.activityLevel == "sedentary" ? "sedentario" : "bajo"}', true));
+    } else {
+      features.add(('💪', 'Workouts personalizados', 'Según tu nivel y preferencia: ${data.preferredExercise ?? "yoga"}', true));
+    }
+
+    features.add(('🌙', 'Rutinas de sueño', 'Dormís ${data.sleepHours ?? "lo justo"} — mejorar el sueño acelera resultados', data.sleepHours != null));
+
+    return features;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final features = _buildFeatures();
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 24),
+          FadeSlideIn(
+            child: const Text('Tu plan incluye',
+                style: TextStyle(fontFamily: 'Outfit', fontSize: 28, fontWeight: FontWeight.w800, color: AppColors.dark)),
+          ),
+          const SizedBox(height: 8),
+          FadeSlideIn(
+            delay: const Duration(milliseconds: 100),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [AppColors.coral.withValues(alpha: 0.1), AppColors.lavender.withValues(alpha: 0.1)],
+                ),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.auto_awesome, size: 14, color: AppColors.coral),
+                  SizedBox(width: 6),
+                  Text('Seleccionado por IA para vos',
+                      style: TextStyle(fontFamily: 'Outfit', fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.coral)),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          ...features.asMap().entries.map((e) {
+            final f = e.value;
+            return FadeSlideIn(
+              delay: Duration(milliseconds: 200 + e.key * 120),
+              child: _SmartFeatureCard(f.$1, f.$2, f.$3, f.$4),
+            );
+          }),
+          const SizedBox(height: 20),
+          FadeSlideIn(
+            delay: const Duration(milliseconds: 900),
+            child: PremiumCTAButton(text: 'Continuar', onPressed: onContinue, showGlow: false),
+          ),
+          const SizedBox(height: 40),
+        ],
+      ),
+    );
+  }
+}
+
+class _SmartFeatureCard extends StatelessWidget {
+  final String emoji, title, desc;
+  final bool isPersonalized;
+  const _SmartFeatureCard(this.emoji, this.title, this.desc, this.isPersonalized);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(18),
+          border: isPersonalized
+              ? Border.all(color: AppColors.coral.withValues(alpha: 0.15), width: 1.5)
+              : null,
+          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 12)],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 44, height: 44,
+              decoration: BoxDecoration(
+                color: AppColors.coral.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Center(child: Text(emoji, style: const TextStyle(fontSize: 22))),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(title, style: const TextStyle(fontFamily: 'Outfit', fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.dark)),
+                      ),
+                      if (isPersonalized)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: AppColors.coral.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: const Text('Para vos', style: TextStyle(fontFamily: 'Outfit', fontSize: 9, fontWeight: FontWeight.w700, color: AppColors.coral)),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 3),
+                  Text(desc, style: TextStyle(fontFamily: 'Outfit', fontSize: 13, color: AppColors.dark.withValues(alpha: 0.55), height: 1.3)),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Con Yuna vs Sin plan — with data echo
+class _ComparisonPage extends StatelessWidget {
+  final OnboardingData data;
+  final VoidCallback onContinue;
+  const _ComparisonPage({required this.data, required this.onContinue});
+
+  @override
+  Widget build(BuildContext context) {
+    final weeks = ((data.currentWeight ?? 70) - (data.targetWeight ?? 60)) > 0
+        ? (((data.currentWeight ?? 70) - (data.targetWeight ?? 60)) / 0.75).ceil()
+        : 8;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Column(
+        children: [
+          const SizedBox(height: 24),
+          FadeSlideIn(
+            child: const Text('Con Yuna vs sin plan',
+                style: TextStyle(fontFamily: 'Outfit', fontSize: 28, fontWeight: FontWeight.w800, color: AppColors.dark)),
+          ),
+          const SizedBox(height: 32),
+          FadeSlideIn(
+            delay: const Duration(milliseconds: 200),
+            child: Row(children: [
+              Expanded(
+                child: _CompareColumn(
+                  'Sin plan', [
+                    ('❌', 'Dietas restrictivas'),
+                    ('❌', 'Sin apoyo emocional'),
+                    ('❌', 'Efecto rebote'),
+                    ('❌', 'Lento e incierto'),
+                  ], Colors.grey.shade100, null,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: GlowingBorder(
+                  colors: const [AppColors.coral, Color(0xFFFFD700), AppColors.lavender],
+                  borderRadius: 20,
+                  child: _CompareColumn(
+                    'Con Yuna ✨', [
+                      ('✅', 'Plan de $weeks semanas'),
+                      ('✅', 'Anti-estrés incluido'),
+                      ('✅', 'Resultados duraderos'),
+                      ('✅', '${data.targetWeight?.toStringAsFixed(0) ?? "--"} kg meta'),
+                    ], AppColors.coral.withValues(alpha: 0.04), AppColors.coral,
+                  ),
+                ),
+              ),
+            ]),
+          ),
+          const Spacer(),
+          FadeSlideIn(
+            delay: const Duration(milliseconds: 500),
+            child: PremiumCTAButton(text: 'Quiero Yuna', onPressed: onContinue),
+          ),
+          const SizedBox(height: 40),
+        ],
+      ),
+    );
+  }
+}
+
+class _CompareColumn extends StatelessWidget {
+  final String title;
+  final List<(String, String)> items;
+  final Color bg;
+  final Color? accent;
+  const _CompareColumn(this.title, this.items, this.bg, this.accent);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(20),
+        border: accent != null && accent != AppColors.coral ? Border.all(color: accent!.withValues(alpha: 0.3), width: 2) : null,
+      ),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text(title, style: TextStyle(fontFamily: 'Outfit', fontSize: 16, fontWeight: FontWeight.w700, color: accent ?? AppColors.dark)),
+        const SizedBox(height: 14),
+        ...items.asMap().entries.map((e) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(e.value.$1, style: const TextStyle(fontSize: 14)),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(e.value.$2,
+                      style: TextStyle(fontFamily: 'Outfit', fontSize: 12, color: AppColors.dark.withValues(alpha: 0.7), height: 1.3)),
+                ),
+              ],
+            ),
+          );
+        }),
+      ]),
+    );
+  }
+}
+
+/// 🧩 IKEA EFFECT — "Confirm YOUR plan"
+class _ConfirmPlanPage extends StatefulWidget {
+  final OnboardingData data;
+  final VoidCallback onConfirm;
+  const _ConfirmPlanPage({required this.data, required this.onConfirm});
+
+  @override
+  State<_ConfirmPlanPage> createState() => _ConfirmPlanPageState();
+}
+
+class _ConfirmPlanPageState extends State<_ConfirmPlanPage> {
+  bool _confirmed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final weeks = ((widget.data.currentWeight ?? 70) - (widget.data.targetWeight ?? 60)) > 0
+        ? (((widget.data.currentWeight ?? 70) - (widget.data.targetWeight ?? 60)) / 0.75).ceil()
+        : 8;
+
+    return Stack(
+      children: [
+        if (_confirmed) const Positioned.fill(child: ConfettiOverlay(count: 40)),
+        const Positioned.fill(
+          child: FloatingParticles(count: 8, color: AppColors.lavender, maxSize: 5),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Column(
+            children: [
+              const SizedBox(height: 32),
+              FadeSlideIn(
+                child: ScaleReveal(
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      BreathingAura(color: AppColors.coral, size: 140),
+                      Container(
+                        width: 90, height: 90,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: AppColors.coralStatusGradient,
+                          boxShadow: [BoxShadow(color: AppColors.coral.withValues(alpha: 0.3), blurRadius: 20)],
+                        ),
+                        child: const Center(child: Text('📋', style: TextStyle(fontSize: 40))),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 28),
+              FadeSlideIn(
+                delay: const Duration(milliseconds: 200),
+                child: const Text('Tu plan está listo', textAlign: TextAlign.center,
+                    style: TextStyle(fontFamily: 'Outfit', fontSize: 28, fontWeight: FontWeight.w800, color: AppColors.dark)),
+              ),
+              const SizedBox(height: 16),
+              // Blueprint summary
+              FadeSlideIn(
+                delay: const Duration(milliseconds: 400),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: AppColors.coral.withValues(alpha: 0.15)),
+                    boxShadow: [BoxShadow(color: AppColors.coral.withValues(alpha: 0.06), blurRadius: 20)],
+                  ),
+                  child: Column(
+                    children: [
+                      _BlueprintRow('🎯', 'Objetivo', '${widget.data.currentWeight?.toStringAsFixed(0) ?? "--"} → ${widget.data.targetWeight?.toStringAsFixed(0) ?? "--"} kg'),
+                      _BlueprintRow('📅', 'Duración', '$weeks semanas'),
+                      _BlueprintRow('🧘', 'Incluye', 'Meditación + Yoga + Nutrición'),
+                      _BlueprintRow('🔥', 'Intensidad', widget.data.activityLevel == 'sedentary' ? 'Gradual (adaptado a vos)' : 'Moderada'),
+                      if ((widget.data.stressLevel ?? 5) >= 7)
+                        _BlueprintRow('😌', 'Extra', 'Anti-estrés personalizado'),
+                    ],
+                  ),
+                ),
+              ),
+              const Spacer(),
+              FadeSlideIn(
+                delay: const Duration(milliseconds: 700),
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 400),
+                  child: _confirmed
+                      ? PremiumCTAButton(
+                          key: const ValueKey('continue'),
+                          text: 'Continuar ✨',
+                          onPressed: widget.onConfirm,
+                        )
+                      : PremiumCTAButton(
+                          key: const ValueKey('confirm'),
+                          text: 'Sí, este es mi plan ✨',
+                          onPressed: () {
+                            HapticFeedback.heavyImpact();
+                            setState(() => _confirmed = true);
+                            Future.delayed(const Duration(milliseconds: 1200), () {
+                              if (mounted) widget.onConfirm();
+                            });
+                          },
+                        ),
+                ),
+              ),
+              const SizedBox(height: 40),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _BlueprintRow extends StatelessWidget {
+  final String emoji, label, value;
+  const _BlueprintRow(this.emoji, this.label, this.value);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        children: [
+          Text(emoji, style: const TextStyle(fontSize: 18)),
+          const SizedBox(width: 12),
+          Text(label, style: TextStyle(fontFamily: 'Outfit', fontSize: 14, color: AppColors.dark.withValues(alpha: 0.5))),
+          const Spacer(),
+          Text(value, style: const TextStyle(fontFamily: 'Outfit', fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.dark)),
+        ],
+      ),
+    );
+  }
+}
+
+/// Name input page with premium styling
+class _NameInputPage extends StatefulWidget {
+  final Function(String) onSubmit;
+  const _NameInputPage({required this.onSubmit});
+
+  @override
+  State<_NameInputPage> createState() => _NameInputPageState();
+}
+
+class _NameInputPageState extends State<_NameInputPage> {
+  final _controller = TextEditingController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 24),
+          FadeSlideIn(
+            child: const Text('¿Cómo te gustaría que te llamemos?',
+                style: TextStyle(fontFamily: 'Outfit', fontSize: 28, fontWeight: FontWeight.w800, color: AppColors.dark, letterSpacing: -0.3)),
+          ),
+          const SizedBox(height: 8),
+          FadeSlideIn(
+            delay: const Duration(milliseconds: 100),
+            child: Text('Tu nombre hace tu experiencia más personal 💜',
+                style: TextStyle(fontFamily: 'Outfit', fontSize: 15, color: AppColors.dark.withValues(alpha: 0.5))),
+          ),
+          const SizedBox(height: 40),
+          FadeSlideIn(
+            delay: const Duration(milliseconds: 200),
+            child: TextField(
+              controller: _controller,
+              autofocus: true,
+              textCapitalization: TextCapitalization.words,
+              style: const TextStyle(fontFamily: 'Outfit', fontSize: 28, fontWeight: FontWeight.w600, color: AppColors.dark),
+              decoration: InputDecoration(
+                hintText: 'Tu nombre',
+                hintStyle: TextStyle(color: AppColors.dark.withValues(alpha: 0.15)),
+                border: UnderlineInputBorder(borderSide: BorderSide(color: AppColors.coral.withValues(alpha: 0.2))),
+                focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(color: AppColors.coral, width: 2.5)),
+              ),
+              onChanged: (_) => setState(() {}),
+            ),
+          ),
+          const Spacer(),
+          FadeSlideIn(
+            delay: const Duration(milliseconds: 400),
+            child: AnimatedOpacity(
+              opacity: _controller.text.trim().isNotEmpty ? 1 : 0.4,
+              duration: const Duration(milliseconds: 300),
+              child: PremiumCTAButton(
+                text: 'Continuar',
+                onPressed: _controller.text.trim().isNotEmpty
+                    ? () => widget.onSubmit(_controller.text.trim())
+                    : () {},
+                showGlow: _controller.text.trim().isNotEmpty,
+              ),
+            ),
+          ),
+          const SizedBox(height: 40),
+        ],
+      ),
+    );
+  }
+}

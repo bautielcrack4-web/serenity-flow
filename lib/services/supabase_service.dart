@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:serenity_flow/models/gamification_model.dart';
 import 'package:serenity_flow/models/routine_model.dart';
+import 'package:serenity_flow/models/onboarding_data.dart';
 import 'package:serenity_flow/core/design_system.dart';
 
 class SupabaseService {
@@ -53,6 +54,32 @@ class SupabaseService {
     // A true deletion usually requires an Edge Function to delete the auth user.
     // We will simulate it by clearing session and signing out for MVP compliance.
     await signOut();
+  }
+
+  // --- Onboarding Data ---
+
+  /// Save all onboarding responses to the profiles table
+  Future<bool> saveOnboardingProfile(OnboardingData data) async {
+    if (userId == null) return false;
+    try {
+      final profileData = data.toProfileMap();
+      // Add extra fields not in toProfileMap
+      profileData['selected_plan'] = data.get('selected_plan');
+      profileData['notifications_accepted'] = data.notificationsAccepted;
+      profileData['motivation'] = data.motivation;
+      profileData['previous_attempts'] = data.previousAttempts;
+      profileData['meals_per_day'] = data.mealsPerDay;
+      profileData['water_glasses'] = data.waterGlasses;
+      profileData['cooking_preference'] = data.cookingPreference;
+      profileData['mindfulness_experience'] = data.mindfulnessExperience;
+
+      await _supabase.from('profiles').update(profileData).eq('id', userId!);
+      debugPrint('✅ Onboarding profile saved to Supabase');
+      return true;
+    } catch (e) {
+      debugPrint('❌ Error saving onboarding profile: $e');
+      return false;
+    }
   }
 
   // --- Profiles (XP, Level, Streak) ---

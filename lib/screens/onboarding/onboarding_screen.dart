@@ -14,20 +14,20 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
 
-  final List<OnboardingData> _pages = [
-    OnboardingData(
+  final List<OnboardingPageData> _pages = [
+    OnboardingPageData(
       title: "Tu práctica personal",
       description: "Yoga diseñado para ti, a tu ritmo",
       icon: Icons.self_improvement,
       color: AppColors.coral,
     ),
-    OnboardingData(
+    OnboardingPageData(
       title: "Rutinas guiadas",
       description: "Sigue cada pose con timer visual y sonidos suaves",
       icon: Icons.timer_outlined,
       color: AppColors.turquoise,
     ),
-    OnboardingData(
+    OnboardingPageData(
       title: "Celebra tu progreso",
       description: "Cada sesión es un logro",
       icon: Icons.auto_awesome,
@@ -110,7 +110,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     child: Text(
                       "Siguiente",
                       style: TextStyle(
-                        fontFamily: AppTypography.sansFont,
+                        fontFamily: AppTypography.bodyFont,
                         fontSize: 18,
                         color: AppColors.dark,
                       ),
@@ -124,7 +124,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
-  Widget _buildPage(OnboardingData data) {
+  Widget _buildPage(OnboardingPageData data) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 40),
       child: Column(
@@ -174,13 +174,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 }
 
-class OnboardingData {
+class OnboardingPageData {
   final String title;
   final String description;
   final IconData icon;
   final Color color;
 
-  OnboardingData({
+  OnboardingPageData({
     required this.title,
     required this.description,
     required this.icon,

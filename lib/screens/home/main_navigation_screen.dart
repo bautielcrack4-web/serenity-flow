@@ -1,11 +1,14 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:serenity_flow/core/design_system.dart';
-import 'package:serenity_flow/screens/home/home_screen_content.dart';
-import 'package:serenity_flow/screens/home/progress_screen.dart';
-import 'package:serenity_flow/screens/home/settings_screen.dart';
 import 'package:flutter/services.dart';
+import 'package:serenity_flow/core/design_system.dart';
+import 'package:serenity_flow/screens/home/dashboard_screen.dart';
+import 'package:serenity_flow/screens/home/workouts_screen.dart';
+import 'package:serenity_flow/screens/home/nutrition_screen.dart';
+import 'package:serenity_flow/screens/home/mindfulness_screen.dart';
+import 'package:serenity_flow/screens/home/profile_screen.dart';
 
+/// 5-Tab Navigation — Home, Workouts, Nutrition, Mind, Profile
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});
 
@@ -16,10 +19,12 @@ class MainNavigationScreen extends StatefulWidget {
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
   int _currentIndex = 0;
 
-  final List<Widget> _screens = [
-    const HomeScreenContent(),
-    const ProgressScreen(),
-    const SettingsScreen(),
+  final List<Widget> _screens = const [
+    DashboardScreen(),
+    WorkoutsScreen(),
+    NutritionScreen(),
+    MindfulnessScreen(),
+    ProfileScreen(),
   ];
 
   void _onTabTapped(int index) {
@@ -43,48 +48,54 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   }
 
   Widget _buildPremiumNavBar() {
-    return Container(
-      height: 90,
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.95),
-        boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 20, offset: const Offset(0, -5))
-        ],
-      ),
-      child: Stack(
-        children: [
-          // Indicator Line
-          AnimatedAlign(
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeOutCubic,
-            alignment: Alignment(_lerpIndicatorAlign(_currentIndex), -1.0),
-            child: Container(
-              width: 48, height: 4,
-              decoration: BoxDecoration(
-                color: AppColors.coral,
-                borderRadius: const BorderRadius.vertical(bottom: Radius.circular(4)),
-                boxShadow: [BoxShadow(color: AppColors.coral.withOpacity(0.4), blurRadius: 8, offset: const Offset(0, 2))],
-              ),
-            ),
-          ),
-          
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _buildNavItem(0, Icons.spa_outlined, "Home"),
-              _buildNavItem(1, Icons.bar_chart_rounded, "Progress"),
-              _buildNavItem(2, Icons.settings_rounded, "Settings"),
+    return ClipRRect(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+        child: Container(
+          height: 90,
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.92),
+            boxShadow: [
+              BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 20, offset: const Offset(0, -5)),
             ],
           ),
-        ],
+          child: Stack(
+            children: [
+              // Animated indicator line
+              AnimatedAlign(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeOutCubic,
+                alignment: Alignment(_lerpIndicatorAlign(_currentIndex), -1.0),
+                child: Container(
+                  width: 36, height: 3,
+                  decoration: BoxDecoration(
+                    color: AppColors.coral,
+                    borderRadius: const BorderRadius.vertical(bottom: Radius.circular(4)),
+                    boxShadow: [BoxShadow(color: AppColors.coral.withValues(alpha: 0.4), blurRadius: 8, offset: const Offset(0, 2))],
+                  ),
+                ),
+              ),
+
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _buildNavItem(0, Icons.home_rounded, 'Home'),
+                  _buildNavItem(1, Icons.fitness_center_rounded, 'Workouts'),
+                  _buildNavItem(2, Icons.restaurant_rounded, 'Nutrition'),
+                  _buildNavItem(3, Icons.self_improvement_rounded, 'Mind'),
+                  _buildNavItem(4, Icons.person_rounded, 'Profile'),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
 
   double _lerpIndicatorAlign(int index) {
-    if (index == 0) return -0.66;
-    if (index == 1) return 0.0;
-    return 0.66;
+    // Map 0-4 to -0.8 → 0.8
+    return -0.8 + (index * 0.4);
   }
 
   Widget _buildNavItem(int index, IconData icon, String label) {
@@ -93,22 +104,31 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       onTap: () => _onTabTapped(index),
       behavior: HitTestBehavior.opaque,
       child: SizedBox(
-        width: 80,
+        width: 64,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              icon,
-              color: isSelected ? AppColors.coral : AppColors.gray.withOpacity(0.5),
-              size: 28,
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: isSelected ? AppColors.coral.withValues(alpha: 0.1) : Colors.transparent,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                icon,
+                color: isSelected ? AppColors.coral : AppColors.gray.withValues(alpha: 0.4),
+                size: 24,
+              ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 2),
             Text(
               label,
               style: TextStyle(
-                color: isSelected ? AppColors.coral : AppColors.gray.withOpacity(0.5),
-                fontWeight: isSelected ? FontWeight.w900 : FontWeight.bold,
-                fontSize: 12,
+                fontFamily: 'Outfit',
+                color: isSelected ? AppColors.coral : AppColors.gray.withValues(alpha: 0.4),
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                fontSize: 10,
               ),
             ),
           ],

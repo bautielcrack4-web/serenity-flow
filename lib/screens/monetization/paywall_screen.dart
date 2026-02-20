@@ -6,6 +6,8 @@ import 'package:serenity_flow/core/design_system.dart';
 import 'package:serenity_flow/services/revenue_cat_service.dart';
 import 'package:serenity_flow/services/supabase_service.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
+import 'package:serenity_flow/screens/monetization/widgets/horizontal_benefit_row.dart';
+import 'package:serenity_flow/screens/monetization/widgets/expandable_legal_section.dart';
 import 'package:serenity_flow/services/haptic_service.dart';
 
 class PaywallScreen extends StatefulWidget {
@@ -106,41 +108,47 @@ class _PaywallScreenState extends State<PaywallScreen> {
       backgroundColor: AppColors.cream,
       body: Stack(
         children: [
-          // Background Aura
-          Positioned(
-            top: -100,
-            right: -100,
+          // Background Gradient (Subtle)
+          Positioned.fill(
             child: Container(
-              width: 300, height: 300,
               decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColors.turquoise.withOpacity(0.05),
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    AppColors.cream,
+                    AppColors.turquoise.withOpacity(0.05),
+                    AppColors.cream,
+                  ],
+                ),
               ),
             ),
           ),
           
           SafeArea(
-            child: Column(
-              children: [
-                _buildHeader(),
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: Column(
-                      children: [
-                        const SizedBox(height: 20),
-                        _buildHeroCarousel(),
-                        const SizedBox(height: 32),
-                        _buildBenefitList(),
-                        const SizedBox(height: 40),
-                        _buildSubscriptionOptions(),
-                        const SizedBox(height: 32),
-                      ],
-                    ),
-                  ),
-                ),
-                _buildFooter(),
-              ],
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Column(
+                children: [
+                  const SizedBox(height: 10),
+                  // Compact Header
+                  _buildHeader(),
+                  
+                  // Horizontal Benefits (Saves vertical space)
+                  const SizedBox(height: 20),
+                  const HorizontalBenefitRow(),
+                  
+                  const Spacer(),
+                  
+                  // Pricing Cards (The Core - Above Fold)
+                  _buildSubscriptionOptions(),
+                  
+                  const Spacer(),
+                  
+                  // Action & Legal
+                  _buildFooter(),
+                ],
+              ),
             ),
           ),
           
@@ -183,91 +191,40 @@ class _PaywallScreenState extends State<PaywallScreen> {
   }
 
   Widget _buildHeader() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(40, 40, 40, 0),
-      child: Column(
-        children: [
-          const Text(
-            "Unlock your body's full potential.",
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: AppColors.dark, height: 1.1),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            "Billed annually. Start your journey today.\nFeel great with only 5 minutes a day.",
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 14, color: AppColors.dark.withOpacity(0.5), fontWeight: FontWeight.w600, height: 1.4),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildHeroCarousel() {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 20),
-      decoration: BoxDecoration(
-        color: AppColors.lightGray.withOpacity(0.3),
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          _buildCircleIllustration(0.8),
-          _buildCircleIllustration(1.0),
-          _buildCircleIllustration(0.8),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCircleIllustration(double scale) {
-    return Transform.scale(
-      scale: scale,
-      child: Container(
-        width: 80, height: 80,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          gradient: AppColors.turquoiseStatusGradient,
-          boxShadow: [
-            BoxShadow(color: AppColors.turquoise.withOpacity(0.2), blurRadius: 10, offset: const Offset(0, 4)),
-          ],
-        ),
-        child: const Icon(Icons.accessibility_new_rounded, color: Colors.white, size: 40),
-      ),
-    );
-  }
-
-  Widget _buildBenefitList() {
     return Column(
       children: [
         const Text(
-          "Feel great with only 5 minutes a day.",
-          style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: AppColors.dark),
+          "Unlock your body's\nfull potential.",
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 26, fontWeight: FontWeight.w900, color: AppColors.dark, height: 1.1),
         ),
-        const SizedBox(height: 24),
-        _buildBenefitItem("Improve flexibility"),
-        _buildBenefitItem("Reduce pain"),
-        _buildBenefitItem("Prevent injuries"),
-        _buildBenefitItem("Improve sleep"),
+        const SizedBox(height: 8),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.star_rounded, color: AppColors.gold, size: 20),
+            const Icon(Icons.star_rounded, color: AppColors.gold, size: 20),
+            const Icon(Icons.star_rounded, color: AppColors.gold, size: 20),
+            const Icon(Icons.star_rounded, color: AppColors.gold, size: 20),
+            const Icon(Icons.star_rounded, color: AppColors.gold, size: 20),
+            const SizedBox(width: 8),
+            Text(
+              "Trusted by 10k+ Yogis",
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: AppColors.dark.withOpacity(0.6),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Text(
+          "Feel great with only 5 minutes a day.\nStart your journey now.",
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 14, color: AppColors.dark.withOpacity(0.5), fontWeight: FontWeight.w600, height: 1.4),
+        ),
       ],
-    );
-  }
-
-  Widget _buildBenefitItem(String text) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(4),
-            decoration: const BoxDecoration(color: AppColors.turquoise, shape: BoxShape.circle),
-            child: const Icon(Icons.check_rounded, color: Colors.white, size: 16),
-          ),
-          const SizedBox(width: 16),
-          Text(text, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: AppColors.dark)),
-        ],
-      ),
     );
   }
 
@@ -279,108 +236,110 @@ class _PaywallScreenState extends State<PaywallScreen> {
     return Column(
       children: _packages.map((package) {
         bool isAnnual = package.packageType == PackageType.annual;
-        bool isSelected = _selectedPackage == package;
-        
-        // Define price strings based on package type
-        String mainPrice = package.storeProduct.priceString; // e.g. "$14.99"
-        String secondaryPrice = isAnnual 
-            ? "${package.storeProduct.currencyCode} ${(package.storeProduct.price / 12).toStringAsFixed(2)} / mo" 
-            : "";
-        
-        return GestureDetector(
-          onTap: () => setState(() => _selectedPackage = package),
-          child: Container(
-            margin: const EdgeInsets.only(bottom: 16),
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(
-                color: isSelected ? AppColors.turquoise : Colors.transparent, 
-                width: 2.5
-              ),
-              boxShadow: [
-                if (isSelected) 
-                  BoxShadow(color: AppColors.turquoise.withOpacity(0.1), blurRadius: 20, offset: const Offset(0, 8)),
-                BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10, offset: const Offset(0, 4)),
-              ],
-            ),
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            isAnnual ? "Annual Plan" : "Monthly Plan",
-                            style: TextStyle(
-                              fontSize: 16, 
-                              fontWeight: FontWeight.w700, 
-                              color: AppColors.dark.withOpacity(0.6)
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          // Primary Price (Billed Amount) - MUST BE LARGEST
-                          Text(
-                            mainPrice,
-                            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: AppColors.dark),
-                          ),
-                          const SizedBox(height: 4),
-                          if (isAnnual) ...[
-                             Text(
-                               "Calculated at Just $secondaryPrice",
-                               style: TextStyle(
-                                 fontSize: 13, 
-                                 color: AppColors.dark.withOpacity(0.4),
-                                 fontWeight: FontWeight.w500
-                               ),
-                             ),
-                          ] else ...[
-                            Text(
-                               "Billed monthly",
-                               style: TextStyle(
-                                 fontSize: 13, 
-                                 color: AppColors.dark.withOpacity(0.4),
-                                 fontWeight: FontWeight.w500
-                               ),
-                             ),
-                          ],
-                        ],
-                      ),
-                    ),
-                    Icon(
-                        isSelected ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
-                        color: isSelected ? AppColors.turquoise : AppColors.lightGray,
-                        size: 28
-                    ),
-                  ],
-                ),
-                if (isAnnual)
-                  Positioned(
-                    top: -35,
-                    right: -10,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: AppColors.coral,
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [BoxShadow(color: AppColors.coral.withOpacity(0.3), blurRadius: 8)],
-                      ),
-                      child: const Text(
-                        "BEST VALUE",
-                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 10),
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
+        return _buildPricingCard(
+          package: package, 
+          isAnnual: isAnnual, 
+          isSelected: _selectedPackage == package
         );
       }).toList(),
+    );
+  }
+
+  Widget _buildPricingCard({required Package package, required bool isAnnual, required bool isSelected}) {
+    String mainPrice = package.storeProduct.priceString;
+    String secondaryPrice = isAnnual 
+        ? "${package.storeProduct.currencyCode} ${(package.storeProduct.price / 12).toStringAsFixed(2)} / mo" 
+        : "";
+
+    return GestureDetector(
+      onTap: () => setState(() => _selectedPackage = package),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12), // Tighter spacing
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected ? AppColors.turquoise : Colors.transparent, 
+            width: isSelected ? 3 : 0
+          ),
+          boxShadow: [
+            if (isSelected) 
+              BoxShadow(color: AppColors.turquoise.withOpacity(0.15), blurRadius: 15, offset: const Offset(0, 5)),
+            BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 2)),
+          ],
+        ),
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Row(
+              children: [
+                // Radio Circle
+                Container(
+                  width: 24, height: 24,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: isSelected ? AppColors.turquoise : AppColors.lightGray, width: 2),
+                    color: isSelected ? AppColors.turquoise : Colors.transparent,
+                  ),
+                  child: isSelected ? const Icon(Icons.check, size: 16, color: Colors.white) : null,
+                ),
+                const SizedBox(width: 16),
+                
+                // Text Content
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        isAnnual ? "Annual Plan" : "Monthly Plan",
+                        style: TextStyle(
+                          fontSize: 16, 
+                          fontWeight: FontWeight.w700, 
+                          color: AppColors.dark.withOpacity(0.8)
+                        ),
+                      ),
+                      if (isAnnual && secondaryPrice.isNotEmpty)
+                        Text(
+                          "Calculated at $secondaryPrice",
+                          style: TextStyle(
+                            fontSize: 12, 
+                            color: AppColors.dark.withOpacity(0.4),
+                            fontWeight: FontWeight.w500
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                
+                // Price Right Side
+                Text(
+                  mainPrice,
+                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: AppColors.dark),
+                ),
+              ],
+            ),
+            
+            if (isAnnual)
+              Positioned(
+                top: -28,
+                right: 0,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppColors.coral,
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: [BoxShadow(color: AppColors.coral.withOpacity(0.3), blurRadius: 6)],
+                  ),
+                  child: const Text(
+                    "BEST VALUE",
+                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 10),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -394,47 +353,49 @@ class _PaywallScreenState extends State<PaywallScreen> {
   }
 
   Widget _buildDemoCard(String title, String mainPrice, String secondaryPrice, bool isSelected) {
+    // Reusing the same logic visually as _buildPricingCard structure
+    // Simplified for demo
     return GestureDetector(
       onTap: () => setState(() {}),
       child: Container(
-        margin: const EdgeInsets.only(bottom: 16),
-        padding: const EdgeInsets.all(20),
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isSelected ? AppColors.turquoise : Colors.transparent, 
-            width: 2.5
+            width: isSelected ? 3 : 0
           ),
           boxShadow: [
-            if (isSelected) 
-              BoxShadow(color: AppColors.turquoise.withOpacity(0.1), blurRadius: 20, offset: const Offset(0, 8)),
-            BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10, offset: const Offset(0, 4)),
+             if (isSelected) 
+              BoxShadow(color: AppColors.turquoise.withOpacity(0.15), blurRadius: 15, offset: const Offset(0, 5)),
+            BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 2)),
           ],
         ),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.dark.withOpacity(0.6))),
-                const SizedBox(height: 4),
-                // Main Price big
-                Text(mainPrice, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: AppColors.dark)),
-                const SizedBox(height: 4),
-                if (secondaryPrice.isNotEmpty) ...[
-                  Text("Calculated at $secondaryPrice", style: TextStyle(fontSize: 13, color: AppColors.dark.withOpacity(0.4), fontWeight: FontWeight.w500)),
-                ] else ...[
-                  Text("Billed monthly", style: TextStyle(fontSize: 13, color: AppColors.dark.withOpacity(0.4), fontWeight: FontWeight.w500)),
-                ]
-              ],
+            Container(
+              width: 24, height: 24,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: isSelected ? AppColors.turquoise : AppColors.lightGray, width: 2),
+                color: isSelected ? AppColors.turquoise : Colors.transparent,
+              ),
+              child: isSelected ? const Icon(Icons.check, size: 16, color: Colors.white) : null,
             ),
-             Icon(
-                isSelected ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
-                color: isSelected ? AppColors.turquoise : AppColors.lightGray,
-                size: 28
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.dark.withOpacity(0.8))),
+                  if (secondaryPrice.isNotEmpty)
+                     Text("Calculated at $secondaryPrice", style: TextStyle(fontSize: 12, color: AppColors.dark.withOpacity(0.4), fontWeight: FontWeight.w500)),
+                ],
+              ),
             ),
+             Text(mainPrice, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: AppColors.dark)),
           ],
         ),
       ),
@@ -442,78 +403,34 @@ class _PaywallScreenState extends State<PaywallScreen> {
   }
 
   Widget _buildFooter() {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 20, offset: const Offset(0, -5))],
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _buildPurchaseButton(),
-          const SizedBox(height: 16),
-          TextButton(
-            onPressed: () => RevenueCatService().restorePurchases(),
-            child: Text(
-              "Restore purchases",
-              style: TextStyle(color: AppColors.dark.withOpacity(0.5), fontWeight: FontWeight.w700, decoration: TextDecoration.underline),
-            ),
-          ),
-          const SizedBox(height: 16),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-            child: Text(
-              "A purchase will be applied to your iTunes account on confirmation. Subscriptions will automatically renew unless canceled within 24-hours before the end of the current period. You can cancel anytime with your iTunes account settings. Any unused portion of a free trial will be forfeited if you purchase a subscription.",
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 10, color: Color(0xFF9E9E9E)),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _buildLegalLink("Privacy Policy", "https://sites.google.com/view/yunaapp/privacy-policy"),
-              Text(" • ", style: TextStyle(color: AppColors.dark.withOpacity(0.3))),
-              _buildLegalLink("Terms of Use (EULA)", "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/"),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLegalLink(String text, String url) {
-    return GestureDetector(
-      onTap: () async {
-        final uri = Uri.parse(url);
-         if (await canLaunchUrl(uri)) {
-           await launchUrl(uri);
-         }
-      },
-      child: Text(
-        text,
-        style: TextStyle(color: AppColors.dark.withOpacity(0.4), fontSize: 11, fontWeight: FontWeight.w600),
-      ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _buildPurchaseButton(),
+        // New Expandable Legal Section
+        ExpandableLegalSection(
+          onRestore: () => RevenueCatService().restorePurchases(),
+        ),
+      ],
     );
   }
 
   Widget _buildPurchaseButton() {
     return Container(
       width: double.infinity,
-      height: 60,
+      height: 56,
       decoration: BoxDecoration(
         gradient: AppColors.turquoiseStatusGradient,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
-          BoxShadow(color: AppColors.turquoise.withOpacity(0.3), blurRadius: 12, offset: const Offset(0, 6)),
+          BoxShadow(color: AppColors.turquoise.withOpacity(0.3), blurRadius: 10, offset: const Offset(0, 4)),
         ],
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: _handlePurchase,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(16),
           child: Center(
             child: _isLoading 
               ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3))
