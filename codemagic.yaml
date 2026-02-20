@@ -36,55 +36,48 @@ workflows:
       xcode: latest
       vars:
         BUNDLE_ID: "com.yuna.yoga.bauti"
-        XCODE_WORKSPACE: "Runner.xcworkspace"
-        XCODE_SCHEME: "Runner"
-      ios_signing:
-        distribution_type: app_store
-        bundle_identifier: com.yuna.yoga.bauti
     scripts:
       - name: Setup signing, build, and export
         script: |
           # 1. Generate RSA 2048 private key
           openssl genrsa -out /tmp/cert_key.pem 2048
-          echo "Private key generated"
-          
-          # 2. Set env var in current shell (not CM_ENV, to keep in same process)
           export CERTIFICATE_PRIVATE_KEY="$(cat /tmp/cert_key.pem)"
+          echo "=== Private key generated ==="
           
-          # 3. Fetch signing files (certificate + provisioning profile)
+          # 2. Fetch signing files (creates new certificate + provisioning profile)
           app-store-connect fetch-signing-files com.yuna.yoga.bauti \
             --type IOS_APP_STORE \
             --create
-          echo "Signing files fetched"
+          echo "=== Signing files fetched ==="
           
-          # 4. Debug: show what certificates are installed
+          # 3. Debug: show installed code signing identities
+          echo "=== Keychain certificates ==="
           security find-identity -v -p codesigning
           
-          # 5. Apply profiles to Xcode project
+          # 4. Apply profiles to Xcode project (switches to manual signing)
           xcode-project use-profiles
-          echo "Profiles applied"
+          echo "=== Profiles applied ==="
           
-          # 6. Show export options plist content
-          echo "Export options:"
-          cat /Users/builder/export_options.plist
+          # 5. Show export options
+          echo "=== Export options plist ==="
+          cat /Users/builder/export_options.plist || echo "No export options plist found"
           
-          # 7. Get Flutter dependencies
+          # 6. Get Flutter dependencies
           flutter packages pub get
           
-          # 8. Install pods
+          # 7. Install pods
           cd ios && pod install && cd ..
           
-          # 9. Build IPA
+          # 8. Build IPA
           flutter build ipa --release \
             --export-options-plist=/Users/builder/export_options.plist
           
-          # 10. Find IPA
-          echo "Looking for IPA:"
+          # 9. Find IPA
+          echo "=== Looking for IPA ==="
           find build -name "*.ipa" 2>/dev/null
     artifacts:
       - build/ios/ipa/*.ipa
       - build/**/*.ipa
-      - /tmp/xcodebuild_logs/*.log
     publishing:
       email:
         recipients:
