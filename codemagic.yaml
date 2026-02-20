@@ -69,8 +69,16 @@ workflows:
         script: |
           flutter build ipa --release \
             --export-options-plist=/Users/builder/export_options.plist
+          
+          # Debug: find the IPA
+          echo "Looking for IPA files:"
+          find build -name "*.ipa" 2>/dev/null || echo "No IPA found in build/"
+          find /Users/builder -name "*.ipa" -maxdepth 5 2>/dev/null || echo "No IPA found anywhere"
     artifacts:
       - build/ios/ipa/*.ipa
+      - build/ios/ipa/**/*.ipa
+      - build/ios/archive/**
+      - build/**/*.ipa
       - /tmp/xcodebuild_logs/*.log
       - flutter_drive.log
     publishing:
