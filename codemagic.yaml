@@ -38,6 +38,7 @@ workflows:
       xcode: latest
       groups:
         - revenuecat
+        - certificate_key
       vars:
         BUNDLE_ID: "com.yuna.yoga.bauti"
         XCODE_WORKSPACE: "Runner.xcworkspace"
@@ -46,17 +47,8 @@ workflows:
         distribution_type: app_store
         bundle_identifier: com.yuna.yoga.bauti
     scripts:
-      - name: Generate certificate key and fetch signing files
+      - name: Fetch signing files from App Store Connect
         script: |
-          # Generate EC P-256 private key for the signing certificate
-          openssl ecparam -genkey -name prime256v1 -noout -out /tmp/cert_key.pem
-          echo "EC private key generated"
-          cat /tmp/cert_key.pem | head -1
-          
-          # Set the env var that Codemagic CLI uses internally
-          export CM_CERTIFICATE_PRIVATE_KEY="$(cat /tmp/cert_key.pem)"
-          
-          # Now fetch-signing-files will use CM_CERTIFICATE_PRIVATE_KEY automatically
           app-store-connect fetch-signing-files com.yuna.yoga.bauti \
             --type IOS_APP_STORE \
             --create
