@@ -46,12 +46,12 @@ workflows:
         distribution_type: app_store
         bundle_identifier: com.yuna.yoga.bauti
     scripts:
-      - name: Clean old certificates from keychain
+      - name: Fetch signing files from App Store Connect
         script: |
-          # Remove any cached/old certificates to force fresh fetch
-          security delete-certificate -c "Apple Distribution: Bautista Moran" ~/Library/Keychains/login.keychain-db 2>/dev/null || true
-          security delete-certificate -c "Apple Distribution" /Library/Keychains/System.keychain 2>/dev/null || true
-          echo "Old certificates cleaned"
+          # Explicitly fetch (or create) fresh certificate + provisioning profile
+          app-store-connect fetch-signing-files com.yuna.yoga.bauti \
+            --type IOS_APP_STORE \
+            --create
       - name: Set up code signing settings on Xcode project
         script: |
           xcode-project use-profiles
