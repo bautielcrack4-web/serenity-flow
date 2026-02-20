@@ -55,6 +55,9 @@ workflows:
           echo "=== Installed profiles ==="
           ls ~/Library/MobileDevice/Provisioning\ Profiles/ 2>/dev/null || echo "NONE"
 
+          # Initialize keychain (required before adding certificates)
+          keychain initialize
+
           # Install certificates into the keychain
           keychain add-certificates
           echo "✓ Certificates added to keychain"
