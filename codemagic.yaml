@@ -46,12 +46,17 @@ workflows:
         distribution_type: app_store
         bundle_identifier: com.yuna.yoga.bauti
     scripts:
-      - name: Fetch signing files from App Store Connect
+      - name: Generate private key and fetch signing files
         script: |
-          # Explicitly fetch (or create) fresh certificate + provisioning profile
+          # Generate a fresh RSA private key for the certificate
+          openssl genrsa -out /tmp/cert_private_key.pem 2048
+          echo "Private key generated"
+          
+          # Fetch signing files, providing the private key so it can create a new certificate
           app-store-connect fetch-signing-files com.yuna.yoga.bauti \
             --type IOS_APP_STORE \
-            --create
+            --create \
+            --certificate-key /tmp/cert_private_key.pem
       - name: Set up code signing settings on Xcode project
         script: |
           xcode-project use-profiles
