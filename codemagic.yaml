@@ -34,20 +34,37 @@ workflows:
     environment:
       flutter: stable
       xcode: latest
-      ios_signing:
-        distribution_type: app_store
-        bundle_identifier: com.yuna.yoga.bauti
     scripts:
+      - name: Set up code signing
+        script: |
+          # Generate RSA 2048 private key (required by Apple)
+          openssl genrsa -out /tmp/cert_key.pem 2048
+
+          # Fetch or create signing files from App Store Connect
+          app-store-connect fetch-signing-files com.yuna.yoga.bauti \
+            --type IOS_APP_STORE \
+            --certificate-key /tmp/cert_key.pem \
+            --create
+
+          # Install certificates into the keychain (this step was missing before!)
+          keychain add-certificates
+
+          # Configure Xcode project to use the profiles
+          xcode-project use-profiles
+
       - name: Get Flutter dependencies
         script: |
           flutter packages pub get
+
       - name: Install pods
         script: |
           find . -name "Podfile" -execdir pod install \;
+
       - name: Flutter build ipa
         script: |
           flutter build ipa --release \
             --export-options-plist=/Users/builder/export_options.plist
+
     artifacts:
       - build/ios/ipa/*.ipa
     publishing:
