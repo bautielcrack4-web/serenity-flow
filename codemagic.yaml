@@ -32,12 +32,12 @@ workflows:
     max_build_duration: 120
     instance_type: mac_mini_m1
     integrations:
-      app_store_connect: Lume AI Key # Switching to a key with verified Admin access
+      app_store_connect: Lume AI Key
     environment:
       flutter: stable
       xcode: latest
       groups:
-        - revenuecat # Removed app_store_credentials to avoid conflicts with manual profiles
+        - revenuecat
       vars:
         BUNDLE_ID: "com.yuna.yoga.bauti"
         XCODE_WORKSPACE: "Runner.xcworkspace"
@@ -58,7 +58,6 @@ workflows:
       - name: Flutter build ipa
         script: |
           flutter build ipa --release \
-            --build-number=18 \
             --export-options-plist=/Users/builder/export_options.plist
     artifacts:
       - build/ios/ipa/*.ipa
