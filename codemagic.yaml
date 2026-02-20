@@ -36,44 +36,56 @@ workflows:
       xcode: latest
       vars:
         BUNDLE_ID: "com.yuna.yoga.bauti"
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.yuna.yoga.bauti
     scripts:
-      - name: Setup signing, build, and export
+      - name: Generate certificate private key
         script: |
-          # 1. Generate RSA 2048 private key
+          # Generate RSA 2048 private key and export for subsequent steps
           openssl genrsa -out /tmp/cert_key.pem 2048
-          export CERTIFICATE_PRIVATE_KEY="$(cat /tmp/cert_key.pem)"
-          echo "=== Private key generated ==="
+          echo "CERTIFICATE_PRIVATE_KEY<<EOF" >> $CM_ENV
+          cat /tmp/cert_key.pem >> $CM_ENV
+          echo "EOF" >> $CM_ENV
+          echo "Private key generated and exported"
+      - name: Clean old certificates from keychain
+        script: |
+          # Remove any old/cached certificates to avoid conflicts
+          echo "Certificates BEFORE cleanup:"
+          security find-identity -v -p codesigning || true
           
-          # 2. Fetch signing files (creates new certificate + provisioning profile)
+          # Delete old Apple Distribution certificates
+          security delete-certificate -c "Apple Distribution" 2>/dev/null || true
+          security delete-certificate -c "Apple Distribution" 2>/dev/null || true
+          security delete-certificate -c "Apple Distribution" 2>/dev/null || true
+          
+          echo "Certificates AFTER cleanup:"
+          security find-identity -v -p codesigning || true
+      - name: Fetch signing files from App Store Connect
+        script: |
           app-store-connect fetch-signing-files com.yuna.yoga.bauti \
             --type IOS_APP_STORE \
             --create
-          echo "=== Signing files fetched ==="
           
-          # 3. Debug: show installed code signing identities
-          echo "=== Keychain certificates ==="
+          echo "Certificates after fetch:"
           security find-identity -v -p codesigning
-          
-          # 4. Apply profiles to Xcode project (switches to manual signing)
+      - name: Set up code signing settings on Xcode project
+        script: |
           xcode-project use-profiles
-          echo "=== Profiles applied ==="
-          
-          # 5. Show export options
-          echo "=== Export options plist ==="
-          cat /Users/builder/export_options.plist || echo "No export options plist found"
-          
-          # 6. Get Flutter dependencies
+          echo "Export options plist:"
+          cat /Users/builder/export_options.plist || echo "Not found"
+      - name: Get Flutter dependencies
+        script: |
           flutter packages pub get
-          
-          # 7. Install pods
-          cd ios && pod install && cd ..
-          
-          # 8. Build IPA
+      - name: Install pods
+        script: |
+          find . -name "Podfile" -execdir pod install \;
+      - name: Flutter build ipa
+        script: |
           flutter build ipa --release \
             --export-options-plist=/Users/builder/export_options.plist
           
-          # 9. Find IPA
-          echo "=== Looking for IPA ==="
+          echo "Looking for IPA:"
           find build -name "*.ipa" 2>/dev/null
     artifacts:
       - build/ios/ipa/*.ipa
