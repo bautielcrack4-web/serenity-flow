@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:serenity_flow/core/design_system.dart';
 import 'package:serenity_flow/components/mesh_gradient_background.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
-import 'package:serenity_flow/services/supabase_service.dart';
 import 'package:serenity_flow/screens/home/main_navigation_screen.dart';
+
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -20,7 +20,8 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _handleAppleSignIn() async {
     setState(() => _isLoading = true);
     try {
-      final credential = await SignInWithApple.getAppleIDCredential(
+      await SignInWithApple.getAppleIDCredential(
+
         scopes: [
           AppleIDAuthorizationScopes.email,
           AppleIDAuthorizationScopes.fullName,
@@ -39,7 +40,8 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       }
     } catch (e) {
-      print("Apple Sign In Error: $e");
+      debugPrint("Apple Sign In Error: $e");
+
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -62,7 +64,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   height: 120,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Colors.white.withOpacity(0.5),
+                    color: Colors.white.withValues(alpha: 0.5),
                     boxShadow: AppShadows.card,
                   ),
                   child: Padding(
@@ -89,7 +91,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 16,
-                    color: AppColors.dark.withOpacity(0.5),
+                    color: AppColors.dark.withValues(alpha: 0.5),
                     height: 1.5,
                   ),
                 ),
@@ -118,7 +120,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: Text(
                       "Continue as Guest",
                       style: TextStyle(
-                        color: AppColors.dark.withOpacity(0.4),
+                        color: AppColors.dark.withValues(alpha: 0.4),
                         fontWeight: FontWeight.w700,
                         decoration: TextDecoration.underline,
                       ),

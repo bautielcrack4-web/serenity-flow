@@ -16,7 +16,7 @@ class ConfettiPainter extends CustomPainter {
       final y = particle.startY + (particle.velocityY * progress * size.height) + (progress * progress * 200); // Gravity
       
       final paint = Paint()
-        ..color = particle.color.withOpacity(1 - progress)
+        ..color = particle.color.withValues(alpha: 1 - progress)
         ..style = PaintingStyle.fill;
 
       canvas.save();

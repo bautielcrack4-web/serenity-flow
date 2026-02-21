@@ -63,12 +63,6 @@ class _PoseScreenState extends State<PoseScreen> with TickerProviderStateMixin {
     });
   }
 
-  void _initializePose() {
-    final pose = widget.routine.poses[_currentPoseIndex];
-    _timeLeft = pose.duration; 
-    _startTimer();
-  }
-
   void _startTimer() {
     _timer?.cancel();
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
@@ -154,7 +148,7 @@ class _PoseScreenState extends State<PoseScreen> with TickerProviderStateMixin {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     gradient: RadialGradient(
-                      colors: [_dynamicColor.withOpacity(0.08), Colors.transparent],
+                      colors: [_dynamicColor.withValues(alpha: 0.08), Colors.transparent],
                     ),
                   ),
                 ),
@@ -197,7 +191,7 @@ class _PoseScreenState extends State<PoseScreen> with TickerProviderStateMixin {
                     width: 52,
                     height: 52,
                     decoration: BoxDecoration(
-                      color: _currentPoseIndex > 0 ? Colors.white.withOpacity(0.9) : Colors.white.withOpacity(0.4),
+                      color: _currentPoseIndex > 0 ? Colors.white.withValues(alpha: 0.9) : Colors.white.withValues(alpha: 0.4),
                       shape: BoxShape.circle,
                       boxShadow: _currentPoseIndex > 0 ? AppShadows.button : [],
                     ),
@@ -219,7 +213,7 @@ class _PoseScreenState extends State<PoseScreen> with TickerProviderStateMixin {
                     width: 56,
                     height: 56,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.9),
+                      color: Colors.white.withValues(alpha: 0.9),
                       shape: BoxShape.circle,
                       boxShadow: AppShadows.button,
                     ),
@@ -241,7 +235,7 @@ class _PoseScreenState extends State<PoseScreen> with TickerProviderStateMixin {
                     width: 52,
                     height: 52,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.9),
+                      color: Colors.white.withValues(alpha: 0.9),
                       shape: BoxShape.circle,
                       boxShadow: AppShadows.button,
                     ),
@@ -265,7 +259,7 @@ class _PoseScreenState extends State<PoseScreen> with TickerProviderStateMixin {
 
   Widget _buildCountdownOverlay() {
     return Container(
-      color: AppColors.dawnBackground.withOpacity(0.9),
+      color: AppColors.dawnBackground.withValues(alpha: 0.9),
       width: double.infinity,
       height: double.infinity,
       child: Center(
@@ -317,7 +311,7 @@ class _PoseScreenState extends State<PoseScreen> with TickerProviderStateMixin {
           // Gradient Horizontal Progress Bar
           Container(
             height: 8, width: double.infinity,
-            decoration: BoxDecoration(color: AppColors.lightGray.withOpacity(0.5), borderRadius: BorderRadius.circular(4)),
+            decoration: BoxDecoration(color: AppColors.lightGray.withValues(alpha: 0.5), borderRadius: BorderRadius.circular(4)),
             child: FractionallySizedBox(
               alignment: Alignment.centerLeft,
               widthFactor: progress,
@@ -351,7 +345,7 @@ class _PoseScreenState extends State<PoseScreen> with TickerProviderStateMixin {
                      height: 280 + (_auraController.value * 20),
                      decoration: BoxDecoration(
                        shape: BoxShape.circle,
-                       gradient: RadialGradient(colors: [_dynamicColor.withOpacity(0.1), Colors.transparent]),
+                       gradient: RadialGradient(colors: [_dynamicColor.withValues(alpha: 0.1), Colors.transparent]),
                      ),
                    ),
                    SizedBox(
@@ -389,7 +383,7 @@ class _PoseScreenState extends State<PoseScreen> with TickerProviderStateMixin {
                 strokeWidth: 16,
                 strokeCap: StrokeCap.round,
                 valueColor: AlwaysStoppedAnimation<Color>(_dynamicColor),
-                backgroundColor: AppColors.lightGray.withOpacity(0.2),
+                backgroundColor: AppColors.lightGray.withValues(alpha: 0.2),
               ),
             ),
             
@@ -404,7 +398,7 @@ class _PoseScreenState extends State<PoseScreen> with TickerProviderStateMixin {
             
             Positioned(
               bottom: 60,
-              child: Text("SECONDS", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: _dynamicColor.withOpacity(0.6), letterSpacing: 2)),
+              child: Text("SECONDS", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: _dynamicColor.withValues(alpha: 0.6), letterSpacing: 2)),
             ),
           ],
         ),
@@ -414,7 +408,7 @@ class _PoseScreenState extends State<PoseScreen> with TickerProviderStateMixin {
 
   Widget _buildPauseOverlay() {
     return Container(
-      color: Colors.black.withOpacity(0.6),
+      color: Colors.black.withValues(alpha: 0.6),
       child: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -444,7 +438,7 @@ class _PoseScreenState extends State<PoseScreen> with TickerProviderStateMixin {
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.coral.withOpacity(0.3),
+                      color: AppColors.coral.withValues(alpha: 0.3),
                       blurRadius: 20,
                       offset: const Offset(0, 10),
                     ),

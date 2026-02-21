@@ -76,7 +76,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           );
                         },
                         style: Theme.of(context).elevatedButtonTheme.style?.copyWith(
-                          shadowColor: WidgetStateProperty.all(AppColors.coral.withOpacity(0.4)),
+                          shadowColor: WidgetStateProperty.all(AppColors.coral.withValues(alpha: 0.4)),
                           elevation: WidgetStateProperty.all(8),
                         ),
                         child: const Text("Comenzar mi viaje"),
@@ -92,7 +92,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         child: Text(
                           "Ya tengo cuenta / Entrar",
                           style: TextStyle(
-                            color: AppColors.dark.withOpacity(0.7),
+                            color: AppColors.dark.withValues(alpha: 0.7),
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -134,7 +134,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             width: 200,
             height: 200,
             decoration: BoxDecoration(
-              color: data.color.withOpacity(0.1),
+              color: data.color.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(
@@ -167,7 +167,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       height: 10,
       width: _currentPage == index ? 24 : 10,
       decoration: BoxDecoration(
-        color: _currentPage == index ? AppColors.coral : AppColors.turquoise.withOpacity(0.3),
+        color: _currentPage == index ? AppColors.coral : AppColors.turquoise.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(5),
       ),
     );

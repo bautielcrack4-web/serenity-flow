@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:serenity_flow/core/design_system.dart';
 import 'dart:ui' as api_ui;
-import 'dart:math';
 
 class MeshGradientBackground extends StatefulWidget {
   final Widget child;
@@ -105,7 +104,7 @@ class _MeshGradientBackgroundState extends State<MeshGradientBackground> with Ti
                   Positioned(
                     top: 50 + _movements[4].value,
                     right: 80 + _movements[0].value,
-                    child: _buildBlob(250 * _scales[4].value, blobColors[4].withOpacity(0.4)),
+                    child: _buildBlob(250 * _scales[4].value, blobColors[4].withValues(alpha: 0.4)),
                   ),
                 ],
               );
@@ -120,7 +119,7 @@ class _MeshGradientBackgroundState extends State<MeshGradientBackground> with Ti
         ),
 
         // Subtle Noise/Grain (Optional, simulate with low opacity white overlay)
-        Container(color: Colors.white.withOpacity(0.01)),
+        Container(color: Colors.white.withValues(alpha: 0.01)),
 
         // Child Content
         // Child Content
@@ -134,7 +133,7 @@ class _MeshGradientBackgroundState extends State<MeshGradientBackground> with Ti
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: color.withOpacity(0.2), // Lower opacity for subtler effect
+        color: color.withValues(alpha: 0.2), // Lower opacity for subtler effect
         shape: BoxShape.circle,
       ),
     );

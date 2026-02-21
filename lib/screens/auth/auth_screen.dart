@@ -187,7 +187,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                     color: AppColors.primary,
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.primary.withOpacity(0.3),
+                        color: AppColors.primary.withValues(alpha: 0.3),
                         blurRadius: 8,
                         offset: const Offset(0, 2),
                       ),
@@ -228,7 +228,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                     elevation: 4,
-                    shadowColor: AppColors.primary.withOpacity(0.4),
+                    shadowColor: AppColors.primary.withValues(alpha: 0.4),
                   ),
                   child: _isLoading
                       ? const SizedBox(

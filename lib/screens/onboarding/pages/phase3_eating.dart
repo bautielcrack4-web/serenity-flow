@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:serenity_flow/core/design_system.dart';
+import 'package:serenity_flow/core/l10n.dart';
 import 'package:serenity_flow/models/onboarding_data.dart';
 import 'package:serenity_flow/screens/onboarding/widgets/onboarding_widgets.dart';
 import 'package:serenity_flow/screens/onboarding/widgets/onboarding_animations.dart';
@@ -12,15 +13,16 @@ List<Widget> buildPhase3Pages(
   VoidCallback next,
   Function(String, dynamic) answer,
 ) {
+  final s = L10n.s;
   return [
     // PAGE 13: Meals per day
     _QuizPage(
-      question: '¿Cuántas comidas hacés al día?',
+      question: s.p3MealsQuestion,
       options: [
-        _O('1️⃣', '1-2 comidas', '1-2'),
-        _O('3️⃣', '3 comidas', '3'),
-        _O('4️⃣', '4-5 comidas', '4-5'),
-        _O('🔄', 'No tengo horario fijo', 'irregular'),
+        _O('1️⃣', s.p3Meals12, '1-2'),
+        _O('3️⃣', s.p3Meals3, '3'),
+        _O('4️⃣', s.p3Meals45, '4-5'),
+        _O('🔄', s.p3MealsIrregular, 'irregular'),
       ],
       onSelect: (v) => answer('meals_per_day', v),
       selected: data.mealsPerDay,
@@ -32,36 +34,35 @@ List<Widget> buildPhase3Pages(
     // PAGE 15: Info break — water fact
     InfoBreakCard(
       emoji: '💧',
-      title: '¿Sabías esto?',
-      fact:
-          'Beber 500ml de agua antes de cada comida puede aumentar la pérdida de peso hasta un 44%. El agua acelera el metabolismo y reduce el apetito.',
+      title: s.p3WaterInfoTitle,
+      fact: s.p3WaterInfoFact,
       onContinue: next,
     ),
 
     // PAGE 16: Dietary restrictions (multi-select)
     _MultiSelectPage(
-      question: '¿Tenés alguna restricción alimentaria?',
-      subtitle: 'Podés elegir más de una',
+      question: s.p3DietQuestion,
+      subtitle: s.p3DietSubtitle,
       options: [
-        _O('🥬', 'Vegetariana', 'vegetarian'),
-        _O('🌱', 'Vegana', 'vegan'),
-        _O('🌾', 'Sin gluten', 'gluten_free'),
-        _O('🥛', 'Sin lactosa', 'lactose_free'),
-        _O('🥜', 'Sin frutos secos', 'nut_free'),
-        _O('✅', 'Ninguna restricción', 'none'),
+        _O('🥬', s.p3DietVegetarian, 'vegetarian'),
+        _O('🌱', s.p3DietVegan, 'vegan'),
+        _O('🌾', s.p3DietGlutenFree, 'gluten_free'),
+        _O('🥛', s.p3DietLactoseFree, 'lactose_free'),
+        _O('🥜', s.p3DietNutFree, 'nut_free'),
+        _O('✅', s.p3DietNone, 'none'),
       ],
       onSubmit: (vals) => answer('dietary_restrictions', vals),
     ),
 
     // PAGE 17: Snacking
     _QuizPage(
-      question: '¿Cuándo solés picar entre comidas?',
+      question: s.p3SnackQuestion,
       options: [
-        _O('🚫', 'Casi nunca', 'never'),
-        _O('☀️', 'A media mañana', 'morning'),
-        _O('🌅', 'A la tarde', 'afternoon'),
-        _O('🌙', 'A la noche', 'night'),
-        _O('😅', 'Todo el día', 'all_day'),
+        _O('🚫', s.p3SnackNever, 'never'),
+        _O('☀️', s.p3SnackMorning, 'morning'),
+        _O('🌅', s.p3SnackAfternoon, 'afternoon'),
+        _O('🌙', s.p3SnackNight, 'night'),
+        _O('😅', s.p3SnackAllDay, 'all_day'),
       ],
       onSelect: (v) => answer('snacking_time', v),
       selected: data.snackingTime,
@@ -69,12 +70,12 @@ List<Widget> buildPhase3Pages(
 
     // PAGE 18: Emotional eating — KEY differentiator
     _QuizPage(
-      question: '¿Comés más cuando estás estresada o triste?',
-      subtitle: 'Sé honesta, esto es para ayudarte 💜',
+      question: s.p3EmotionalQuestion,
+      subtitle: s.p3EmotionalSubtitle,
       options: [
-        _O('😔', 'Sí, siempre me pasa', 'always'),
-        _O('🤷', 'A veces', 'sometimes'),
-        _O('😌', 'Casi nunca', 'rarely'),
+        _O('😔', s.p3EmotionalAlways, 'always'),
+        _O('🤷', s.p3EmotionalSometimes, 'sometimes'),
+        _O('😌', s.p3EmotionalRarely, 'rarely'),
       ],
       onSelect: (v) => answer('emotional_eating', v),
       selected: data.emotionalEating,
@@ -82,11 +83,11 @@ List<Widget> buildPhase3Pages(
 
     // PAGE 19: Cooking preference
     _QuizPage(
-      question: '¿Te gusta cocinar?',
+      question: s.p3CookingQuestion,
       options: [
-        _O('👩‍🍳', 'Me encanta cocinar', 'love'),
-        _O('🍳', 'Lo hago por necesidad', 'necessity'),
-        _O('📱', 'Prefiero delivery o cosas rápidas', 'no'),
+        _O('👩‍🍳', s.p3CookingLove, 'love'),
+        _O('🍳', s.p3CookingNecessity, 'necessity'),
+        _O('📱', s.p3CookingNo, 'no'),
       ],
       onSelect: (v) => answer('cooking_preference', v),
       selected: data.cookingPreference,
@@ -95,9 +96,8 @@ List<Widget> buildPhase3Pages(
     // PAGE 20: Info break — Yuna approach
     InfoBreakCard(
       emoji: '🧘',
-      title: 'Yuna es diferente',
-      fact:
-          'Yuna combina nutrición inteligente con mindfulness. No se trata de restricción, sino de consciencia. Vamos a transformar tu relación con la comida.',
+      title: s.p3YunaInfoTitle,
+      fact: s.p3YunaInfoFact,
       onContinue: next,
     ),
   ];
@@ -189,8 +189,8 @@ class _WaterPageState extends State<_WaterPage> {
         children: [
           const SizedBox(height: 24),
           FadeSlideIn(
-            child: const Text('¿Cuántos vasos de agua tomás al día?',
-                style: TextStyle(fontFamily: 'Outfit', fontSize: 28, fontWeight: FontWeight.w800, color: AppColors.dark, letterSpacing: -0.3)),
+            child: Text(L10n.s.p3WaterQuestion,
+                style: const TextStyle(fontFamily: 'Outfit', fontSize: 28, fontWeight: FontWeight.w800, color: AppColors.dark, letterSpacing: -0.3)),
           ),
           const Spacer(),
           FadeSlideIn(
@@ -212,7 +212,7 @@ class _WaterPageState extends State<_WaterPage> {
           ),
           const SizedBox(height: 4),
           Center(
-            child: Text('vasos', style: TextStyle(fontFamily: 'Outfit', fontSize: 18, color: AppColors.dark.withValues(alpha: 0.5))),
+            child: Text(L10n.s.glassesUnit, style: TextStyle(fontFamily: 'Outfit', fontSize: 18, color: AppColors.dark.withValues(alpha: 0.5))),
           ),
           const SizedBox(height: 24),
           // Water glass icons with staggered animation
@@ -266,7 +266,7 @@ class _WaterPageState extends State<_WaterPage> {
           FadeSlideIn(
             delay: const Duration(milliseconds: 500),
             child: PremiumCTAButton(
-              text: 'Continuar',
+              text: L10n.s.continueBtn,
               onPressed: () => widget.onSubmit(_glasses),
               showGlow: false,
             ),

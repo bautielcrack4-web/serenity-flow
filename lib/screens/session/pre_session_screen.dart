@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:serenity_flow/core/design_system.dart';
+import 'package:serenity_flow/core/l10n.dart';
 import 'package:serenity_flow/models/routine_model.dart';
 import 'package:serenity_flow/screens/session/pose_screen.dart';
 import 'package:flutter/services.dart';
@@ -65,7 +66,7 @@ class _PreSessionScreenState extends State<PreSessionScreen> with SingleTickerPr
           IconButton(icon: const Icon(Icons.arrow_back_ios_new_rounded), onPressed: () => Navigator.pop(context)),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(color: widget.routine.themeGradient.colors.first.withOpacity(0.2), borderRadius: BorderRadius.circular(20)),
+            decoration: BoxDecoration(color: widget.routine.themeGradient.colors.first.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(20)),
             child: Row(
               children: [
                  Icon(Icons.accessibility_new_rounded, size: 16, color: widget.routine.themeGradient.colors.last),
@@ -90,7 +91,7 @@ class _PreSessionScreenState extends State<PreSessionScreen> with SingleTickerPr
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              gradient: RadialGradient(colors: [widget.routine.themeGradient.colors.first.withOpacity(0.4), Colors.transparent]),
+              gradient: RadialGradient(colors: [widget.routine.themeGradient.colors.first.withValues(alpha: 0.4), Colors.transparent]),
             ),
             child: Image.asset(widget.routine.icon, fit: BoxFit.contain),
           ),
@@ -100,7 +101,7 @@ class _PreSessionScreenState extends State<PreSessionScreen> with SingleTickerPr
         const SizedBox(height: 12),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 40),
-          child: Text(widget.routine.description, textAlign: TextAlign.center, style: TextStyle(fontSize: 17, color: AppColors.dark.withOpacity(0.6), height: 1.4)),
+          child: Text(widget.routine.description, textAlign: TextAlign.center, style: TextStyle(fontSize: 17, color: AppColors.dark.withValues(alpha: 0.6), height: 1.4)),
         ),
       ],
     );
@@ -159,7 +160,7 @@ class _PreSessionScreenState extends State<PreSessionScreen> with SingleTickerPr
             borderRadius: BorderRadius.circular(36),
             boxShadow: [
               BoxShadow(
-                color: AppColors.coral.withOpacity(0.3 + (_glowController.value * 0.2)),
+                color: AppColors.coral.withValues(alpha: 0.3 + (_glowController.value * 0.2)),
                 blurRadius: 20 + (_glowController.value * 10),
                 spreadRadius: 2,
               )
@@ -175,12 +176,12 @@ class _PreSessionScreenState extends State<PreSessionScreen> with SingleTickerPr
               shadowColor: Colors.transparent,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(36)),
             ),
-            child: const Row(
+            child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text("START PRACTICE", style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1.2)),
-                SizedBox(width: 12),
-                Icon(Icons.play_arrow_rounded, color: Colors.white, size: 28),
+                Text(L10n.s.compStartPractice, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1.2)),
+                const SizedBox(width: 12),
+                const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 28),
               ],
             ),
           ),

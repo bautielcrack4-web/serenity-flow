@@ -153,7 +153,7 @@ class _HomeScreenContentState extends State<HomeScreenContent> with SingleTicker
                       ),
                     ),
                   );
-                }).toList(),
+                }),
               ],
             ),
           ),
@@ -181,7 +181,7 @@ class _HomeScreenContentState extends State<HomeScreenContent> with SingleTicker
             const SizedBox(height: 8),
             Text(
               "Ready for your practice today?",
-              style: AppTextStyles.caption.copyWith(color: AppColors.dark.withOpacity(0.6)),
+              style: AppTextStyles.caption.copyWith(color: AppColors.dark.withValues(alpha: 0.6)),
             ),
           ],
         );
@@ -198,14 +198,14 @@ class _HomeScreenContentState extends State<HomeScreenContent> with SingleTicker
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            AppColors.coral.withOpacity(0.15),
-            AppColors.lavender.withOpacity(0.15),
+            AppColors.coral.withValues(alpha: 0.15),
+            AppColors.lavender.withValues(alpha: 0.15),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.coral.withOpacity(0.3), width: 2),
+        border: Border.all(color: AppColors.coral.withValues(alpha: 0.3), width: 2),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -215,7 +215,7 @@ class _HomeScreenContentState extends State<HomeScreenContent> with SingleTicker
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: AppColors.coral.withOpacity(0.2),
+                  color: AppColors.coral.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Text(
@@ -238,7 +238,7 @@ class _HomeScreenContentState extends State<HomeScreenContent> with SingleTicker
                 height: 60,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Colors.white.withOpacity(0.5),
+                  color: Colors.white.withValues(alpha: 0.5),
                 ),
                 padding: const EdgeInsets.all(8),
                 child: Image.asset(recommended.icon, fit: BoxFit.contain),
@@ -261,7 +261,7 @@ class _HomeScreenContentState extends State<HomeScreenContent> with SingleTicker
                       recommended.description,
                       style: TextStyle(
                         fontSize: 14,
-                        color: AppColors.dark.withOpacity(0.6),
+                        color: AppColors.dark.withValues(alpha: 0.6),
                       ),
                     ),
                   ],
@@ -382,7 +382,7 @@ class _HomeScreenContentState extends State<HomeScreenContent> with SingleTicker
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.6),
+        color: Colors.white.withValues(alpha: 0.6),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Colors.white),
       ),
@@ -390,7 +390,7 @@ class _HomeScreenContentState extends State<HomeScreenContent> with SingleTicker
         children: [
           Container(
             padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(color: AppColors.peachGradient.colors.first.withOpacity(0.3), shape: BoxShape.circle),
+            decoration: BoxDecoration(color: AppColors.peachGradient.colors.first.withValues(alpha: 0.3), shape: BoxShape.circle),
             child: const Icon(Icons.fitness_center, color: AppColors.dark),
           ),
           const SizedBox(width: 16),

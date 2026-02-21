@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:serenity_flow/core/design_system.dart';
+import 'package:serenity_flow/core/l10n.dart';
 import 'package:serenity_flow/services/audio_service.dart';
 import 'package:serenity_flow/services/haptic_service.dart';
 import 'package:serenity_flow/services/supabase_service.dart';
@@ -86,8 +87,8 @@ class _CompletionScreenState extends State<CompletionScreen> with TickerProvider
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ).createShader(bounds),
-                  child: const Text(
-                    "SESSION COMPLETED!",
+                  child: Text(
+                    L10n.s.compSessionCompleted,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 36,
@@ -99,7 +100,7 @@ class _CompletionScreenState extends State<CompletionScreen> with TickerProvider
                   ),
                 ),
                 const SizedBox(height: 12),
-                Text("Body and mind in balance", style: AppTextStyles.caption.copyWith(color: AppColors.dark.withOpacity(0.5))),
+                Text(L10n.s.compBodyMindBalance, style: AppTextStyles.caption.copyWith(color: AppColors.dark.withValues(alpha: 0.5))),
                 
                 const Spacer(),
                 
@@ -108,16 +109,16 @@ class _CompletionScreenState extends State<CompletionScreen> with TickerProvider
                   padding: const EdgeInsets.symmetric(horizontal: 24),
                   child: Row(
                     children: [
-                      Expanded(child: _buildStaggeredStat("Minutes", "08", 0, AppColors.coral)),
+                      Expanded(child: _buildStaggeredStat(L10n.s.compMinutes, "08", 0, AppColors.coral)),
                       const SizedBox(width: 16),
-                      Expanded(child: _buildStaggeredStat("Streak", "04", 1, AppColors.lavender)),
+                      Expanded(child: _buildStaggeredStat(L10n.s.compStreak, "04", 1, AppColors.lavender)),
                     ],
                   ),
                 ),
                 const SizedBox(height: 16),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: _buildStaggeredStat("Daily Goal", "100%", 2, AppColors.turquoise),
+                  child: _buildStaggeredStat(L10n.s.compDailyGoal, "100%", 2, AppColors.turquoise),
                 ),
                 
                 const Spacer(),
@@ -145,7 +146,7 @@ class _CompletionScreenState extends State<CompletionScreen> with TickerProvider
             decoration: BoxDecoration(
               gradient: AppColors.turquoiseStatusGradient,
               shape: BoxShape.circle,
-              boxShadow: [BoxShadow(color: AppColors.turquoise.withOpacity(0.4), blurRadius: 30, offset: const Offset(0, 10))],
+              boxShadow: [BoxShadow(color: AppColors.turquoise.withValues(alpha: 0.4), blurRadius: 30, offset: const Offset(0, 10))],
             ),
             child: const Icon(Icons.check_rounded, color: Colors.white, size: 90),
           ),
@@ -165,15 +166,15 @@ class _CompletionScreenState extends State<CompletionScreen> with TickerProvider
       child: Container(
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.08),
+          color: color.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(32),
-          border: Border.all(color: color.withOpacity(0.15), width: 1.5),
+          border: Border.all(color: color.withValues(alpha: 0.15), width: 1.5),
         ),
         child: Column(
           children: [
              Text(value, style: TextStyle(fontSize: 52, fontWeight: FontWeight.w900, color: color, height: 1.0)),
              const SizedBox(height: 4),
-             Text(label, style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: color.withOpacity(0.6))),
+             Text(label, style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: color.withValues(alpha: 0.6))),
           ],
         ),
       ),
@@ -189,17 +190,17 @@ class _CompletionScreenState extends State<CompletionScreen> with TickerProvider
              _shareSuccess();
           },
           borderRadius: BorderRadius.circular(20),
-          splashColor: AppColors.coral.withOpacity(0.2),
-          highlightColor: AppColors.coral.withOpacity(0.1),
+          splashColor: AppColors.coral.withValues(alpha: 0.2),
+          highlightColor: AppColors.coral.withValues(alpha: 0.1),
           child: Ink(
              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-             decoration: BoxDecoration(color: AppColors.lightGray.withOpacity(0.5), borderRadius: BorderRadius.circular(20)),
-             child: const Row(
+             decoration: BoxDecoration(color: AppColors.lightGray.withValues(alpha: 0.5), borderRadius: BorderRadius.circular(20)),
+             child: Row(
                mainAxisSize: MainAxisSize.min,
                children: [
-                 Icon(Icons.share_rounded, size: 20, color: AppColors.dark),
-                 SizedBox(width: 8),
-                 Text("SHARE VICTORY", style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.dark)),
+                 const Icon(Icons.share_rounded, size: 20, color: AppColors.dark),
+                 const SizedBox(width: 8),
+                 Text(L10n.s.compShareVictory, style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.dark)),
                ],
              ),
           ),
@@ -208,7 +209,7 @@ class _CompletionScreenState extends State<CompletionScreen> with TickerProvider
         Semantics(
           label: 'Volver al inicio de la aplicación',
           button: true,
-          child: Container(
+          child: SizedBox(
             width: MediaQuery.of(context).size.width * 0.9,
             height: 72,
             child: ElevatedButton(
@@ -218,7 +219,7 @@ class _CompletionScreenState extends State<CompletionScreen> with TickerProvider
                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(36)),
                  elevation: 10,
               ),
-              child: const Text("BACK TO HOME", style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1.5)),
+              child: Text(L10n.s.compBackToHome, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1.5)),
             ),
           ),
         ),
@@ -233,7 +234,7 @@ class _CompletionScreenState extends State<CompletionScreen> with TickerProvider
     
     // Future implementation: await Share.share("Just completed my session today on Yuna! 🔥\n\n🎯 8 Minutes of Flow\n⚡ 4 Day Streak\n\nDownload Yuna and join the flow.");
     // Since we are mocking the dependency setup for this speedrun:
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Opening share menu... (Simulated)")));
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(L10n.s.compShareSimulated)));
   }
 
   Future<void> _processCompletion() async {
@@ -268,16 +269,16 @@ class _CompletionScreenState extends State<CompletionScreen> with TickerProvider
         builder: (context) => AlertDialog(
           backgroundColor: Colors.white,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-          title: const Text("Rate Us", style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.dark)),
-          content: const Text("Thank you! Being a 5-star app helps us reach more people. Would you help us out?", style: TextStyle(color: AppColors.gray)),
+          title: Text(L10n.s.compRateUs, style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.dark)),
+          content: Text(L10n.s.compRateMessage, style: const TextStyle(color: AppColors.gray)),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text("Later", style: TextStyle(color: AppColors.gray)),
+              child: Text(L10n.s.compLater, style: const TextStyle(color: AppColors.gray)),
             ),
             TextButton(
               onPressed: () => Navigator.pop(context, true),
-              child: const Text("Rate Now", style: TextStyle(color: AppColors.coral, fontWeight: FontWeight.bold)),
+              child: Text(L10n.s.compRateNow, style: const TextStyle(color: AppColors.coral, fontWeight: FontWeight.bold)),
             ),
           ],
         ),
@@ -334,5 +335,5 @@ class ConfettiPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(ConfettiPainter old) => true;
+  bool shouldRepaint(ConfettiPainter oldDelegate) => true;
 }

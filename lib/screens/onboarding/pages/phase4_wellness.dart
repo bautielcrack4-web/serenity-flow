@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:serenity_flow/core/design_system.dart';
+import 'package:serenity_flow/core/l10n.dart';
 import 'package:serenity_flow/models/onboarding_data.dart';
 import 'package:serenity_flow/screens/onboarding/widgets/onboarding_widgets.dart';
 import 'package:serenity_flow/screens/onboarding/widgets/onboarding_animations.dart';
@@ -12,18 +13,19 @@ List<Widget> buildPhase4Pages(
   VoidCallback next,
   Function(String, dynamic) answer,
 ) {
+  final s = L10n.s;
   return [
     // PAGE 21: Stress level
     _StressLevelPage(onSubmit: (v) => answer('stress_level', v)),
 
     // PAGE 22: Sleep hours
     _QuizPage(
-      question: '¿Cuántas horas dormís por noche?',
+      question: s.p4SleepQuestion,
       options: [
-        _O('😵', 'Menos de 5 horas', '<5'),
-        _O('😴', '5-6 horas', '5-6'),
-        _O('😊', '7-8 horas', '7-8'),
-        _O('😇', 'Más de 8 horas', '8+'),
+        _O('😵', s.p4SleepLess5, '<5'),
+        _O('😴', s.p4Sleep56, '5-6'),
+        _O('😊', s.p4Sleep78, '7-8'),
+        _O('😇', s.p4SleepMore8, '8+'),
       ],
       onSelect: (v) => answer('sleep_hours', v),
       selected: data.sleepHours,
@@ -32,20 +34,19 @@ List<Widget> buildPhase4Pages(
     // PAGE 23: Info break — sleep & hunger
     InfoBreakCard(
       emoji: '🌙',
-      title: 'Sueño y hambre',
-      fact:
-          'La falta de sueño aumenta la grelina (hormona del hambre) un 28% y reduce la leptina (hormona de saciedad). Yuna te ayuda a dormir mejor para perder peso de forma natural.',
+      title: s.p4SleepInfoTitle,
+      fact: s.p4SleepInfoFact,
       onContinue: next,
     ),
 
     // PAGE 24: Activity level
     _QuizPage(
-      question: '¿Cuál es tu nivel de actividad?',
+      question: s.p4ActivityQuestion,
       options: [
-        _O('🛋️', 'Sedentaria (poco movimiento)', 'sedentary'),
-        _O('🚶', 'Algo activa (camino regularmente)', 'light'),
-        _O('🏃', 'Activa (ejercicio 3-4 veces/semana)', 'active'),
-        _O('💪', 'Muy activa (ejercicio diario)', 'very_active'),
+        _O('🛋️', s.p4ActivitySedentary, 'sedentary'),
+        _O('🚶', s.p4ActivityLight, 'light'),
+        _O('🏃', s.p4ActivityActive, 'active'),
+        _O('💪', s.p4ActivityVeryActive, 'very_active'),
       ],
       onSelect: (v) => answer('activity_level', v),
       selected: data.activityLevel,
@@ -53,15 +54,15 @@ List<Widget> buildPhase4Pages(
 
     // PAGE 25: Preferred exercise
     _QuizPage(
-      question: '¿Qué tipo de ejercicio te atrae más?',
-      subtitle: 'Personalizaremos tu plan según tu preferencia',
+      question: s.p4ExerciseQuestion,
+      subtitle: s.p4ExerciseSubtitle,
       options: [
-        _O('🧘', 'Yoga y stretching', 'yoga'),
-        _O('🚶', 'Caminar', 'walking'),
-        _O('🔥', 'HIIT (alta intensidad)', 'hiit'),
-        _O('🏋️', 'Gym y pesas', 'gym'),
-        _O('💃', 'Baile y cardio', 'dance'),
-        _O('😅', 'No me gusta ejercitarme', 'none'),
+        _O('🧘', s.p4ExerciseYoga, 'yoga'),
+        _O('🚶', s.p4ExerciseWalking, 'walking'),
+        _O('🔥', s.p4ExerciseHiit, 'hiit'),
+        _O('🏋️', s.p4ExerciseGym, 'gym'),
+        _O('💃', s.p4ExerciseDance, 'dance'),
+        _O('😅', s.p4ExerciseNone, 'none'),
       ],
       onSelect: (v) => answer('preferred_exercise', v),
       selected: data.preferredExercise,
@@ -69,11 +70,11 @@ List<Widget> buildPhase4Pages(
 
     // PAGE 26: Mindfulness experience
     _QuizPage(
-      question: '¿Practicaste meditación o respiración consciente alguna vez?',
+      question: s.p4MindfulnessQuestion,
       options: [
-        _O('🧘', 'Sí, regularmente', 'yes'),
-        _O('🤔', 'Un poco, pero no soy constante', 'some'),
-        _O('🆕', 'Nunca probé', 'never'),
+        _O('🧘', s.p4MindfulnessYes, 'yes'),
+        _O('🤔', s.p4MindfulnessSome, 'some'),
+        _O('🆕', s.p4MindfulnessNever, 'never'),
       ],
       onSelect: (v) => answer('mindfulness_experience', v),
       selected: data.mindfulnessExperience,
@@ -164,11 +165,12 @@ class _StressLevelPageState extends State<_StressLevelPage> {
   }
 
   String get _label {
-    if (_level <= 2) return 'Muy relajada';
-    if (_level <= 4) return 'Algo de estrés';
-    if (_level <= 6) return 'Estrés moderado';
-    if (_level <= 8) return 'Bastante estresada';
-    return 'Muy estresada';
+    final s = L10n.s;
+    if (_level <= 2) return s.p4StressVeryRelaxed;
+    if (_level <= 4) return s.p4StressSome;
+    if (_level <= 6) return s.p4StressModerate;
+    if (_level <= 8) return s.p4StressPretty;
+    return s.p4StressPretty; // 9-10
   }
 
   Color get _trackColor {
@@ -186,7 +188,7 @@ class _StressLevelPageState extends State<_StressLevelPage> {
         children: [
           const SizedBox(height: 24),
           FadeSlideIn(
-            child: const Text('¿Cómo describirías tu nivel de estrés?',
+            child: Text(L10n.s.p4StressQuestion,
                 style: TextStyle(fontFamily: 'Outfit', fontSize: 28, fontWeight: FontWeight.w800, color: AppColors.dark, letterSpacing: -0.3)),
           ),
           const Spacer(),
@@ -246,7 +248,7 @@ class _StressLevelPageState extends State<_StressLevelPage> {
           FadeSlideIn(
             delay: const Duration(milliseconds: 500),
             child: PremiumCTAButton(
-              text: 'Continuar',
+              text: L10n.s.continueBtn,
               onPressed: () => widget.onSubmit(_level),
               showGlow: false,
             ),
@@ -299,14 +301,14 @@ class _BreathingDemoPageState extends State<_BreathingDemoPage>
             children: [
               const Spacer(flex: 2),
               FadeSlideIn(
-                child: const Text('Respirá con Yuna', textAlign: TextAlign.center,
+                child: Text(L10n.s.p4BreathingTitle, textAlign: TextAlign.center,
                     style: TextStyle(fontFamily: 'Outfit', fontSize: 28, fontWeight: FontWeight.w800, color: AppColors.dark, letterSpacing: -0.3)),
               ),
               const SizedBox(height: 10),
               FadeSlideIn(
                 delay: const Duration(milliseconds: 200),
                 child: Text(
-                    'La meditación reduce el cortisol, que causa acumulación de grasa abdominal',
+                    L10n.s.p4BreathingSubtitle,
                     textAlign: TextAlign.center,
                     style: TextStyle(fontFamily: 'Outfit', fontSize: 15, color: AppColors.dark.withValues(alpha: 0.6), height: 1.4)),
               ),
@@ -352,7 +354,7 @@ class _BreathingDemoPageState extends State<_BreathingDemoPage>
                           child: AnimatedSwitcher(
                             duration: const Duration(milliseconds: 300),
                             child: Text(
-                              _breathController.value < 0.5 ? 'Inhalá' : 'Exhalá',
+                              _breathController.value < 0.5 ? L10n.s.p4BreathingInhale : L10n.s.p4BreathingExhale,
                               key: ValueKey(_breathController.value < 0.5),
                               style: TextStyle(
                                 fontFamily: 'Outfit',
@@ -372,7 +374,7 @@ class _BreathingDemoPageState extends State<_BreathingDemoPage>
               FadeSlideIn(
                 delay: const Duration(milliseconds: 600),
                 child: PremiumCTAButton(
-                  text: 'Continuar',
+                  text: L10n.s.continueBtn,
                   onPressed: widget.onContinue,
                   showGlow: false,
                 ),

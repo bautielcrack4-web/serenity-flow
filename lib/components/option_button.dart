@@ -70,7 +70,7 @@ class _OptionButtonState extends State<OptionButton> with SingleTickerProviderSt
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.08),
+                color: Colors.black.withValues(alpha: 0.08),
                 blurRadius: 2,
                 offset: const Offset(0, 2),
               ),

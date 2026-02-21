@@ -7,6 +7,7 @@ import 'package:serenity_flow/screens/home/workouts_screen.dart';
 import 'package:serenity_flow/screens/home/nutrition_screen.dart';
 import 'package:serenity_flow/screens/home/mindfulness_screen.dart';
 import 'package:serenity_flow/screens/home/profile_screen.dart';
+import 'package:serenity_flow/services/user_profile_provider.dart';
 
 /// 5-Tab Navigation — Home, Workouts, Nutrition, Mind, Profile
 class MainNavigationScreen extends StatefulWidget {
@@ -26,6 +27,13 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     MindfulnessScreen(),
     ProfileScreen(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    // Load user profile from Supabase so all tabs can access it
+    UserProfileProvider.instance.load();
+  }
 
   void _onTabTapped(int index) {
     if (_currentIndex == index) return;

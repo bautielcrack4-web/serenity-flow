@@ -31,7 +31,7 @@ class _ExpandableLegalSectionState extends State<ExpandableLegalSection> {
                   child: Text(
                     "Restore Purchases",
                     style: TextStyle(
-                      color: AppColors.dark.withOpacity(0.5),
+                      color: AppColors.dark.withValues(alpha: 0.5),
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
                       decoration: TextDecoration.underline,
@@ -40,12 +40,12 @@ class _ExpandableLegalSectionState extends State<ExpandableLegalSection> {
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: Text("•", style: TextStyle(color: AppColors.dark.withOpacity(0.3))),
+                  child: Text("•", style: TextStyle(color: AppColors.dark.withValues(alpha: 0.3))),
                 ),
                 Text(
                   _isExpanded ? "Hide Terms" : "Terms & Privacy",
                   style: TextStyle(
-                    color: AppColors.dark.withOpacity(0.5),
+                    color: AppColors.dark.withValues(alpha: 0.5),
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                   ),
@@ -53,7 +53,7 @@ class _ExpandableLegalSectionState extends State<ExpandableLegalSection> {
                 Icon(
                   _isExpanded ? Icons.keyboard_arrow_down_rounded : Icons.keyboard_arrow_up_rounded,
                   size: 16,
-                  color: AppColors.dark.withOpacity(0.5),
+                  color: AppColors.dark.withValues(alpha: 0.5),
                 ),
               ],
             ),
@@ -78,14 +78,14 @@ class _ExpandableLegalSectionState extends State<ExpandableLegalSection> {
           Text(
             "A purchase will be applied to your iTunes account on confirmation. Subscriptions will automatically renew unless canceled within 24-hours before the end of the current period. You can cancel anytime with your iTunes account settings. Any unused portion of a free trial will be forfeited if you purchase a subscription.",
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 10, color: AppColors.dark.withOpacity(0.4), height: 1.4),
+            style: TextStyle(fontSize: 10, color: AppColors.dark.withValues(alpha: 0.4), height: 1.4),
           ),
           const SizedBox(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               _buildLink("Privacy Policy", "https://sites.google.com/view/yunaapp/privacy-policy"),
-              Text(" • ", style: TextStyle(color: AppColors.dark.withOpacity(0.3))),
+              Text(" • ", style: TextStyle(color: AppColors.dark.withValues(alpha: 0.3))),
               _buildLink("Terms of Use (EULA)", "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/"),
             ],
           ),
@@ -103,7 +103,7 @@ class _ExpandableLegalSectionState extends State<ExpandableLegalSection> {
       child: Text(
         text,
         style: TextStyle(
-          color: AppColors.dark.withOpacity(0.5),
+          color: AppColors.dark.withValues(alpha: 0.5),
           fontSize: 10,
           fontWeight: FontWeight.w700,
           decoration: TextDecoration.underline,

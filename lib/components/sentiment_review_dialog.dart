@@ -78,7 +78,7 @@ class _SentimentReviewDialogState extends State<SentimentReviewDialog> with Sing
           child: Container(
             padding: const EdgeInsets.all(32),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.9), // Glass feel
+              color: Colors.white.withValues(alpha: 0.9), // Glass feel
               borderRadius: BorderRadius.circular(32),
               border: Border.all(color: Colors.white, width: 2),
               boxShadow: AppShadows.elevated,
@@ -133,9 +133,9 @@ class _SentimentReviewDialogState extends State<SentimentReviewDialog> with Sing
                           gradient: LinearGradient(
                             colors: [
                               Colors.grey.shade300,
-                              AppColors.turquoise.withOpacity(0.5),
-                              AppColors.coral.withOpacity(0.5),
-                              AppColors.gold.withOpacity(0.8),
+                              AppColors.turquoise.withValues(alpha: 0.5),
+                              AppColors.coral.withValues(alpha: 0.5),
+                              AppColors.gold.withValues(alpha: 0.8),
                             ],
                           ),
                         ),
@@ -147,7 +147,7 @@ class _SentimentReviewDialogState extends State<SentimentReviewDialog> with Sing
                           activeTrackColor: Colors.transparent, // Handled by container
                           inactiveTrackColor: Colors.transparent,
                           thumbColor: Colors.white,
-                          overlayColor: _getColor(_rating).withOpacity(0.1),
+                          overlayColor: _getColor(_rating).withValues(alpha: 0.1),
                           thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 16, elevation: 6),
                           overlayShape: const RoundSliderOverlayShape(overlayRadius: 28),
                         ),

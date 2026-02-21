@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:serenity_flow/core/design_system.dart';
-import 'package:serenity_flow/screens/home/main_navigation_screen.dart';
+import 'package:serenity_flow/core/l10n.dart';
+
 import 'package:serenity_flow/screens/monetization/paywall_screen.dart';
 import 'package:serenity_flow/screens/auth/auth_screen.dart';
 import 'package:serenity_flow/components/mesh_gradient_background.dart';
 import 'package:serenity_flow/services/audio_service.dart';
 import 'package:serenity_flow/services/haptic_service.dart';
 import 'package:flutter/services.dart';
-import 'dart:ui' as api_ui;
+
 
 class QuestionnaireScreen extends StatefulWidget {
   const QuestionnaireScreen({super.key});
@@ -116,12 +117,12 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> with TickerPr
                   scale: _pulseScale,
                   child: Container(
                     width: 18, height: 18,
-                    decoration: BoxDecoration(shape: BoxShape.circle, color: AppColors.coral, boxShadow: [BoxShadow(color: AppColors.coral.withOpacity(0.4), blurRadius: 10)])
+                    decoration: BoxDecoration(shape: BoxShape.circle, color: AppColors.coral, boxShadow: [BoxShadow(color: AppColors.coral.withValues(alpha: 0.4), blurRadius: 10)])
                   ),
                 )
               : Container(
                   width: 18, height: 18,
-                  decoration: BoxDecoration(shape: BoxShape.circle, color: isCompleted ? AppColors.coral : AppColors.dark.withOpacity(0.1)),
+                  decoration: BoxDecoration(shape: BoxShape.circle, color: isCompleted ? AppColors.coral : AppColors.dark.withValues(alpha: 0.1)),
                 ),
           );
         }),
@@ -146,12 +147,12 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> with TickerPr
                     width: 250, height: 250,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      gradient: RadialGradient(colors: [AppColors.coral.withOpacity(0.15), Colors.transparent])
+                      gradient: RadialGradient(colors: [AppColors.coral.withValues(alpha: 0.15), Colors.transparent])
                     ),
                   ),
                   Container(
                     width: 240, height: 240,
-                    decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white.withOpacity(0.4)),
+                    decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white.withValues(alpha: 0.4)),
                     child: Padding(
                       padding: const EdgeInsets.all(20),
                       child: Image.asset(_getCharacterImage(), fit: BoxFit.contain, errorBuilder: (c,e,s) => const Icon(Icons.person, size: 100, color: AppColors.lavender)),
@@ -210,28 +211,30 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> with TickerPr
   }
 
   String _getQuestionText() {
+    final s = L10n.s;
     switch (_currentStep) {
-      case 1: return "What is your main goal?";
-      case 2: return "How often do you practice yoga?";
-      case 3: return "How is your energy today?";
-      case 4: return "Any physical discomfort?";
-      case 5: return "Current stress level?";
-      case 6: return "How much time do you have?";
-      case 7: return "Session preference?";
-      default: return "Ready to start?";
+      case 1: return s.questQ1;
+      case 2: return s.questQ2;
+      case 3: return s.questQ3;
+      case 4: return s.questQ4;
+      case 5: return s.questQ5;
+      case 6: return s.questQ6;
+      case 7: return s.questQ7;
+      default: return s.questQ8;
     }
   }
 
   List<String> _getOptions() {
-     switch (_currentStep) {
-      case 1: return ["Flexibility", "Strength", "Relaxation", "Meditation"];
-      case 2: return ["Never", "Occasionally", "Regularly", "Daily"];
-      case 3: return ["Low", "Medium", "High", "Lots of energy"];
-      case 4: return ["Back", "Neck", "Knees", "None"];
-      case 5: return ["Low", "Medium", "High"];
-      case 6: return ["5-10 min", "15-20 min", "30+ min"];
-      case 7: return ["Guided", "Silent", "Soft Music"];
-      default: return ["Start Now!"];
+    final s = L10n.s;
+    switch (_currentStep) {
+      case 1: return [s.questFlexibility, s.questStrength, s.questRelaxation, s.questMeditationOpt];
+      case 2: return [s.questNever, s.questOccasionally, s.questRegularly, s.questDaily];
+      case 3: return [s.questLowEnergy, s.questMediumEnergy, s.questHighEnergy, s.questLotsEnergy];
+      case 4: return [s.questBack, s.questNeck, s.questKnees, s.questNone];
+      case 5: return [s.questLowStress, s.questMediumStress, s.questHighStress];
+      case 6: return [s.questTime5, s.questTime15, s.questTime30];
+      case 7: return [s.questGuided, s.questSilent, s.questSoftMusic];
+      default: return [s.questStartNow];
     }
   }
 }

@@ -124,6 +124,7 @@ class _CreateRoutineScreenState extends State<CreateRoutineScreen> {
         
         if (currentRoutines.length >= 3) {
           // Show Paywall
+          if (!mounted) return;
           showModalBottomSheet(
             context: context,
             isScrollControlled: true,
@@ -132,6 +133,7 @@ class _CreateRoutineScreenState extends State<CreateRoutineScreen> {
           );
         } else {
           // Some other error
+          if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text("Error saving routine. Please try again.")),
           );
@@ -256,7 +258,7 @@ class _CreateRoutineScreenState extends State<CreateRoutineScreen> {
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.04),
+                          color: Colors.black.withValues(alpha: 0.04),
                           blurRadius: 10,
                           offset: const Offset(0, 4),
                         ),

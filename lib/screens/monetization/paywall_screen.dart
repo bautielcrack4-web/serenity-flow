@@ -1,5 +1,4 @@
 import 'package:confetti/confetti.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:serenity_flow/core/design_system.dart';
@@ -48,12 +47,13 @@ class _PaywallScreenState extends State<PaywallScreen> {
 
     if (mounted) {
       setState(() {
-        _packages = packages;
+        // Filter out monthly packages as requested ("sacar del paywall la mensual")
+        _packages = packages.where((p) => p.packageType != PackageType.monthly).toList();
         
-        if (packages.isNotEmpty) {
-          _selectedPackage = packages.firstWhere(
+        if (_packages.isNotEmpty) {
+          _selectedPackage = _packages.firstWhere(
             (p) => p.packageType == PackageType.annual,
-            orElse: () => packages.first,
+            orElse: () => _packages.first,
           );
         }
         _isLoading = false;
@@ -117,7 +117,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
                   end: Alignment.bottomCenter,
                   colors: [
                     AppColors.cream,
-                    AppColors.turquoise.withOpacity(0.05),
+                    AppColors.turquoise.withValues(alpha: 0.05),
                     AppColors.cream,
                   ],
                 ),
@@ -157,7 +157,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
               top: 50,
               left: 20,
               child: IconButton(
-                icon: Icon(Icons.close_rounded, color: AppColors.dark.withOpacity(0.4), size: 28),
+                icon: Icon(Icons.close_rounded, color: AppColors.dark.withValues(alpha: 0.4), size: 28),
                 onPressed: () {
                   if (widget.onFinish != null) {
                     widget.onFinish!();
@@ -213,7 +213,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
-                color: AppColors.dark.withOpacity(0.6),
+                color: AppColors.dark.withValues(alpha: 0.6),
               ),
             ),
           ],
@@ -222,7 +222,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
         Text(
           "Feel great with only 5 minutes a day.\nStart your journey now.",
           textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 14, color: AppColors.dark.withOpacity(0.5), fontWeight: FontWeight.w600, height: 1.4),
+          style: TextStyle(fontSize: 14, color: AppColors.dark.withValues(alpha: 0.5), fontWeight: FontWeight.w600, height: 1.4),
         ),
       ],
     );
@@ -246,15 +246,29 @@ class _PaywallScreenState extends State<PaywallScreen> {
   }
 
   Widget _buildPricingCard({required Package package, required bool isAnnual, required bool isSelected}) {
-    String mainPrice = package.storeProduct.priceString;
-    String secondaryPrice = isAnnual 
-        ? "${package.storeProduct.currencyCode} ${(package.storeProduct.price / 12).toStringAsFixed(2)} / mo" 
-        : "";
+    final String mainPrice = package.storeProduct.priceString;
+    String planTitle = "Pro Plan";
+    if (package.packageType == PackageType.annual) {
+      planTitle = "Annual Plan";
+    } else if (package.packageType == PackageType.monthly) {
+      planTitle = "Monthly Plan";
+    } else if (package.packageType == PackageType.weekly) {
+      planTitle = "Weekly Plan";
+    } else if (package.packageType == PackageType.sixMonth) {
+      planTitle = "6-Month Plan";
+    } else if (package.packageType == PackageType.threeMonth) {
+      planTitle = "3-Month Plan";
+    }
+
+    String secondaryPrice = "";
+    if (package.packageType == PackageType.annual) {
+      secondaryPrice = "${package.storeProduct.currencyCode} ${(package.storeProduct.price / 12).toStringAsFixed(2)} / mo";
+    }
 
     return GestureDetector(
       onTap: () => setState(() => _selectedPackage = package),
       child: Container(
-        margin: const EdgeInsets.only(bottom: 12), // Tighter spacing
+        margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         decoration: BoxDecoration(
           color: Colors.white,
@@ -265,8 +279,8 @@ class _PaywallScreenState extends State<PaywallScreen> {
           ),
           boxShadow: [
             if (isSelected) 
-              BoxShadow(color: AppColors.turquoise.withOpacity(0.15), blurRadius: 15, offset: const Offset(0, 5)),
-            BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 2)),
+              BoxShadow(color: AppColors.turquoise.withValues(alpha: 0.15), blurRadius: 15, offset: const Offset(0, 5)),
+            BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2)),
           ],
         ),
         child: Stack(
@@ -292,19 +306,19 @@ class _PaywallScreenState extends State<PaywallScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        isAnnual ? "Annual Plan" : "Monthly Plan",
+                        planTitle,
                         style: TextStyle(
                           fontSize: 16, 
                           fontWeight: FontWeight.w700, 
-                          color: AppColors.dark.withOpacity(0.8)
+                          color: AppColors.dark.withValues(alpha: 0.8)
                         ),
                       ),
-                      if (isAnnual && secondaryPrice.isNotEmpty)
+                      if (secondaryPrice.isNotEmpty)
                         Text(
                           "Calculated at $secondaryPrice",
                           style: TextStyle(
                             fontSize: 12, 
-                            color: AppColors.dark.withOpacity(0.4),
+                            color: AppColors.dark.withValues(alpha: 0.4),
                             fontWeight: FontWeight.w500
                           ),
                         ),
@@ -329,7 +343,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
                   decoration: BoxDecoration(
                     color: AppColors.coral,
                     borderRadius: BorderRadius.circular(10),
-                    boxShadow: [BoxShadow(color: AppColors.coral.withOpacity(0.3), blurRadius: 6)],
+                    boxShadow: [BoxShadow(color: AppColors.coral.withValues(alpha: 0.3), blurRadius: 6)],
                   ),
                   child: const Text(
                     "BEST VALUE",
@@ -346,8 +360,8 @@ class _PaywallScreenState extends State<PaywallScreen> {
   Widget _buildDemoOptions() {
     return Column(
       children: [
-        _buildDemoCard("Annual Plan", "US\$ 14.99", "US\$ 1.24 / mo", true),
-        _buildDemoCard("Monthly Plan", "US\$ 4.99", "", false),
+        _buildDemoCard("Annual Plan", "US\$ 49.99", "US\$ 4.16 / mo", true),
+        _buildDemoCard("Weekly Plan", "US\$ 6.99", "", false),
       ],
     );
   }
@@ -369,8 +383,8 @@ class _PaywallScreenState extends State<PaywallScreen> {
           ),
           boxShadow: [
              if (isSelected) 
-              BoxShadow(color: AppColors.turquoise.withOpacity(0.15), blurRadius: 15, offset: const Offset(0, 5)),
-            BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 2)),
+              BoxShadow(color: AppColors.turquoise.withValues(alpha: 0.15), blurRadius: 15, offset: const Offset(0, 5)),
+            BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2)),
           ],
         ),
         child: Row(
@@ -389,9 +403,9 @@ class _PaywallScreenState extends State<PaywallScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.dark.withOpacity(0.8))),
+                  Text(title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.dark.withValues(alpha: 0.8))),
                   if (secondaryPrice.isNotEmpty)
-                     Text("Calculated at $secondaryPrice", style: TextStyle(fontSize: 12, color: AppColors.dark.withOpacity(0.4), fontWeight: FontWeight.w500)),
+                     Text("Calculated at $secondaryPrice", style: TextStyle(fontSize: 12, color: AppColors.dark.withValues(alpha: 0.4), fontWeight: FontWeight.w500)),
                 ],
               ),
             ),
@@ -423,7 +437,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
         gradient: AppColors.turquoiseStatusGradient,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
-          BoxShadow(color: AppColors.turquoise.withOpacity(0.3), blurRadius: 10, offset: const Offset(0, 4)),
+          BoxShadow(color: AppColors.turquoise.withValues(alpha: 0.3), blurRadius: 10, offset: const Offset(0, 4)),
         ],
       ),
       child: Material(

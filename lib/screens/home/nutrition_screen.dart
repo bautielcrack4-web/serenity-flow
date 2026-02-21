@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:serenity_flow/core/design_system.dart';
+import 'package:serenity_flow/core/l10n.dart';
+import 'package:serenity_flow/services/nutrition_service.dart';
+import 'package:serenity_flow/services/sound_service.dart';
 
 /// 🍽️ Nutrition Screen — Meal plans, recipes, water tracker
 class NutritionScreen extends StatefulWidget {
@@ -10,13 +13,83 @@ class NutritionScreen extends StatefulWidget {
 }
 
 class _NutritionScreenState extends State<NutritionScreen> {
-  int _waterGlasses = 3;
+  int _waterGlasses = 0;
   int _selectedDay = DateTime.now().weekday - 1; // 0-indexed Monday
+  bool _isLoading = true;
+  List<MealData> _meals = [];
 
-  static const _dayNames = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+  final _nutritionService = NutritionService();
+
+  static const _dayNamesEn = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  static const _dayNamesEs = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+
+  List<String> get _dayNames => L10n.locale == 'es' ? _dayNamesEs : _dayNamesEn;
+
+  DateTime get _selectedDate {
+    final now = DateTime.now();
+    final monday = now.subtract(Duration(days: now.weekday - 1));
+    return monday.add(Duration(days: _selectedDay));
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    setState(() => _isLoading = true);
+    final date = _selectedDate;
+    final results = await Future.wait([
+      _nutritionService.getMealsForDate(date),
+      _nutritionService.getWaterGlasses(date),
+    ]);
+    if (mounted) {
+      setState(() {
+        _meals = results[0] as List<MealData>;
+        _waterGlasses = results[1] as int;
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _onDayChanged(int day) {
+    setState(() => _selectedDay = day);
+    _loadData();
+  }
+
+  void _onWaterTap(int index) {
+    final newGlasses = (index + 1 == _waterGlasses) ? index : index + 1;
+    setState(() => _waterGlasses = newGlasses);
+    _nutritionService.setWaterGlasses(newGlasses, _selectedDate);
+    SoundService().playWaterDrop();
+  }
+
+  void _onToggleMeal(MealData meal) {
+    final newCompleted = !meal.isCompleted;
+    setState(() {
+      _meals = _meals.map((m) => m.mealType == meal.mealType
+          ? MealData(
+              emoji: m.emoji,
+              name: m.name,
+              description: m.description,
+              time: m.time,
+              calories: m.calories,
+              mealType: m.mealType,
+              isCompleted: newCompleted,
+            )
+          : m).toList();
+    });
+    _nutritionService.toggleMealCompleted(meal.mealType, _selectedDate, newCompleted);
+    newCompleted ? SoundService().playComplete() : SoundService().playTap();
+  }
+
+  int get _totalCalories => _meals.fold(0, (sum, m) => sum + m.calories);
+  int get _completedCalories => _meals.where((m) => m.isCompleted).fold(0, (sum, m) => sum + m.calories);
 
   @override
   Widget build(BuildContext context) {
+    final s = L10n.s;
     return Scaffold(
       backgroundColor: AppColors.cream,
       body: SafeArea(
@@ -27,31 +100,28 @@ class _NutritionScreenState extends State<NutritionScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 16),
-              const Text('Nutrición', style: TextStyle(fontFamily: 'Outfit', fontSize: 32, fontWeight: FontWeight.w900, color: AppColors.dark)),
+              Text(s.nutTitle, style: const TextStyle(fontFamily: 'Outfit', fontSize: 32, fontWeight: FontWeight.w900, color: AppColors.dark)),
               const SizedBox(height: 4),
-              Text('Tu plan alimenticio personalizado', style: TextStyle(fontFamily: 'Outfit', fontSize: 15, color: AppColors.dark.withValues(alpha: 0.5))),
+              Text(s.nutSubtitle, style: TextStyle(fontFamily: 'Outfit', fontSize: 15, color: AppColors.dark.withValues(alpha: 0.5))),
               const SizedBox(height: 24),
-
-              // Macro rings
               _buildMacroSummary(),
               const SizedBox(height: 20),
-
-              // Water tracker
               _buildWaterTracker(),
               const SizedBox(height: 20),
-
-              // Day selector
               _buildDaySelector(),
               const SizedBox(height: 20),
-
-              // Meals
-              const Text('Comidas del día', style: TextStyle(fontFamily: 'Outfit', fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.dark)),
+              Text(s.nutMealsTitle, style: const TextStyle(fontFamily: 'Outfit', fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.dark)),
               const SizedBox(height: 16),
-              ..._meals.map((m) => Padding(
-                padding: const EdgeInsets.only(bottom: 14),
-                child: _MealCard(meal: m),
-              )),
-
+              if (_isLoading)
+                const Center(child: Padding(
+                  padding: EdgeInsets.symmetric(vertical: 40),
+                  child: CircularProgressIndicator(color: AppColors.coral),
+                ))
+              else
+                ..._meals.map((m) => Padding(
+                  padding: const EdgeInsets.only(bottom: 14),
+                  child: _MealCard(meal: m, onToggle: () => _onToggleMeal(m)),
+                )),
               const SizedBox(height: 100),
             ],
           ),
@@ -61,6 +131,9 @@ class _NutritionScreenState extends State<NutritionScreen> {
   }
 
   Widget _buildMacroSummary() {
+    final s = L10n.s;
+    final total = _totalCalories;
+    final completed = _completedCalories;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -73,17 +146,17 @@ class _NutritionScreenState extends State<NutritionScreen> {
         children: [
           Row(
             children: [
-              const Text('Macros de hoy', style: TextStyle(fontFamily: 'Outfit', fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.dark)),
+              Text(s.nutMacrosToday, style: const TextStyle(fontFamily: 'Outfit', fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.dark)),
               const Spacer(),
-              Text('1,420 / 1,800 cal', style: TextStyle(fontFamily: 'Outfit', fontSize: 13, color: AppColors.dark.withValues(alpha: 0.5), fontWeight: FontWeight.w600)),
+              Text('$completed / $total ${s.nutCalLabel}', style: TextStyle(fontFamily: 'Outfit', fontSize: 13, color: AppColors.dark.withValues(alpha: 0.5), fontWeight: FontWeight.w600)),
             ],
           ),
           const SizedBox(height: 20),
           Row(
             children: [
-              Expanded(child: _MacroRing(label: 'Proteínas', value: 0.65, grams: '85g', target: '130g', color: AppColors.coral)),
-              Expanded(child: _MacroRing(label: 'Carbos', value: 0.55, grams: '145g', target: '260g', color: AppColors.turquoise)),
-              Expanded(child: _MacroRing(label: 'Grasas', value: 0.7, grams: '42g', target: '60g', color: AppColors.lavender)),
+              Expanded(child: _MacroRing(label: s.nutProteins, value: total > 0 ? completed / total : 0, grams: '${(completed * 0.3 / 4).round()}g', target: '${(total * 0.3 / 4).round()}g', color: AppColors.coral)),
+              Expanded(child: _MacroRing(label: s.nutCarbs, value: total > 0 ? completed / total * 0.85 : 0, grams: '${(completed * 0.45 / 4).round()}g', target: '${(total * 0.45 / 4).round()}g', color: AppColors.turquoise)),
+              Expanded(child: _MacroRing(label: s.nutFats, value: total > 0 ? completed / total * 0.9 : 0, grams: '${(completed * 0.25 / 9).round()}g', target: '${(total * 0.25 / 9).round()}g', color: AppColors.lavender)),
             ],
           ),
         ],
@@ -92,6 +165,7 @@ class _NutritionScreenState extends State<NutritionScreen> {
   }
 
   Widget _buildWaterTracker() {
+    final s = L10n.s;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -106,9 +180,9 @@ class _NutritionScreenState extends State<NutritionScreen> {
             children: [
               const Text('💧', style: TextStyle(fontSize: 20)),
               const SizedBox(width: 8),
-              const Text('Agua', style: TextStyle(fontFamily: 'Outfit', fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.dark)),
+              Text(s.nutWater, style: const TextStyle(fontFamily: 'Outfit', fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.dark)),
               const Spacer(),
-              Text('$_waterGlasses / 8 vasos', style: TextStyle(fontFamily: 'Outfit', fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.turquoise)),
+              Text('$_waterGlasses / 8 ${s.nutGlasses}', style: const TextStyle(fontFamily: 'Outfit', fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.turquoise)),
             ],
           ),
           const SizedBox(height: 16),
@@ -117,7 +191,7 @@ class _NutritionScreenState extends State<NutritionScreen> {
             children: List.generate(8, (i) {
               final filled = i < _waterGlasses;
               return GestureDetector(
-                onTap: () => setState(() => _waterGlasses = (i + 1 == _waterGlasses) ? i : i + 1),
+                onTap: () => _onWaterTap(i),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
                   width: 32, height: 42,
@@ -149,7 +223,7 @@ class _NutritionScreenState extends State<NutritionScreen> {
           return Padding(
             padding: const EdgeInsets.only(right: 8),
             child: GestureDetector(
-              onTap: () => setState(() => _selectedDay = i),
+              onTap: () => _onDayChanged(i),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
                 width: 48,
@@ -189,7 +263,7 @@ class _MacroRing extends StatelessWidget {
               SizedBox(
                 width: 64, height: 64,
                 child: CircularProgressIndicator(
-                  value: value,
+                  value: value.clamp(0.0, 1.0),
                   strokeWidth: 5,
                   backgroundColor: color.withValues(alpha: 0.1),
                   valueColor: AlwaysStoppedAnimation(color),
@@ -208,26 +282,14 @@ class _MacroRing extends StatelessWidget {
   }
 }
 
-class _MealData {
-  final String emoji, name, description, time, calories;
-  final bool isCompleted;
-  const _MealData({required this.emoji, required this.name, required this.description, required this.time, required this.calories, this.isCompleted = false});
-}
-
-const _meals = [
-  _MealData(emoji: '🥣', name: 'Desayuno', description: 'Avena con frutas y semillas de chía', time: '8:00', calories: '350 cal', isCompleted: true),
-  _MealData(emoji: '🍎', name: 'Snack mañana', description: 'Manzana con mantequilla de almendras', time: '10:30', calories: '180 cal', isCompleted: true),
-  _MealData(emoji: '🥗', name: 'Almuerzo', description: 'Ensalada de pollo con quinoa y aguacate', time: '13:00', calories: '480 cal'),
-  _MealData(emoji: '🥜', name: 'Snack tarde', description: 'Yogur griego con nueces', time: '16:00', calories: '200 cal'),
-  _MealData(emoji: '🍗', name: 'Cena', description: 'Salmón al horno con verduras asadas', time: '20:00', calories: '420 cal'),
-];
-
 class _MealCard extends StatelessWidget {
-  final _MealData meal;
-  const _MealCard({required this.meal});
+  final MealData meal;
+  final VoidCallback onToggle;
+  const _MealCard({required this.meal, required this.onToggle});
 
   @override
   Widget build(BuildContext context) {
+    final s = L10n.s;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -261,14 +323,17 @@ class _MealCard extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(meal.description, style: TextStyle(fontFamily: 'Outfit', fontSize: 13, color: AppColors.dark.withValues(alpha: 0.6))),
                 const SizedBox(height: 2),
-                Text(meal.calories, style: TextStyle(fontFamily: 'Outfit', fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.coral.withValues(alpha: 0.7))),
+                Text('${meal.calories} ${s.nutCalLabel}', style: TextStyle(fontFamily: 'Outfit', fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.coral.withValues(alpha: 0.7))),
               ],
             ),
           ),
-          Icon(
-            meal.isCompleted ? Icons.check_circle_rounded : Icons.add_circle_outline_rounded,
-            color: meal.isCompleted ? AppColors.turquoise : AppColors.gray.withValues(alpha: 0.3),
-            size: 28,
+          GestureDetector(
+            onTap: onToggle,
+            child: Icon(
+              meal.isCompleted ? Icons.check_circle_rounded : Icons.add_circle_outline_rounded,
+              color: meal.isCompleted ? AppColors.turquoise : AppColors.gray.withValues(alpha: 0.3),
+              size: 28,
+            ),
           ),
         ],
       ),

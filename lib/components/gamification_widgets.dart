@@ -25,12 +25,12 @@ class XPProgressBar extends StatelessWidget {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [levelColor.withOpacity(0.15), levelColor.withOpacity(0.05)],
+          colors: [levelColor.withValues(alpha: 0.15), levelColor.withValues(alpha: 0.05)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: levelColor.withOpacity(0.3), width: 2),
+        border: Border.all(color: levelColor.withValues(alpha: 0.3), width: 2),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -65,7 +65,7 @@ class XPProgressBar extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: levelColor.withOpacity(0.2),
+                  color: levelColor.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -86,7 +86,7 @@ class XPProgressBar extends StatelessWidget {
               Container(
                 height: 12,
                 decoration: BoxDecoration(
-                  color: levelColor.withOpacity(0.2),
+                  color: levelColor.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(6),
                 ),
               ),
@@ -96,12 +96,12 @@ class XPProgressBar extends StatelessWidget {
                   height: 12,
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      colors: [levelColor, levelColor.withOpacity(0.7)],
+                      colors: [levelColor, levelColor.withValues(alpha: 0.7)],
                     ),
                     borderRadius: BorderRadius.circular(6),
                     boxShadow: [
                       BoxShadow(
-                        color: levelColor.withOpacity(0.4),
+                        color: levelColor.withValues(alpha: 0.4),
                         blurRadius: 8,
                         spreadRadius: 1,
                       ),
@@ -118,7 +118,7 @@ class XPProgressBar extends StatelessWidget {
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
-                color: levelColor.withOpacity(0.7),
+                color: levelColor.withValues(alpha: 0.7),
               ),
             ),
           ],
@@ -154,21 +154,21 @@ class AchievementBadge extends StatelessWidget {
               gradient: unlocked
                   ? RadialGradient(
                       colors: [
-                        achievement.color.withOpacity(0.3),
-                        achievement.color.withOpacity(0.1),
+                        achievement.color.withValues(alpha: 0.3),
+                        achievement.color.withValues(alpha: 0.1),
                       ],
                     )
                   : null,
-              color: unlocked ? null : AppColors.lightGray.withOpacity(0.5),
+              color: unlocked ? null : AppColors.lightGray.withValues(alpha: 0.5),
               shape: BoxShape.circle,
               border: Border.all(
-                color: unlocked ? achievement.color : AppColors.gray.withOpacity(0.3),
+                color: unlocked ? achievement.color : AppColors.gray.withValues(alpha: 0.3),
                 width: 3,
               ),
               boxShadow: unlocked
                   ? [
                       BoxShadow(
-                        color: achievement.color.withOpacity(0.3),
+                        color: achievement.color.withValues(alpha: 0.3),
                         blurRadius: 16,
                         spreadRadius: 2,
                       ),
@@ -178,7 +178,7 @@ class AchievementBadge extends StatelessWidget {
             child: Icon(
               achievement.icon,
               size: 40,
-              color: unlocked ? achievement.color : AppColors.gray.withOpacity(0.5),
+              color: unlocked ? achievement.color : AppColors.gray.withValues(alpha: 0.5),
             ),
           ),
           const SizedBox(height: 8),

@@ -29,7 +29,7 @@ class ErrorState extends StatelessWidget {
               width: 120,
               height: 120,
               decoration: BoxDecoration(
-                color: AppColors.lightGray.withOpacity(0.5),
+                color: AppColors.lightGray.withValues(alpha: 0.5),
                 shape: BoxShape.circle,
               ),
               child: Icon(
@@ -58,7 +58,7 @@ class ErrorState extends StatelessWidget {
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 16,
-                color: AppColors.dark.withOpacity(0.6),
+                color: AppColors.dark.withValues(alpha: 0.6),
                 height: 1.5,
               ),
             ),
@@ -125,8 +125,8 @@ class EmptyState extends StatelessWidget {
               decoration: BoxDecoration(
                 gradient: RadialGradient(
                   colors: [
-                    AppColors.lavender.withOpacity(0.2),
-                    AppColors.lavender.withOpacity(0.05),
+                    AppColors.lavender.withValues(alpha: 0.2),
+                    AppColors.lavender.withValues(alpha: 0.05),
                   ],
                 ),
                 shape: BoxShape.circle,
@@ -153,7 +153,7 @@ class EmptyState extends StatelessWidget {
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 15,
-                color: AppColors.dark.withOpacity(0.6),
+                color: AppColors.dark.withValues(alpha: 0.6),
                 height: 1.4,
               ),
             ),
@@ -203,7 +203,7 @@ class LoadingState extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.dark.withOpacity(0.6),
+                      color: AppColors.dark.withValues(alpha: 0.6),
                     ),
                   ),
                 ],
@@ -220,7 +220,7 @@ class LoadingState extends StatelessWidget {
               message!,
               style: TextStyle(
                 fontSize: 15,
-                color: AppColors.dark.withOpacity(0.6),
+                color: AppColors.dark.withValues(alpha: 0.6),
               ),
             ),
           ],

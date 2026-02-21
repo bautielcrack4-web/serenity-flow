@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:serenity_flow/core/design_system.dart';
+import 'package:serenity_flow/core/l10n.dart';
 import 'package:serenity_flow/screens/onboarding/onboarding_flow.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:serenity_flow/services/supabase_service.dart';
 import 'package:serenity_flow/services/revenue_cat_service.dart';
+import 'package:serenity_flow/services/sound_service.dart';
+import 'package:serenity_flow/services/notification_service.dart';
 import 'package:serenity_flow/screens/home/main_navigation_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  L10n.init(); // 🌐 Auto-detect device language (EN/ES)
   
   try {
     await Supabase.initialize(
@@ -22,6 +26,12 @@ Future<void> main() async {
     
     // Initialize RevenueCat
     await RevenueCatService().init();
+    
+    // Initialize Sound Service
+    await SoundService().init();
+    
+    // Initialize Notifications
+    await NotificationService().init();
   } catch (e) {
     debugPrint("Initialization Error: $e");
     // We continue to allow the app to run, but services might be null

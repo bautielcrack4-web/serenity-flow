@@ -1,17 +1,20 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:serenity_flow/core/design_system.dart';
+import 'package:serenity_flow/core/l10n.dart';
 import 'package:serenity_flow/models/onboarding_data.dart';
 import 'package:serenity_flow/screens/onboarding/widgets/onboarding_widgets.dart';
 import 'package:serenity_flow/screens/onboarding/widgets/onboarding_animations.dart';
+import 'package:serenity_flow/services/notification_service.dart';
 
-/// PHASE 6: Commitment + Social Proof (5 pages)
+/// PHASE 6: Commitment + Social Proof (5 pages + email)
 /// Purpose: Cement commitment before the paywall
 List<Widget> buildPhase6Pages(
   OnboardingData data,
   VoidCallback next,
   Function(String, dynamic) answer,
 ) {
+  final s = L10n.s;
   return [
     // PAGE 37: Testimonials
     _TestimonialsPage(onContinue: next),
@@ -22,8 +25,8 @@ List<Widget> buildPhase6Pages(
     // PAGE 39: Info break — urgency
     InfoBreakCard(
       emoji: '⏰',
-      title: 'Las primeras 48 horas son clave',
-      fact: 'Los estudios muestran que empezar HOY aumenta 4x la probabilidad de alcanzar tu objetivo. Tu plan está listo para comenzar ahora mismo.',
+      title: s.p6UrgencyTitle,
+      fact: s.p6UrgencyFact,
       onContinue: next,
     ),
 
@@ -32,6 +35,17 @@ List<Widget> buildPhase6Pages(
 
     // PAGE 41: Personalized urgency with session timer
     _PersonalizedUrgencyPage(data: data, onContinue: next),
+
+    // PAGE 42: Email capture (before paywall)
+    _EmailCapturePage(
+      name: data.displayName ?? '',
+      onSubmit: (email) {
+        if (email != null && email.isNotEmpty) {
+          answer('email', email);
+        }
+        next();
+      },
+    ),
   ];
 }
 
@@ -42,10 +56,11 @@ class _TestimonialsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = L10n.s;
     final testimonials = [
-      ('María, 28', 5, 'Perdí 12kg en 3 meses. La meditación me ayudó a dejar de comer por ansiedad.', '🇦🇷'),
-      ('Valentina, 35', 5, 'Por fin no siento culpa al comer. Yuna cambió mi relación con la comida.', '🇲🇽'),
-      ('Camila, 24', 5, 'Las rutinas de respiración me cambiaron la vida. Bajé 8kg sin pasar hambre.', '🇨🇴'),
+      (s.p6Testimonial1Name, 5, s.p6Testimonial1Text, '🇪🇸'),
+      (s.p6Testimonial2Name, 5, s.p6Testimonial2Text, '🇺🇸'),
+      (s.p6Testimonial3Name, 5, s.p6Testimonial3Text, '🇨🇦'),
     ];
 
     return Padding(
@@ -55,13 +70,13 @@ class _TestimonialsPage extends StatelessWidget {
         children: [
           const SizedBox(height: 24),
           FadeSlideIn(
-            child: const Text('Historias reales',
-                style: TextStyle(fontFamily: 'Outfit', fontSize: 28, fontWeight: FontWeight.w800, color: AppColors.dark)),
+            child: Text(L10n.s.p6TestimonialsTitle,
+                style: const TextStyle(fontFamily: 'Outfit', fontSize: 28, fontWeight: FontWeight.w800, color: AppColors.dark)),
           ),
           const SizedBox(height: 8),
           FadeSlideIn(
             delay: const Duration(milliseconds: 100),
-            child: Text('Mujeres como vos que lograron su objetivo',
+            child: Text(L10n.s.p6TestimonialsSubtitle,
                 style: TextStyle(fontFamily: 'Outfit', fontSize: 15, color: AppColors.dark.withValues(alpha: 0.5))),
           ),
           const SizedBox(height: 24),
@@ -110,7 +125,7 @@ class _TestimonialsPage extends StatelessWidget {
           ),
           FadeSlideIn(
             delay: const Duration(milliseconds: 800),
-            child: PremiumCTAButton(text: 'Continuar', onPressed: onContinue, showGlow: false),
+            child: PremiumCTAButton(text: L10n.s.continueBtn, onPressed: onContinue, showGlow: false),
           ),
           const SizedBox(height: 40),
         ],
@@ -143,15 +158,11 @@ class _CommitmentPage extends StatelessWidget {
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
-                    BreathingAura(color: AppColors.lavender, size: 180),
-                    Container(
-                      width: 110, height: 110,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: AppColors.lavender.withValues(alpha: 0.1),
-                        boxShadow: [BoxShadow(color: AppColors.lavender.withValues(alpha: 0.2), blurRadius: 30, spreadRadius: 5)],
-                      ),
-                      child: const Center(child: Text('🦋', style: TextStyle(fontSize: 52))),
+                    BreathingAura(color: AppColors.lavender, size: 220),
+                    Image.asset(
+                      'assets/images/onboarding/onboard_01_saludo.png',
+                      width: 200,
+                      height: 200,
                     ),
                   ],
                 ),
@@ -160,7 +171,9 @@ class _CommitmentPage extends StatelessWidget {
               FadeSlideIn(
                 delay: const Duration(milliseconds: 600),
                 child: Text(
-                  name.isNotEmpty ? '¿Estás lista, $name?' : '¿Estás lista?',
+                   name.isNotEmpty
+                      ? L10n.s.p6CommitmentReadyNamed.replaceFirst('{name}', name)
+                      : L10n.s.p6CommitmentReady,
                   textAlign: TextAlign.center,
                   style: const TextStyle(fontFamily: 'Outfit', fontSize: 30, fontWeight: FontWeight.w800, color: AppColors.dark),
                 ),
@@ -169,7 +182,7 @@ class _CommitmentPage extends StatelessWidget {
               FadeSlideIn(
                 delay: const Duration(milliseconds: 800),
                 child: Text(
-                  'Tu transformación empieza hoy.\nYuna va a acompañarte cada día.',
+                   L10n.s.p6CommitmentSubtitle,
                   textAlign: TextAlign.center,
                   style: TextStyle(fontFamily: 'Outfit', fontSize: 16, color: AppColors.dark.withValues(alpha: 0.6), height: 1.5),
                 ),
@@ -177,7 +190,7 @@ class _CommitmentPage extends StatelessWidget {
               const Spacer(flex: 3),
               FadeSlideIn(
                 delay: const Duration(milliseconds: 1000),
-                child: PremiumCTAButton(text: '¡Estoy lista! 🎉', onPressed: onContinue),
+                child: PremiumCTAButton(text: L10n.s.p6CommitmentBtn, onPressed: onContinue),
               ),
               const SizedBox(height: 40),
             ],
@@ -189,9 +202,28 @@ class _CommitmentPage extends StatelessWidget {
 }
 
 /// Notifications with premium styling
-class _NotificationsPage extends StatelessWidget {
+class _NotificationsPage extends StatefulWidget {
   final Function(bool) onSubmit;
   const _NotificationsPage({required this.onSubmit});
+
+  @override
+  State<_NotificationsPage> createState() => _NotificationsPageState();
+}
+
+class _NotificationsPageState extends State<_NotificationsPage> {
+  bool _loading = false;
+
+  Future<void> _onAccept() async {
+    setState(() => _loading = true);
+    final granted = await NotificationService().requestPermission();
+    if (granted) {
+      await NotificationService().scheduleAll();
+    }
+    if (mounted) {
+      setState(() => _loading = false);
+      widget.onSubmit(granted);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -213,7 +245,7 @@ class _NotificationsPage extends StatelessWidget {
                     shape: BoxShape.circle,
                     color: AppColors.coral.withValues(alpha: 0.08),
                   ),
-                  child: const Center(child: Text('🔔', style: TextStyle(fontSize: 40))),
+                  child: const Text('🔔', style: TextStyle(fontSize: 40)),
                 ),
               ],
             ),
@@ -221,14 +253,14 @@ class _NotificationsPage extends StatelessWidget {
           const SizedBox(height: 28),
           FadeSlideIn(
             delay: const Duration(milliseconds: 400),
-            child: const Text('Recordatorios diarios', textAlign: TextAlign.center,
-                style: TextStyle(fontFamily: 'Outfit', fontSize: 26, fontWeight: FontWeight.w800, color: AppColors.dark)),
+            child: Text(L10n.s.p6NotificationsTitle, textAlign: TextAlign.center,
+                style: const TextStyle(fontFamily: 'Outfit', fontSize: 26, fontWeight: FontWeight.w800, color: AppColors.dark)),
           ),
           const SizedBox(height: 12),
           FadeSlideIn(
             delay: const Duration(milliseconds: 600),
             child: Text(
-              'Las usuarias con recordatorios activados tienen 3x más éxito en alcanzar su objetivo.',
+              L10n.s.p6NotificationsSubtitle,
               textAlign: TextAlign.center,
               style: TextStyle(fontFamily: 'Outfit', fontSize: 15, color: AppColors.dark.withValues(alpha: 0.6), height: 1.4),
             ),
@@ -236,14 +268,16 @@ class _NotificationsPage extends StatelessWidget {
           const Spacer(flex: 3),
           FadeSlideIn(
             delay: const Duration(milliseconds: 800),
-            child: PremiumCTAButton(text: 'Activar recordatorios', onPressed: () => onSubmit(true)),
+            child: _loading
+                ? const CircularProgressIndicator(color: AppColors.coral)
+                : PremiumCTAButton(text: L10n.s.p6NotificationsBtn, onPressed: _onAccept),
           ),
           const SizedBox(height: 12),
           FadeSlideIn(
             delay: const Duration(milliseconds: 900),
             child: TextButton(
-              onPressed: () => onSubmit(false),
-              child: Text('No, gracias', style: TextStyle(fontFamily: 'Outfit', fontSize: 15, color: AppColors.dark.withValues(alpha: 0.4))),
+              onPressed: () => widget.onSubmit(false),
+              child: Text(L10n.s.p6NotificationsSkip, style: TextStyle(fontFamily: 'Outfit', fontSize: 15, color: AppColors.dark.withValues(alpha: 0.4))),
             ),
           ),
           const SizedBox(height: 24),
@@ -329,7 +363,7 @@ class _PersonalizedUrgencyPageState extends State<_PersonalizedUrgencyPage> {
               FadeSlideIn(
                 delay: const Duration(milliseconds: 500),
                 child: Text(
-                  name.isNotEmpty ? '$name, tu plan está listo' : 'Tu plan está listo',
+                   name.isNotEmpty ? L10n.s.p6PlanReadyNamed.replaceFirst('{name}', name) : L10n.s.p6PlanReadyTitle,
                   textAlign: TextAlign.center,
                   style: const TextStyle(fontFamily: 'Outfit', fontSize: 28, fontWeight: FontWeight.w800, color: AppColors.dark),
                 ),
@@ -352,7 +386,7 @@ class _PersonalizedUrgencyPageState extends State<_PersonalizedUrgencyPage> {
                         child: const Icon(Icons.auto_awesome, size: 16, color: AppColors.coral),
                       ),
                       const SizedBox(width: 8),
-                      Text('Plan generado hace $_elapsedMinutes min',
+                      Text(L10n.s.p6PlanGeneratedMin.replaceFirst('{min}', '$_elapsedMinutes'),
                           style: const TextStyle(fontFamily: 'Outfit', fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.coral)),
                     ],
                   ),
@@ -380,7 +414,7 @@ class _PersonalizedUrgencyPageState extends State<_PersonalizedUrgencyPage> {
                       ),
                       const SizedBox(width: 8),
                       Text('$_activeUsers ', style: const TextStyle(fontFamily: 'Outfit', fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.coral)),
-                      Text('mujeres similares empezaron hoy',
+                      Text(L10n.s.p6ActiveUsersLabel,
                           style: TextStyle(fontFamily: 'Outfit', fontSize: 13, color: AppColors.dark.withValues(alpha: 0.6))),
                     ],
                   ),
@@ -391,7 +425,8 @@ class _PersonalizedUrgencyPageState extends State<_PersonalizedUrgencyPage> {
               FadeSlideIn(
                 delay: const Duration(milliseconds: 800),
                 child: Text(
-                  'Plan de $weeks semanas optimizado para vos.\nSi no empezás ahora, los resultados se retrasan.',
+                   L10n.s.p6PlanSummary
+                      .replaceFirst('{weeks}', '$weeks'),
                   textAlign: TextAlign.center,
                   style: TextStyle(fontFamily: 'Outfit', fontSize: 15, color: AppColors.dark.withValues(alpha: 0.6), height: 1.5),
                 ),
@@ -399,12 +434,249 @@ class _PersonalizedUrgencyPageState extends State<_PersonalizedUrgencyPage> {
               const Spacer(flex: 3),
               FadeSlideIn(
                 delay: const Duration(milliseconds: 1000),
-                child: PremiumCTAButton(text: 'Activar mi plan ahora', onPressed: widget.onContinue),
+                child: PremiumCTAButton(text: L10n.s.p6ActivatePlanBtn, onPressed: widget.onContinue),
               ),
               const SizedBox(height: 40),
             ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// 📧 Email Capture — Lead generation before paywall
+/// Inspired by Noom, BetterMe, Calm pre-paywall email screens
+class _EmailCapturePage extends StatefulWidget {
+  final String name;
+  final Function(String?) onSubmit;
+  const _EmailCapturePage({required this.name, required this.onSubmit});
+
+  @override
+  State<_EmailCapturePage> createState() => _EmailCapturePageState();
+}
+
+class _EmailCapturePageState extends State<_EmailCapturePage> {
+  final _controller = TextEditingController();
+  final _focusNode = FocusNode();
+  bool _isValid = false;
+  bool _loading = false;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  bool _validateEmail(String email) {
+    return RegExp(r'^[\w\-\.]+@([\w\-]+\.)+[\w\-]{2,}$').hasMatch(email);
+  }
+
+  void _onSubmit() {
+    if (!_isValid) return;
+    setState(() => _loading = true);
+    widget.onSubmit(_controller.text.trim());
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isEs = Localizations.localeOf(context).languageCode == 'es';
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 28),
+        child: Stack(
+          children: [
+            const Positioned.fill(
+              child: FloatingParticles(count: 12, color: AppColors.lavender, maxSize: 5),
+            ),
+            Column(
+              children: [
+                const Spacer(flex: 2),
+                // Animated envelope icon
+                ScaleReveal(
+                  delay: const Duration(milliseconds: 200),
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                    BreathingAura(color: AppColors.lavender, size: 200),
+                    Image.asset(
+                      'assets/images/onboarding/illust_email.png',
+                      width: 180,
+                      height: 180,
+                    ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 32),
+                // Title
+                FadeSlideIn(
+                  delay: const Duration(milliseconds: 400),
+                  child: Text(
+                    isEs ? '¿Dónde te enviamos\ntu plan?' : 'Where should we send\nyour plan?',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontFamily: 'Outfit',
+                      fontSize: 28,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.dark,
+                      height: 1.2,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                // Subtitle
+                FadeSlideIn(
+                  delay: const Duration(milliseconds: 550),
+                  child: Text(
+                    widget.name.isNotEmpty
+                        ? (isEs
+                            ? '${widget.name}, guarda tu progreso y recibe consejos personalizados'
+                            : '${widget.name}, save your progress and receive personalized tips')
+                        : (isEs
+                            ? 'Guarda tu progreso y recibe consejos personalizados'
+                            : 'Save your progress and receive personalized tips'),
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamily: 'Outfit',
+                      fontSize: 15,
+                      color: AppColors.dark.withValues(alpha: 0.55),
+                      height: 1.5,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 36),
+                // Email Input
+                FadeSlideIn(
+                  delay: const Duration(milliseconds: 700),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: (_isValid ? AppColors.coral : AppColors.lavender).withValues(alpha: 0.15),
+                          blurRadius: 20,
+                          spreadRadius: 2,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: TextField(
+                      controller: _controller,
+                      focusNode: _focusNode,
+                      keyboardType: TextInputType.emailAddress,
+                      autocorrect: false,
+                      textInputAction: TextInputAction.done,
+                      onChanged: (v) => setState(() => _isValid = _validateEmail(v.trim())),
+                      onSubmitted: (_) { if (_isValid) _onSubmit(); },
+                      style: const TextStyle(
+                        fontFamily: 'Outfit',
+                        fontSize: 17,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.dark,
+                      ),
+                      decoration: InputDecoration(
+                        hintText: isEs ? 'tu@email.com' : 'your@email.com',
+                        hintStyle: TextStyle(
+                          fontFamily: 'Outfit',
+                          fontSize: 17,
+                          color: AppColors.dark.withValues(alpha: 0.3),
+                        ),
+                        prefixIcon: Padding(
+                          padding: const EdgeInsets.only(left: 16, right: 12),
+                          child: Icon(
+                            Icons.email_rounded,
+                            color: _isValid ? AppColors.coral : AppColors.dark.withValues(alpha: 0.3),
+                            size: 22,
+                          ),
+                        ),
+                        prefixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
+                        suffixIcon: _isValid
+                            ? const Padding(
+                                padding: EdgeInsets.only(right: 16),
+                                child: Icon(Icons.check_circle_rounded, color: AppColors.coral, size: 22),
+                              )
+                            : null,
+                        suffixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
+                        filled: true,
+                        fillColor: Colors.white,
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          borderSide: BorderSide.none,
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          borderSide: BorderSide(color: AppColors.lavender.withValues(alpha: 0.3), width: 1.5),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          borderSide: BorderSide(
+                            color: _isValid ? AppColors.coral : AppColors.lavender,
+                            width: 2,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                // Privacy assurance
+                FadeSlideIn(
+                  delay: const Duration(milliseconds: 850),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.lock_rounded, size: 13, color: AppColors.dark.withValues(alpha: 0.35)),
+                      const SizedBox(width: 6),
+                      Text(
+                        isEs ? 'Sin spam. Solo tu bienestar.' : 'No spam. Only your wellness.',
+                        style: TextStyle(
+                          fontFamily: 'Outfit',
+                          fontSize: 12,
+                          color: AppColors.dark.withValues(alpha: 0.35),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Spacer(flex: 3),
+                // CTA
+                FadeSlideIn(
+                  delay: const Duration(milliseconds: 950),
+                  child: AnimatedOpacity(
+                    duration: const Duration(milliseconds: 300),
+                    opacity: _isValid ? 1.0 : 0.5,
+                    child: _loading
+                        ? const CircularProgressIndicator(color: AppColors.coral)
+                        : PremiumCTAButton(
+                            text: isEs ? 'Continuar' : 'Continue',
+                            onPressed: _isValid ? _onSubmit : () {},
+                          ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                // Skip
+                FadeSlideIn(
+                  delay: const Duration(milliseconds: 1050),
+                  child: TextButton(
+                    onPressed: () => widget.onSubmit(null),
+                    child: Text(
+                      isEs ? 'Omitir por ahora' : 'Skip for now',
+                      style: TextStyle(
+                        fontFamily: 'Outfit',
+                        fontSize: 15,
+                        color: AppColors.dark.withValues(alpha: 0.35),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

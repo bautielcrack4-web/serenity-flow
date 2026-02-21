@@ -36,6 +36,7 @@ class OnboardingData {
 
   // Phase 5+: Plan & Commitment
   String? get displayName => _responses['display_name'];
+  String? get email => _responses['email'];
   bool get notificationsAccepted => _responses['notifications_accepted'] ?? false;
 
   /// Set a response value

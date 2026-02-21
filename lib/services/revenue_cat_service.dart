@@ -116,4 +116,16 @@ class RevenueCatService {
       debugPrint("RevenueCat logIn error: $e");
     }
   }
+
+  /// Set email as subscriber attribute in RevenueCat
+  /// This links the captured email to the subscription for lead tracking
+  Future<void> setEmail(String email) async {
+    if (kIsWeb || email.isEmpty) return;
+    try {
+      await Purchases.setEmail(email);
+      debugPrint("RevenueCat email set: $email");
+    } catch (e) {
+      debugPrint("RevenueCat setEmail error: $e");
+    }
+  }
 }

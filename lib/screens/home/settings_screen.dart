@@ -1,9 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:serenity_flow/core/design_system.dart';
+import 'package:serenity_flow/core/l10n.dart';
 import 'package:serenity_flow/components/mesh_gradient_background.dart';
 import 'package:flutter/services.dart';
-import 'dart:ui' as api_ui;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -13,6 +13,8 @@ import 'package:serenity_flow/services/supabase_service.dart';
 import 'package:serenity_flow/main.dart'; // To restart app
 import 'package:serenity_flow/services/revenue_cat_service.dart';
 import 'package:serenity_flow/screens/monetization/paywall_screen.dart';
+import 'package:serenity_flow/services/sound_service.dart';
+import 'package:serenity_flow/services/notification_service.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -25,6 +27,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _soundEnabled = true;
   bool _vibrationEnabled = true;
   bool _notificationsEnabled = true;
+  bool _streakNotif = true;
+  bool _waterNotif = true;
+  bool _weeklyNotif = true;
+  TimeOfDay _practiceTime = const TimeOfDay(hour: 8, minute: 0);
   int _poseDuration = 30; // Restoring this missing variable
 
   bool _isAnonymous = false;
@@ -35,6 +41,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
     super.initState();
     _checkUserStatus();
     _isPro = RevenueCatService().isPro;
+    _loadPreferences();
+  }
+
+  Future<void> _loadPreferences() async {
+    _soundEnabled = SoundService().enabled;
+    _notificationsEnabled = await NotificationService().isEnabled;
+    _streakNotif = await NotificationService().isStreakEnabled;
+    _waterNotif = await NotificationService().isWaterEnabled;
+    _weeklyNotif = await NotificationService().isWeeklyEnabled;
+    _practiceTime = await NotificationService().practiceTime;
+    if (mounted) setState(() {});
   }
 
   void _checkUserStatus() {
@@ -75,7 +92,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Account successfully linked! Progress saved. ✅")),
+            SnackBar(content: Text(L10n.s.setAccountLinked)),
           );
         }
       }
@@ -83,7 +100,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       debugPrint("Sign in error: $e");
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Sign in failed: ${e.toString()}")),
+          SnackBar(content: Text("${L10n.s.setSignInFailed}: ${e.toString()}")),
         );
       }
     }
@@ -100,7 +117,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             children: [
               Padding(
                 padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
-                child: Text("Settings", style: Theme.of(context).textTheme.displayLarge),
+                child: Text(L10n.s.setTitle, style: Theme.of(context).textTheme.displayLarge),
               ),
               Expanded(
                 child: ListView(
@@ -135,32 +152,57 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       const SizedBox(height: 24),
                     ],
                     
-                    _buildSectionPadding("SESSION"),
+                    _buildSectionPadding(L10n.s.setSession),
                     _buildPillSelector(),
                     const SizedBox(height: 32),
                     
-                    _buildSectionPadding("PREFERENCES"),
+                    _buildSectionPadding(L10n.s.setPreferences),
                     _buildSettingsCard([
-                      _buildSwitchTile("Sound", _soundEnabled, Icons.volume_up_rounded, (v) => setState(() => _soundEnabled = v)),
+                      _buildSwitchTile(L10n.s.setSound, _soundEnabled, Icons.volume_up_rounded, (v) {
+                        setState(() => _soundEnabled = v);
+                        SoundService().setEnabled(v);
+                      }),
                       _buildDivider(),
-                      _buildSwitchTile("Haptics", _vibrationEnabled, Icons.vibration_rounded, (v) => setState(() => _vibrationEnabled = v)),
+                      _buildSwitchTile(L10n.s.setHaptics, _vibrationEnabled, Icons.vibration_rounded, (v) => setState(() => _vibrationEnabled = v)),
                     ]),
                     const SizedBox(height: 32),
                     
-                    _buildSectionPadding("NOTIFICATIONS"),
+                    _buildSectionPadding(L10n.s.setNotificationsSection),
                     _buildSettingsCard([
-                      _buildSwitchTile("Reminders", _notificationsEnabled, Icons.notifications_active_rounded, (v) => setState(() => _notificationsEnabled = v)),
+                      _buildSwitchTile(L10n.s.setReminders, _notificationsEnabled, Icons.notifications_active_rounded, (v) {
+                        setState(() => _notificationsEnabled = v);
+                        NotificationService().setEnabled(v);
+                      }),
+                      if (_notificationsEnabled) ...[
+                        _buildDivider(),
+                        _buildTimeTile(),
+                        _buildDivider(),
+                        _buildSwitchTile('🔥 Streak', _streakNotif, Icons.local_fire_department_rounded, (v) {
+                          setState(() => _streakNotif = v);
+                          NotificationService().setStreakEnabled(v);
+                        }),
+                        _buildDivider(),
+                        _buildSwitchTile('💧 Agua', _waterNotif, Icons.water_drop_rounded, (v) {
+                          setState(() => _waterNotif = v);
+                          NotificationService().setWaterEnabled(v);
+                        }),
+                        _buildDivider(),
+                        _buildSwitchTile('📊 Semanal', _weeklyNotif, Icons.bar_chart_rounded, (v) {
+                          setState(() => _weeklyNotif = v);
+                          NotificationService().setWeeklyEnabled(v);
+                        }),
+                      ],
                     ]),
                     
                     const SizedBox(height: 32),
                     
-                    _buildSectionPadding("LEGAL"),
+                    _buildSectionPadding(L10n.s.setLegal),
                     _buildSettingsCard([
-                      _buildActionTile("Privacy Policy", Icons.privacy_tip_outlined, () {
+                      _buildActionTile(L10n.s.setPrivacyPolicy, Icons.privacy_tip_outlined, () {
                          _launchUrl("https://sites.google.com/view/yunaapp/privacy-policy");
                       }),
                       _buildDivider(),
-                      _buildActionTile("Terms of Service", Icons.description_outlined, () {
+                      _buildActionTile(L10n.s.setTermsOfService, Icons.description_outlined, () {
                          _launchUrl("https://sites.google.com/view/yunaapp/terms-of-service");
                       }),
                     ]),
@@ -183,7 +225,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget _buildSectionPadding(String title) {
     return Padding(
       padding: const EdgeInsets.only(left: 8, bottom: 12),
-      child: Text(title, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: AppColors.gray.withOpacity(0.8), letterSpacing: 1.2)),
+      child: Text(title, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: AppColors.gray.withValues(alpha: 0.8), letterSpacing: 1.2)),
     );
   }
 
@@ -194,7 +236,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text("Pose Duration", style: TextStyle(fontWeight: FontWeight.w900, fontSize: 17, color: AppColors.dark)),
+          Text(L10n.s.setPoseDuration, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 17, color: AppColors.dark)),
           const SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -224,7 +266,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           color: isSelected ? AppColors.coral : Colors.white,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(color: AppColors.coral, width: 2),
-          boxShadow: isSelected ? [BoxShadow(color: AppColors.coral.withOpacity(0.3), blurRadius: 10, offset: const Offset(0, 4))] : [],
+          boxShadow: isSelected ? [BoxShadow(color: AppColors.coral.withValues(alpha: 0.3), blurRadius: 10, offset: const Offset(0, 4))] : [],
         ),
         child: Text("${seconds}s", style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: isSelected ? Colors.white : AppColors.coral)),
       ),
@@ -248,7 +290,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           Expanded(child: Text(title, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: AppColors.dark))),
           CupertinoSwitch(
             value: value,
-            activeColor: AppColors.coral,
+            activeTrackColor: AppColors.coral,
             onChanged: (v) {
               HapticFeedback.lightImpact();
               onChanged(v);
@@ -259,13 +301,53 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildDivider() => Divider(height: 1, thickness: 1, indent: 60, endIndent: 20, color: AppColors.lightGray.withOpacity(0.5));
+  Widget _buildTimeTile() {
+    final timeStr = _practiceTime.format(context);
+    return GestureDetector(
+      onTap: () async {
+        final picked = await showTimePicker(
+          context: context,
+          initialTime: _practiceTime,
+          builder: (context, child) => Theme(
+            data: Theme.of(context).copyWith(
+              colorScheme: const ColorScheme.light(primary: AppColors.coral),
+            ),
+            child: child!,
+          ),
+        );
+        if (picked != null) {
+          setState(() => _practiceTime = picked);
+          NotificationService().setPracticeTime(picked);
+        }
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        child: Row(
+          children: [
+            const Icon(Icons.access_time_rounded, color: AppColors.lavender, size: 24),
+            const SizedBox(width: 16),
+            const Expanded(child: Text('⏰ Hora de práctica', style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: AppColors.dark))),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              decoration: BoxDecoration(
+                color: AppColors.coral.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(timeStr, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.coral)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDivider() => Divider(height: 1, thickness: 1, indent: 60, endIndent: 20, color: AppColors.lightGray.withValues(alpha: 0.5));
 
   Widget _buildResetButton() {
     return Center(
       child: TextButton(
         onPressed: () => HapticFeedback.heavyImpact(),
-        child: Text("Reset Practice Data", style: TextStyle(color: AppColors.coral.withOpacity(0.8), fontSize: 16, fontWeight: FontWeight.w900)),
+        child: Text(L10n.s.setResetData, style: TextStyle(color: AppColors.coral.withValues(alpha: 0.8), fontSize: 16, fontWeight: FontWeight.w900)),
       ),
     );
   }
@@ -283,7 +365,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             Icon(icon, color: AppColors.lavender, size: 24),
             const SizedBox(width: 16),
             Expanded(child: Text(title, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: AppColors.dark))),
-            Icon(Icons.chevron_right_rounded, color: AppColors.gray.withOpacity(0.5)),
+            Icon(Icons.chevron_right_rounded, color: AppColors.gray.withValues(alpha: 0.5)),
           ],
         ),
       ),
@@ -298,20 +380,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
           showDialog(
             context: context,
             builder: (context) => CupertinoAlertDialog(
-              title: const Text("Delete Account"),
-              content: const Text("Are you sure? This action is irreversible and will delete all your progress."),
+              title: Text(L10n.s.setDeleteConfirmTitle),
+              content: Text(L10n.s.setDeleteConfirmMessage),
               actions: [
                 CupertinoDialogAction(
-                  child: const Text("Cancel"),
+                  child: Text(L10n.s.setDeleteCancel),
                   onPressed: () => Navigator.pop(context),
                 ),
                 CupertinoDialogAction(
                   isDestructiveAction: true,
-                  child: const Text("Delete"),
+                  child: Text(L10n.s.setDeleteConfirm),
                   onPressed: () async {
                     Navigator.pop(context); // Close dialog
                     await SupabaseService().deleteAccount();
-                    if (!mounted) return;
+                    if (!context.mounted) return;
                     // Restart App
                      Navigator.of(context).pushAndRemoveUntil(
                       MaterialPageRoute(builder: (context) => const SerenityFlowApp()),
@@ -324,8 +406,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           );
         },
         child: Text(
-          "Delete Account",
-          style: TextStyle(color: Colors.red.withOpacity(0.6), fontSize: 14, fontWeight: FontWeight.bold),
+          L10n.s.setDeleteAccount,
+          style: TextStyle(color: Colors.red.withValues(alpha: 0.6), fontSize: 14, fontWeight: FontWeight.bold),
         ),
       ),
     );
@@ -336,12 +418,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [AppColors.turquoise.withOpacity(0.1), AppColors.coral.withOpacity(0.1)],
+          colors: [AppColors.turquoise.withValues(alpha: 0.1), AppColors.coral.withValues(alpha: 0.1)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.turquoise.withOpacity(0.3), width: 1.5),
+        border: Border.all(color: AppColors.turquoise.withValues(alpha: 0.3), width: 1.5),
       ),
       child: Row(
         children: [
@@ -355,18 +437,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: const Icon(Icons.cloud_upload_outlined, color: AppColors.turquoise, size: 24),
           ),
           const SizedBox(width: 16),
-          const Expanded(
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Protect Your Progress",
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                  L10n.s.setProtectProgress,
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                 ),
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
                 Text(
-                  "Sign in with Apple to save your routines & progress in the cloud",
-                  style: TextStyle(fontSize: 12, color: AppColors.gray),
+                  L10n.s.setProtectDesc,
+                  style: const TextStyle(fontSize: 12, color: AppColors.gray),
                 ),
               ],
             ),
@@ -383,12 +465,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [AppColors.gold.withOpacity(0.2), AppColors.coral.withOpacity(0.2)],
+          colors: [AppColors.gold.withValues(alpha: 0.2), AppColors.coral.withValues(alpha: 0.2)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.gold.withOpacity(0.5), width: 1.5),
+        border: Border.all(color: AppColors.gold.withValues(alpha: 0.5), width: 1.5),
       ),
       child: Row(
         children: [
@@ -402,18 +484,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: const Icon(Icons.star_rounded, color: AppColors.gold, size: 24),
           ),
           const SizedBox(width: 16),
-          const Expanded(
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Unlock Pro Access",
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                  L10n.s.setUnlockPro,
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                 ),
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
                 Text(
-                  "Get unlimited access to all advanced yoga routines & premium features",
-                  style: TextStyle(fontSize: 12, color: AppColors.gray),
+                  L10n.s.setUnlockProDesc,
+                  style: const TextStyle(fontSize: 12, color: AppColors.gray),
                 ),
               ],
             ),

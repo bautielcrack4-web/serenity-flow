@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:math' as math;
 import 'package:serenity_flow/core/design_system.dart';
+import 'package:serenity_flow/core/l10n.dart';
 import 'package:serenity_flow/models/onboarding_data.dart';
 import 'package:serenity_flow/screens/onboarding/widgets/onboarding_widgets.dart';
 import 'package:serenity_flow/screens/onboarding/widgets/onboarding_animations.dart';
@@ -26,8 +27,8 @@ List<Widget> buildPhase5Pages(
     // PAGE 31: Social proof
     InfoBreakCard(
       emoji: '🏆',
-      title: 'Resultados reales',
-      fact: 'El 87% de las mujeres con un perfil similar al tuyo lograron su objetivo con Yuna en el tiempo estimado.',
+      title: L10n.s.p5SocialProofTitle,
+      fact: L10n.s.p5SocialProofFact,
       onContinue: next,
     ),
 
@@ -64,9 +65,14 @@ class _PlanLoadingPageState extends State<_PlanLoadingPage>
   late AnimationController _progressController;
   late AnimationController _ringController;
   final _factors = [
-    'Metabolismo', 'Nivel de estrés', 'Hábitos alimenticios',
-    'Ciclo hormonal', 'Nivel de actividad', 'Calidad de sueño',
-    'Tipo de cuerpo', 'Objetivos personales',
+    () => L10n.s.p5FactorMetabolism,
+    () => L10n.s.p5FactorStress,
+    () => L10n.s.p5FactorEating,
+    () => L10n.s.p5FactorHormonal,
+    () => L10n.s.p5FactorActivity,
+    () => L10n.s.p5FactorSleep,
+    () => L10n.s.p5FactorBodyType,
+    () => L10n.s.p5FactorGoals,
   ];
   int _currentFactor = 0;
 
@@ -137,8 +143,8 @@ class _PlanLoadingPageState extends State<_PlanLoadingPage>
                 ),
               ),
               const SizedBox(height: 32),
-              const Text('Analizando tu perfil...', textAlign: TextAlign.center,
-                  style: TextStyle(fontFamily: 'Outfit', fontSize: 24, fontWeight: FontWeight.w700, color: AppColors.dark)),
+              Text(L10n.s.p5LoadingTitle, textAlign: TextAlign.center,
+                  style: const TextStyle(fontFamily: 'Outfit', fontSize: 24, fontWeight: FontWeight.w700, color: AppColors.dark)),
               const SizedBox(height: 24),
               // Factor checklist
               ...List.generate(_factors.length, (i) {
@@ -163,7 +169,7 @@ class _PlanLoadingPageState extends State<_PlanLoadingPage>
                       ),
                       const SizedBox(width: 10),
                       Text(
-                        _factors[i],
+                        _factors[i](),
                         style: TextStyle(
                           fontFamily: 'Outfit', fontSize: 14,
                           color: isAnalyzed ? const Color(0xFF4CAF50) : isCurrent ? AppColors.coral : AppColors.dark.withValues(alpha: 0.3),
@@ -225,13 +231,14 @@ class _ProfileResultPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = L10n.s;
     final chips = [
-      ('🎯', 'Objetivo', data.goalType == 'lose_weight' ? 'Perder peso' : data.goalType == 'tone' ? 'Tonificar' : 'Bienestar'),
-      ('⚖️', 'Peso actual', '${data.currentWeight?.toStringAsFixed(1) ?? "--"} kg'),
-      ('🎯', 'Peso objetivo', '${data.targetWeight?.toStringAsFixed(1) ?? "--"} kg'),
-      ('📏', 'Altura', '${data.height?.toStringAsFixed(0) ?? "--"} cm'),
-      ('😰', 'Estrés', '${data.stressLevel ?? "--"}/10'),
-      ('💪', 'Actividad', data.activityLevel ?? '--'),
+      ('🎯', s.p5ProfileGoalLabel, data.goalType == 'lose_weight' ? s.p5ProfileGoalLoseWeight : data.goalType == 'tone' ? s.p5ProfileGoalTone : s.p5ProfileGoalWellness),
+      ('⚖️', s.p5ProfileCurrentWeight, '${data.currentWeight?.toStringAsFixed(1) ?? "--"} kg'),
+      ('🎯', s.p5ProfileTargetWeight, '${data.targetWeight?.toStringAsFixed(1) ?? "--"} kg'),
+      ('📏', s.p5ProfileHeight, '${data.height?.toStringAsFixed(0) ?? "--"} cm'),
+      ('😰', s.p5ProfileStress, '${data.stressLevel ?? "--"}/10'),
+      ('💪', s.p5ProfileActivity, data.activityLevel ?? '--'),
     ];
 
     return Stack(
@@ -243,12 +250,12 @@ class _ProfileResultPage extends StatelessWidget {
             children: [
               const SizedBox(height: 24),
               FadeSlideIn(
-                child: const Text('Tu perfil Yuna', style: TextStyle(fontFamily: 'Outfit', fontSize: 28, fontWeight: FontWeight.w800, color: AppColors.dark)),
+                child: Text(s.p5ProfileTitle, style: const TextStyle(fontFamily: 'Outfit', fontSize: 28, fontWeight: FontWeight.w800, color: AppColors.dark)),
               ),
               const SizedBox(height: 8),
               FadeSlideIn(
                 delay: const Duration(milliseconds: 100),
-                child: Text('Creado exclusivamente para vos ✨',
+                child: Text(s.p5CreatedForYou,
                     style: TextStyle(fontFamily: 'Outfit', fontSize: 15, color: AppColors.dark.withValues(alpha: 0.5))),
               ),
               const SizedBox(height: 28),
@@ -261,7 +268,7 @@ class _ProfileResultPage extends StatelessWidget {
               const Spacer(),
               FadeSlideIn(
                 delay: const Duration(milliseconds: 900),
-                child: PremiumCTAButton(text: 'Ver mi plan', onPressed: onContinue),
+                child: PremiumCTAButton(text: s.p5ViewPlanBtn, onPressed: onContinue),
               ),
               const SizedBox(height: 40),
             ],
@@ -393,20 +400,20 @@ class _ProjectionGraphPageState extends State<_ProjectionGraphPage>
           // Milestones
           FadeSlideIn(
             delay: const Duration(milliseconds: 800),
-            child: _Milestone('🌱', 'Semana 2', 'Primeros cambios visibles'),
+            child: _Milestone('🌱', L10n.s.p5Week2Milestone, L10n.s.p5Week2Desc),
           ),
           FadeSlideIn(
             delay: const Duration(milliseconds: 1000),
-            child: _Milestone('🔥', 'Semana ${(_weeks * 0.5).round()}', 'Aceleración de resultados'),
+            child: _Milestone('🔥', '${L10n.s.p5WeekLabel} ${(_weeks * 0.5).round()}', L10n.s.p5HalfwayMilestoneDesc),
           ),
           FadeSlideIn(
             delay: const Duration(milliseconds: 1200),
-            child: _Milestone('🎯', 'Semana $_weeks', '${_targetWeight.toStringAsFixed(1)} kg — Meta alcanzada'),
+            child: _Milestone('🎯', '${L10n.s.p5WeekLabel} $_weeks', '${_targetWeight.toStringAsFixed(1)} kg — ${L10n.s.p5GoalMilestoneDesc}'),
           ),
           const Spacer(),
           FadeSlideIn(
             delay: const Duration(milliseconds: 1400),
-            child: PremiumCTAButton(text: 'Ver mi plan completo', onPressed: widget.onContinue),
+            child: PremiumCTAButton(text: L10n.s.p5ViewFullPlanBtn, onPressed: widget.onContinue),
           ),
           const SizedBox(height: 40),
         ],
@@ -463,8 +470,8 @@ class _WeightGraphPainter extends CustomPainter {
     _drawText(canvas, '${targetWeight.toStringAsFixed(0)} kg', Offset(0, graphH), textStyle);
 
     // X axis labels
-    _drawText(canvas, 'Hoy', Offset(padding, h - 10), textStyle);
-    _drawText(canvas, 'Sem $weeks', Offset(w - padding - 30, h - 10), textStyle);
+    _drawText(canvas, L10n.s.p5Today, Offset(padding, h - 10), textStyle);
+    _drawText(canvas, '${L10n.s.p5WeekLabel} $weeks', Offset(w - padding - 30, h - 10), textStyle);
 
     // Grid lines
     final gridPaint = Paint()
@@ -566,25 +573,26 @@ class _PersonalizedPlanPage extends StatelessWidget {
     final emotional = data.emotionalEating != null && data.emotionalEating != 'nunca';
     final lowSleep = data.sleepHours == 'less_than_6' || data.sleepHours == '6_hours';
 
+    final s = L10n.s;
     return [
-      ('🌱', 'Semana 1-2: Adaptación',
+      ('🌱', s.p5PlanPhase1Title,
         stressHigh
-            ? 'Técnicas de relajación para bajar tu estrés de ${data.stressLevel}/10'
-            : 'Tu cuerpo se ajusta al nuevo plan suavemente',
-        'Basado en tu perfil'),
-      ('🔥', 'Semana 3-6: Aceleración',
+            ? '${s.p5PlanPhase1DescStress} ${data.stressLevel}/10'
+            : s.p5PlanPhase1DescNormal,
+        s.p5PlanPhase1Tag),
+      ('🔥', s.p5PlanPhase2Title,
         emotional
-            ? 'Herramientas para manejar la alimentación emocional'
-            : 'Resultados visibles y más energía cada día',
-        'Personalizado'),
-      ('🌙', 'Semana 3+: Descanso',
+            ? s.p5PlanPhase2DescEmotional
+            : s.p5PlanPhase2DescNormal,
+        s.p5PlanPhase2Tag),
+      ('🌙', s.p5PlanPhase3Title,
         lowSleep
-            ? 'Rutinas de sueño porque dormís ${data.sleepHours == "less_than_6" ? "menos de 6hs" : "~6hs"}'
-            : 'Optimización del descanso para acelerar resultados',
-        'Adaptado a vos'),
-      ('💎', 'Semana 7+: Consolidación',
-        'Hábitos sólidos, peso estable en ${data.targetWeight?.toStringAsFixed(1) ?? "tu"} kg',
-        'Tu meta'),
+            ? '${s.p5PlanPhase3DescLowSleep} ${data.sleepHours == "less_than_6" ? "<6h" : "~6h"}'
+            : s.p5PlanPhase3DescNormal,
+        s.p5PlanPhase3Tag),
+      ('💎', s.p5PlanPhase4Title,
+        '${s.p5PlanPhase4Desc} ${data.targetWeight?.toStringAsFixed(1) ?? "--"} kg',
+        s.p5PlanPhase4Tag),
     ];
   }
 
@@ -598,8 +606,8 @@ class _PersonalizedPlanPage extends StatelessWidget {
         children: [
           const SizedBox(height: 24),
           FadeSlideIn(
-            child: const Text('Tu plan personalizado',
-                style: TextStyle(fontFamily: 'Outfit', fontSize: 28, fontWeight: FontWeight.w800, color: AppColors.dark)),
+            child: Text(L10n.s.p5PlanTitle,
+                style: const TextStyle(fontFamily: 'Outfit', fontSize: 28, fontWeight: FontWeight.w800, color: AppColors.dark)),
           ),
           const SizedBox(height: 6),
           FadeSlideIn(
@@ -617,8 +625,8 @@ class _PersonalizedPlanPage extends StatelessWidget {
                     child: const Icon(Icons.auto_awesome, size: 14, color: AppColors.coral),
                   ),
                   const SizedBox(width: 6),
-                  const Text('IA analizó tus 8 factores',
-                      style: TextStyle(fontFamily: 'Outfit', fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.coral)),
+                  Text(L10n.s.p5PlanAiBadge,
+                      style: const TextStyle(fontFamily: 'Outfit', fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.coral)),
                 ],
               ),
             ),
@@ -634,7 +642,7 @@ class _PersonalizedPlanPage extends StatelessWidget {
           const SizedBox(height: 24),
           FadeSlideIn(
             delay: const Duration(milliseconds: 1000),
-            child: PremiumCTAButton(text: 'Continuar', onPressed: onContinue, showGlow: false),
+            child: PremiumCTAButton(text: L10n.s.continueBtn, onPressed: onContinue, showGlow: false),
           ),
           const SizedBox(height: 40),
         ],
@@ -707,33 +715,33 @@ class _SmartFeaturesPage extends StatelessWidget {
     final hasRestrictions = data.dietaryRestrictions.isNotEmpty;
     final lowActivity = data.activityLevel == 'sedentary' || data.activityLevel == 'light';
 
-    // Always show core features, but personalize descriptions
+    final s = L10n.s;
     if (stressHigh) {
-      features.add(('🧘', 'Meditaciones anti-estrés', 'Tu estrés es ${data.stressLevel}/10 — incluimos sesiones para bajarlo', true));
+      features.add(('🧘', s.p5FeatureMeditationTitle, '${s.p5FeatureMeditationDescHigh} ${data.stressLevel}/10', true));
     } else {
-      features.add(('🧘', 'Meditaciones guiadas', 'Sesiones de relajación para tu bienestar', false));
+      features.add(('🧘', s.p5FeatureMeditationTitle, s.p5FeatureMeditationDescNormal, false));
     }
 
     if (emotional) {
-      features.add(('🧠', 'Control de hambre emocional', 'Dijiste que comés por estrés/emociones — tenemos técnicas para eso', true));
+      features.add(('🧠', s.p5FeatureEmotionalTitle, s.p5FeatureEmotionalDesc, true));
     }
 
     if (hasRestrictions) {
       final restr = data.dietaryRestrictions.take(2).join(', ');
-      features.add(('🥗', 'Recetas adaptadas', 'Sin $restr — todas las recetas respetan tus restricciones', true));
+      features.add(('🥗', s.p5FeatureRecipesTitle, '${s.p5FeatureRecipesDescRestricted} ($restr)', true));
     } else {
-      features.add(('🥗', 'Recetas saludables', 'Platos fáciles adaptados a tu estilo de cocina', false));
+      features.add(('🥗', s.p5FeatureRecipesTitle, s.p5FeatureRecipesDescNormal, false));
     }
 
-    features.add(('📊', 'Tracking inteligente', 'Peso, agua, hábitos y progreso en un solo lugar', false));
+    features.add(('📊', s.p5FeatureTrackingTitle, s.p5FeatureTrackingDesc, false));
 
     if (lowActivity) {
-      features.add(('💪', 'Workouts para principiantes', 'Empezamos suave porque tu nivel es ${data.activityLevel == "sedentary" ? "sedentario" : "bajo"}', true));
+      features.add(('💪', s.p5FeatureWorkoutsBeginnerTitle, data.activityLevel == "sedentary" ? s.p5FeatureWorkoutsBeginnerDescSedentary : s.p5FeatureWorkoutsBeginnerDescLight, true));
     } else {
-      features.add(('💪', 'Workouts personalizados', 'Según tu nivel y preferencia: ${data.preferredExercise ?? "yoga"}', true));
+      features.add(('💪', s.p5FeatureWorkoutsTitle, '${s.p5ForYouTag}: ${data.preferredExercise ?? "yoga"}', true));
     }
 
-    features.add(('🌙', 'Rutinas de sueño', 'Dormís ${data.sleepHours ?? "lo justo"} — mejorar el sueño acelera resultados', data.sleepHours != null));
+    features.add(('🌙', s.p5FeatureSleepTitle, data.sleepHours ?? '--', data.sleepHours != null));
 
     return features;
   }
@@ -748,8 +756,8 @@ class _SmartFeaturesPage extends StatelessWidget {
         children: [
           const SizedBox(height: 24),
           FadeSlideIn(
-            child: const Text('Tu plan incluye',
-                style: TextStyle(fontFamily: 'Outfit', fontSize: 28, fontWeight: FontWeight.w800, color: AppColors.dark)),
+            child: Text(L10n.s.p5FeaturesTitle,
+                style: const TextStyle(fontFamily: 'Outfit', fontSize: 28, fontWeight: FontWeight.w800, color: AppColors.dark)),
           ),
           const SizedBox(height: 8),
           FadeSlideIn(
@@ -762,13 +770,13 @@ class _SmartFeaturesPage extends StatelessWidget {
                 ),
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: const Row(
+              child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.auto_awesome, size: 14, color: AppColors.coral),
-                  SizedBox(width: 6),
-                  Text('Seleccionado por IA para vos',
-                      style: TextStyle(fontFamily: 'Outfit', fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.coral)),
+                  const Icon(Icons.auto_awesome, size: 14, color: AppColors.coral),
+                  const SizedBox(width: 6),
+                  Text(L10n.s.p5FeatureAiBadge,
+                      style: const TextStyle(fontFamily: 'Outfit', fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.coral)),
                 ],
               ),
             ),
@@ -784,7 +792,7 @@ class _SmartFeaturesPage extends StatelessWidget {
           const SizedBox(height: 20),
           FadeSlideIn(
             delay: const Duration(milliseconds: 900),
-            child: PremiumCTAButton(text: 'Continuar', onPressed: onContinue, showGlow: false),
+            child: PremiumCTAButton(text: L10n.s.continueBtn, onPressed: onContinue, showGlow: false),
           ),
           const SizedBox(height: 40),
         ],
@@ -873,8 +881,8 @@ class _ComparisonPage extends StatelessWidget {
         children: [
           const SizedBox(height: 24),
           FadeSlideIn(
-            child: const Text('Con Yuna vs sin plan',
-                style: TextStyle(fontFamily: 'Outfit', fontSize: 28, fontWeight: FontWeight.w800, color: AppColors.dark)),
+            child: Text(L10n.s.p5ComparisonTitle,
+                style: const TextStyle(fontFamily: 'Outfit', fontSize: 28, fontWeight: FontWeight.w800, color: AppColors.dark)),
           ),
           const SizedBox(height: 32),
           FadeSlideIn(
@@ -882,11 +890,11 @@ class _ComparisonPage extends StatelessWidget {
             child: Row(children: [
               Expanded(
                 child: _CompareColumn(
-                  'Sin plan', [
-                    ('❌', 'Dietas restrictivas'),
-                    ('❌', 'Sin apoyo emocional'),
-                    ('❌', 'Efecto rebote'),
-                    ('❌', 'Lento e incierto'),
+                  L10n.s.p5ComparisonWithoutTitle, [
+                    ('❌', L10n.s.p5WithoutRestrictive),
+                    ('❌', L10n.s.p5WithoutEmotional),
+                    ('❌', L10n.s.p5WithoutRebound),
+                    ('❌', L10n.s.p5WithoutSlow),
                   ], Colors.grey.shade100, null,
                 ),
               ),
@@ -896,11 +904,11 @@ class _ComparisonPage extends StatelessWidget {
                   colors: const [AppColors.coral, Color(0xFFFFD700), AppColors.lavender],
                   borderRadius: 20,
                   child: _CompareColumn(
-                    'Con Yuna ✨', [
-                      ('✅', 'Plan de $weeks semanas'),
-                      ('✅', 'Anti-estrés incluido'),
-                      ('✅', 'Resultados duraderos'),
-                      ('✅', '${data.targetWeight?.toStringAsFixed(0) ?? "--"} kg meta'),
+                    L10n.s.p5ComparisonWithTitle, [
+                      ('✅', '$weeks${L10n.s.p5WithPlanWeeks}'),
+                      ('✅', L10n.s.p5WithAntiStress),
+                      ('✅', L10n.s.p5WithLastingResults),
+                      ('✅', '${data.targetWeight?.toStringAsFixed(0) ?? "--"} ${L10n.s.p5WithGoalKg}'),
                     ], AppColors.coral.withValues(alpha: 0.04), AppColors.coral,
                   ),
                 ),
@@ -910,7 +918,7 @@ class _ComparisonPage extends StatelessWidget {
           const Spacer(),
           FadeSlideIn(
             delay: const Duration(milliseconds: 500),
-            child: PremiumCTAButton(text: 'Quiero Yuna', onPressed: onContinue),
+            child: PremiumCTAButton(text: L10n.s.p5WantYunaBtn, onPressed: onContinue),
           ),
           const SizedBox(height: 40),
         ],
@@ -1011,8 +1019,8 @@ class _ConfirmPlanPageState extends State<_ConfirmPlanPage> {
               const SizedBox(height: 28),
               FadeSlideIn(
                 delay: const Duration(milliseconds: 200),
-                child: const Text('Tu plan está listo', textAlign: TextAlign.center,
-                    style: TextStyle(fontFamily: 'Outfit', fontSize: 28, fontWeight: FontWeight.w800, color: AppColors.dark)),
+                child: Text(L10n.s.p5ConfirmReady, textAlign: TextAlign.center,
+                    style: const TextStyle(fontFamily: 'Outfit', fontSize: 28, fontWeight: FontWeight.w800, color: AppColors.dark)),
               ),
               const SizedBox(height: 16),
               // Blueprint summary
@@ -1029,12 +1037,12 @@ class _ConfirmPlanPageState extends State<_ConfirmPlanPage> {
                   ),
                   child: Column(
                     children: [
-                      _BlueprintRow('🎯', 'Objetivo', '${widget.data.currentWeight?.toStringAsFixed(0) ?? "--"} → ${widget.data.targetWeight?.toStringAsFixed(0) ?? "--"} kg'),
-                      _BlueprintRow('📅', 'Duración', '$weeks semanas'),
-                      _BlueprintRow('🧘', 'Incluye', 'Meditación + Yoga + Nutrición'),
-                      _BlueprintRow('🔥', 'Intensidad', widget.data.activityLevel == 'sedentary' ? 'Gradual (adaptado a vos)' : 'Moderada'),
+                      _BlueprintRow('🎯', L10n.s.p5BlueprintGoal, '${widget.data.currentWeight?.toStringAsFixed(0) ?? "--"} → ${widget.data.targetWeight?.toStringAsFixed(0) ?? "--"} kg'),
+                      _BlueprintRow('📅', L10n.s.p5BlueprintDuration, '$weeks ${L10n.s.p5BlueprintWeeks}'),
+                      _BlueprintRow('🧘', L10n.s.p5BlueprintIncludes, L10n.s.p5BlueprintIncludesValue),
+                      _BlueprintRow('🔥', L10n.s.p5BlueprintIntensity, widget.data.activityLevel == 'sedentary' ? L10n.s.p5BlueprintIntensityGradual : L10n.s.p5BlueprintIntensityModerate),
                       if ((widget.data.stressLevel ?? 5) >= 7)
-                        _BlueprintRow('😌', 'Extra', 'Anti-estrés personalizado'),
+                        _BlueprintRow('😌', L10n.s.p5BlueprintExtra, L10n.s.p5BlueprintAntiStress),
                     ],
                   ),
                 ),
@@ -1047,12 +1055,12 @@ class _ConfirmPlanPageState extends State<_ConfirmPlanPage> {
                   child: _confirmed
                       ? PremiumCTAButton(
                           key: const ValueKey('continue'),
-                          text: 'Continuar ✨',
+                          text: L10n.s.p5ConfirmContinueBtn,
                           onPressed: widget.onConfirm,
                         )
                       : PremiumCTAButton(
                           key: const ValueKey('confirm'),
-                          text: 'Sí, este es mi plan ✨',
+                          text: L10n.s.p5ConfirmBtn,
                           onPressed: () {
                             HapticFeedback.heavyImpact();
                             setState(() => _confirmed = true);
@@ -1120,13 +1128,13 @@ class _NameInputPageState extends State<_NameInputPage> {
         children: [
           const SizedBox(height: 24),
           FadeSlideIn(
-            child: const Text('¿Cómo te gustaría que te llamemos?',
-                style: TextStyle(fontFamily: 'Outfit', fontSize: 28, fontWeight: FontWeight.w800, color: AppColors.dark, letterSpacing: -0.3)),
+            child: Text(L10n.s.p5NameTitle,
+                style: const TextStyle(fontFamily: 'Outfit', fontSize: 28, fontWeight: FontWeight.w800, color: AppColors.dark, letterSpacing: -0.3)),
           ),
           const SizedBox(height: 8),
           FadeSlideIn(
             delay: const Duration(milliseconds: 100),
-            child: Text('Tu nombre hace tu experiencia más personal 💜',
+            child: Text(L10n.s.p5NameSubtitle,
                 style: TextStyle(fontFamily: 'Outfit', fontSize: 15, color: AppColors.dark.withValues(alpha: 0.5))),
           ),
           const SizedBox(height: 40),
@@ -1138,7 +1146,7 @@ class _NameInputPageState extends State<_NameInputPage> {
               textCapitalization: TextCapitalization.words,
               style: const TextStyle(fontFamily: 'Outfit', fontSize: 28, fontWeight: FontWeight.w600, color: AppColors.dark),
               decoration: InputDecoration(
-                hintText: 'Tu nombre',
+                hintText: L10n.s.p5NameHint,
                 hintStyle: TextStyle(color: AppColors.dark.withValues(alpha: 0.15)),
                 border: UnderlineInputBorder(borderSide: BorderSide(color: AppColors.coral.withValues(alpha: 0.2))),
                 focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(color: AppColors.coral, width: 2.5)),
@@ -1153,7 +1161,7 @@ class _NameInputPageState extends State<_NameInputPage> {
               opacity: _controller.text.trim().isNotEmpty ? 1 : 0.4,
               duration: const Duration(milliseconds: 300),
               child: PremiumCTAButton(
-                text: 'Continuar',
+                text: L10n.s.p5NameContinueBtn,
                 onPressed: _controller.text.trim().isNotEmpty
                     ? () => widget.onSubmit(_controller.text.trim())
                     : () {},

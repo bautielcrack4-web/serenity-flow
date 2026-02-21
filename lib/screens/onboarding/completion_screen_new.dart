@@ -73,7 +73,7 @@ class _CompletionScreenNewState extends State<CompletionScreenNew> with SingleTi
                           shape: BoxShape.circle, 
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.1), 
+                              color: Colors.black.withValues(alpha: 0.1), 
                               blurRadius: 10, 
                               offset: const Offset(0, 4)
                             )
@@ -95,7 +95,7 @@ class _CompletionScreenNewState extends State<CompletionScreenNew> with SingleTi
                       "Your personalized practice is ready",
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: AppColors.dark.withOpacity(0.6),
+                        color: AppColors.dark.withValues(alpha: 0.6),
                       ),
                     ),
                     
@@ -112,7 +112,7 @@ class _CompletionScreenNewState extends State<CompletionScreenNew> with SingleTi
                           );
                         },
                         style: Theme.of(context).elevatedButtonTheme.style?.copyWith(
-                          shadowColor: WidgetStateProperty.all(AppColors.coral.withOpacity(0.4)),
+                          shadowColor: WidgetStateProperty.all(AppColors.coral.withValues(alpha: 0.4)),
                           elevation: WidgetStateProperty.all(12),
                         ),
                         child: const Text("Start My Journey"),

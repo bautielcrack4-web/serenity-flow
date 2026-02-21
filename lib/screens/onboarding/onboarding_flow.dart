@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:serenity_flow/services/supabase_service.dart';
+import 'package:serenity_flow/services/revenue_cat_service.dart';
+import 'package:serenity_flow/services/notification_service.dart';
 import 'package:serenity_flow/core/design_system.dart';
 import 'package:serenity_flow/models/onboarding_data.dart';
 import 'package:serenity_flow/screens/onboarding/widgets/onboarding_widgets.dart';
@@ -78,6 +80,17 @@ class _OnboardingFlowState extends State<OnboardingFlow>
       await supabase.saveOnboardingProfile(_data);
     } catch (e) {
       debugPrint('Onboarding save to Supabase failed: $e');
+    }
+
+    // Link email to RevenueCat subscriber
+    final email = _data.email;
+    if (email != null && email.isNotEmpty) {
+      await RevenueCatService().setEmail(email);
+    }
+
+    // Schedule notifications if user accepted
+    if (_data.notificationsAccepted) {
+      await NotificationService().scheduleAll();
     }
 
     // Save locally as fallback

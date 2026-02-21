@@ -13,7 +13,6 @@ class LevelSystem {
   
   static int xpForNextLevel(int totalXP) {
     int currentLevel = calculateLevel(totalXP);
-    int xpNeededForCurrentLevel = (currentLevel - 1) * xpPerLevel;
     return currentLevel * xpPerLevel - totalXP;
   }
   

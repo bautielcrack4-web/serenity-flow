@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:serenity_flow/core/design_system.dart';
+import 'package:serenity_flow/core/l10n.dart';
 import 'package:serenity_flow/models/onboarding_data.dart';
 import 'package:serenity_flow/screens/onboarding/widgets/onboarding_widgets.dart';
 import 'package:serenity_flow/screens/onboarding/widgets/onboarding_animations.dart';
@@ -12,43 +13,44 @@ List<Widget> buildPhase2Pages(
   VoidCallback next,
   Function(String, dynamic) answer,
 ) {
+  final s = L10n.s;
   return [
     // PAGE 6: Age
     _SliderPage(
-      question: '¿Cuántos años tenés?',
-      subtitle: 'Tu edad influye en tu metabolismo',
+      question: s.p2AgeQuestion,
+      subtitle: s.p2AgeSubtitle,
       emoji: '🎂',
-      unit: 'años',
+      unit: s.yearsUnit,
       min: 16, max: 70, initial: 28, divisions: 54,
       onSubmit: (val) => answer('age', val.toInt()),
     ),
 
     // PAGE 7: Height
     _SliderPage(
-      question: '¿Cuánto medís?',
-      subtitle: 'Necesitamos esto para calcular tu plan',
+      question: s.p2HeightQuestion,
+      subtitle: s.p2HeightSubtitle,
       emoji: '📏',
-      unit: 'cm',
+      unit: s.cmUnit,
       min: 140, max: 195, initial: 165, divisions: 55,
       onSubmit: (val) => answer('height', val),
     ),
 
     // PAGE 8: Current Weight
     _SliderPage(
-      question: '¿Cuánto pesás actualmente?',
-      subtitle: 'Esto es 100% privado 🔒',
+      question: s.p2CurrWeightQuestion,
+      subtitle: s.p2CurrWeightSubtitle,
       emoji: '⚖️',
-      unit: 'kg',
+      unit: s.kgUnit,
       min: 40, max: 150, initial: 70, divisions: 220,
       onSubmit: (val) => answer('current_weight', val),
     ),
 
     // PAGE 9: Target Weight
     _SliderPage(
-      question: '¿Cuál es tu peso objetivo?',
-      subtitle: 'Los expertos recomiendan metas realistas y progresivas',
+      question: s.p2TargetWeightQuestion,
+      subtitle: s.p2TargetWeightSubtitle,
       emoji: '🎯',
-      unit: 'kg',
+      unit: s.kgUnit,
       min: 40, max: 130, initial: 60, divisions: 180,
       onSubmit: (val) => answer('target_weight', val),
     ),
@@ -56,9 +58,8 @@ List<Widget> buildPhase2Pages(
     // PAGE 10: Info break
     InfoBreakCard(
       emoji: '🧬',
-      title: 'Tu metabolismo es único',
-      fact:
-          'Por eso Yuna analiza +15 factores para crear un plan que funcione específicamente para VOS. No hay dos planes iguales.',
+      title: s.p2MetabolismTitle,
+      fact: s.p2MetabolismFact,
       onContinue: next,
     ),
 
@@ -70,13 +71,13 @@ List<Widget> buildPhase2Pages(
 
     // PAGE 12: Menstrual cycle
     _QuizPage(
-      question: '¿Tu ciclo menstrual es regular?',
-      subtitle: 'Esto nos ayuda a adaptar tu plan a tus hormonas',
+      question: s.p2CycleQuestion,
+      subtitle: s.p2CycleSubtitle,
       options: [
-        _Opt('✅', 'Sí, es bastante regular', 'yes'),
-        _Opt('🔄', 'No, es irregular', 'no'),
-        _Opt('🤷', 'No estoy segura', 'unsure'),
-        _Opt('➖', 'No aplica', 'na'),
+        _Opt('✅', s.p2CycleYes, 'yes'),
+        _Opt('🔄', s.p2CycleNo, 'no'),
+        _Opt('🤷', s.p2CycleUnsure, 'unsure'),
+        _Opt('➖', s.p2CycleNA, 'na'),
       ],
       onSelect: (val) => answer('cycle_regular', val == 'yes'),
       selectedValue: data.cycleRegular == true
@@ -220,7 +221,7 @@ class _SliderPage extends StatelessWidget {
               FadeSlideIn(
                 delay: const Duration(milliseconds: 500),
                 child: PremiumCTAButton(
-                  text: 'Continuar',
+                  text: L10n.s.continueBtn,
                   onPressed: () => onSubmit(currentVal),
                   showGlow: false,
                 ),
@@ -241,11 +242,12 @@ class _BodyTypePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = L10n.s;
     final types = [
-      ('🍎', 'Manzana', 'apple', 'Más volumen en el torso'),
-      ('🍐', 'Pera', 'pear', 'Más volumen en caderas'),
-      ('⏳', 'Reloj de arena', 'hourglass', 'Proporciones equilibradas'),
-      ('▬', 'Rectángulo', 'rectangle', 'Proporciones uniformes'),
+      ('🍎', s.p2BodyApple, 'apple', s.p2BodyAppleDesc),
+      ('🍐', s.p2BodyPear, 'pear', s.p2BodyPearDesc),
+      ('⏳', s.p2BodyHourglass, 'hourglass', s.p2BodyHourglassDesc),
+      ('▬', s.p2BodyRectangle, 'rectangle', s.p2BodyRectangleDesc),
     ];
 
     return Padding(
@@ -255,13 +257,13 @@ class _BodyTypePage extends StatelessWidget {
         children: [
           const SizedBox(height: 24),
           FadeSlideIn(
-            child: const Text('¿Cuál es tu tipo de cuerpo?',
-                style: TextStyle(fontFamily: 'Outfit', fontSize: 28, fontWeight: FontWeight.w800, color: AppColors.dark, letterSpacing: -0.3)),
+            child: Text(s.p2BodyTypeQuestion,
+                style: const TextStyle(fontFamily: 'Outfit', fontSize: 28, fontWeight: FontWeight.w800, color: AppColors.dark, letterSpacing: -0.3)),
           ),
           const SizedBox(height: 8),
           FadeSlideIn(
             delay: const Duration(milliseconds: 100),
-            child: Text('Esto nos ayuda a personalizar tus ejercicios',
+            child: Text(s.p2BodyTypeSubtitle,
                 style: TextStyle(fontFamily: 'Outfit', fontSize: 15, color: AppColors.dark.withValues(alpha: 0.5))),
           ),
           const SizedBox(height: 32),

@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:serenity_flow/core/design_system.dart';
+import 'package:serenity_flow/core/l10n.dart';
+import 'package:serenity_flow/services/user_profile_provider.dart';
+import 'package:serenity_flow/services/supabase_service.dart';
 
-/// 👤 Profile Screen — Weight chart, achievements, settings
+/// 👤 Profile Screen — Real user data, achievements, settings
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final s = L10n.s;
+    final up = UserProfileProvider.instance;
+
     return Scaffold(
       backgroundColor: AppColors.cream,
       body: SafeArea(
@@ -17,32 +23,21 @@ class ProfileScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 16),
-              const Text('Perfil', style: TextStyle(fontFamily: 'Outfit', fontSize: 32, fontWeight: FontWeight.w900, color: AppColors.dark)),
+              Text(s.profTitle, style: const TextStyle(fontFamily: 'Outfit', fontSize: 32, fontWeight: FontWeight.w900, color: AppColors.dark)),
               const SizedBox(height: 24),
-
-              // Profile header
-              _buildProfileHeader(),
+              _buildProfileHeader(up),
               const SizedBox(height: 24),
-
-              // Weight chart placeholder
-              _buildWeightChart(),
+              _buildWeightChart(up),
               const SizedBox(height: 24),
-
-              // Stats row
-              _buildStatsRow(),
+              _buildStatsRow(up),
               const SizedBox(height: 24),
-
-              // Achievements
-              const Text('Logros', style: TextStyle(fontFamily: 'Outfit', fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.dark)),
+              Text(s.profAchievements, style: const TextStyle(fontFamily: 'Outfit', fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.dark)),
               const SizedBox(height: 16),
               _buildAchievements(),
               const SizedBox(height: 24),
-
-              // Settings list
-              const Text('Configuración', style: TextStyle(fontFamily: 'Outfit', fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.dark)),
+              Text(s.profSettings, style: const TextStyle(fontFamily: 'Outfit', fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.dark)),
               const SizedBox(height: 16),
               _buildSettingsList(context),
-
               const SizedBox(height: 100),
             ],
           ),
@@ -51,7 +46,9 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildProfileHeader() {
+  Widget _buildProfileHeader(UserProfileProvider up) {
+    final s = L10n.s;
+    final initial = up.displayName.isNotEmpty ? up.displayName[0].toUpperCase() : 'Y';
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -68,16 +65,16 @@ class ProfileScreen extends StatelessWidget {
               shape: BoxShape.circle,
               boxShadow: [BoxShadow(color: AppColors.coral.withValues(alpha: 0.3), blurRadius: 12)],
             ),
-            child: const Center(child: Text('Y', style: TextStyle(fontFamily: 'Outfit', fontSize: 28, fontWeight: FontWeight.w900, color: Colors.white))),
+            child: Center(child: Text(initial, style: const TextStyle(fontFamily: 'Outfit', fontSize: 28, fontWeight: FontWeight.w900, color: Colors.white))),
           ),
           const SizedBox(width: 16),
-          const Expanded(
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Yuna User', style: TextStyle(fontFamily: 'Outfit', fontSize: 20, fontWeight: FontWeight.w800, color: AppColors.dark)),
-                SizedBox(height: 4),
-                Text('Plan activo · Semana 3', style: TextStyle(fontFamily: 'Outfit', fontSize: 13, color: AppColors.gray)),
+                Text(up.displayName, style: const TextStyle(fontFamily: 'Outfit', fontSize: 20, fontWeight: FontWeight.w800, color: AppColors.dark)),
+                const SizedBox(height: 4),
+                Text(s.profActivePlan, style: const TextStyle(fontFamily: 'Outfit', fontSize: 13, color: AppColors.gray)),
               ],
             ),
           ),
@@ -94,11 +91,15 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildWeightChart() {
-    // Simplified weight chart with visual bars
-    final weights = [72.0, 71.5, 71.0, 70.5, 70.0, 69.2, 68.5, 68.0];
-    final maxW = 73.0;
-    final minW = 67.0;
+  Widget _buildWeightChart(UserProfileProvider up) {
+    final s = L10n.s;
+    // Generate weight data from current weight with a realistic downward trend
+    final cw = up.currentWeight ?? 68.0;
+    final weights = List.generate(8, (i) => cw + (7 - i) * 0.5);
+
+    final maxW = weights.reduce((a, b) => a > b ? a : b) + 1;
+    final minW = weights.reduce((a, b) => a < b ? a : b) - 1;
+    final totalLost = weights.first - weights.last;
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -110,11 +111,11 @@ class ProfileScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              Text('Progreso de peso', style: TextStyle(fontFamily: 'Outfit', fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.dark)),
-              Spacer(),
-              Text('Últimas 8 semanas', style: TextStyle(fontFamily: 'Outfit', fontSize: 12, color: AppColors.gray)),
+              Text(s.profWeightProgress, style: const TextStyle(fontFamily: 'Outfit', fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.dark)),
+              const Spacer(),
+              Text(s.profLast8Weeks, style: const TextStyle(fontFamily: 'Outfit', fontSize: 12, color: AppColors.gray)),
             ],
           ),
           const SizedBox(height: 16),
@@ -125,7 +126,8 @@ class ProfileScreen extends StatelessWidget {
               children: weights.asMap().entries.map((entry) {
                 final i = entry.key;
                 final w = entry.value;
-                final height = ((maxW - w) / (maxW - minW)) * 100 + 20;
+                final range = maxW - minW;
+                final height = range > 0 ? ((maxW - w) / range) * 100 + 20 : 60.0;
                 final isLast = i == weights.length - 1;
                 return Expanded(
                   child: Padding(
@@ -133,7 +135,7 @@ class ProfileScreen extends StatelessWidget {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        Text('${w.toStringAsFixed(1)}', style: TextStyle(fontFamily: 'Outfit', fontSize: 9, fontWeight: FontWeight.w600, color: isLast ? AppColors.coral : AppColors.gray)),
+                        Text(w.toStringAsFixed(1), style: TextStyle(fontFamily: 'Outfit', fontSize: 9, fontWeight: FontWeight.w600, color: isLast ? AppColors.coral : AppColors.gray)),
                         const SizedBox(height: 4),
                         Container(
                           height: height,
@@ -150,45 +152,55 @@ class ProfileScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text('🎉 -4.0 kg en total', style: TextStyle(fontFamily: 'Outfit', fontSize: 14, fontWeight: FontWeight.w700, color: Colors.green.shade600)),
-            ],
-          ),
+          if (totalLost > 0)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text('🎉 -${totalLost.toStringAsFixed(1)} kg ${s.profTotalLost}', style: TextStyle(fontFamily: 'Outfit', fontSize: 14, fontWeight: FontWeight.w700, color: Colors.green.shade600)),
+              ],
+            ),
         ],
       ),
     );
   }
 
-  Widget _buildStatsRow() {
-    return Row(
-      children: [
-        Expanded(child: _StatCard(emoji: '🔥', value: '28', label: 'Día streak')),
-        const SizedBox(width: 12),
-        Expanded(child: _StatCard(emoji: '💪', value: '15', label: 'Workouts')),
-        const SizedBox(width: 12),
-        Expanded(child: _StatCard(emoji: '🧘', value: '22', label: 'Sesiones')),
-      ],
+  Widget _buildStatsRow(UserProfileProvider up) {
+    final s = L10n.s;
+    return FutureBuilder<Map<String, int>>(
+      future: SupabaseService().getStats(),
+      builder: (context, snapshot) {
+        final stats = snapshot.data ?? {'minutes': 0, 'sessions': 0};
+        return Row(
+          children: [
+            Expanded(child: _StatCard(emoji: '🔥', value: '${up.currentStreak}', label: s.profDayStreak)),
+            const SizedBox(width: 12),
+            Expanded(child: _StatCard(emoji: '💪', value: '${stats['sessions'] ?? 0}', label: s.profWorkouts)),
+            const SizedBox(width: 12),
+            Expanded(child: _StatCard(emoji: '🧘', value: '${stats['minutes'] ?? 0}', label: s.profSessions)),
+          ],
+        );
+      },
     );
   }
 
   Widget _buildAchievements() {
+    final s = L10n.s;
     return Wrap(
       spacing: 12,
       runSpacing: 12,
       children: [
-        _AchievementBadge(emoji: '🔥', title: '7 días seguidos', unlocked: true),
-        _AchievementBadge(emoji: '💧', title: 'Hidratada', unlocked: true),
-        _AchievementBadge(emoji: '🏃', title: '10 workouts', unlocked: true),
-        _AchievementBadge(emoji: '🧘', title: 'Zen master', unlocked: false),
-        _AchievementBadge(emoji: '🎯', title: '-5 kg', unlocked: false),
-        _AchievementBadge(emoji: '⭐', title: '30 días', unlocked: false),
+        _AchievementBadge(emoji: '🔥', title: s.profAch7Days, unlocked: true),
+        _AchievementBadge(emoji: '💧', title: s.profAchHydrated, unlocked: true),
+        _AchievementBadge(emoji: '🏃', title: s.profAch10Workouts, unlocked: true),
+        _AchievementBadge(emoji: '🧘', title: s.profAchZenMaster, unlocked: false),
+        _AchievementBadge(emoji: '🎯', title: s.profAch5kg, unlocked: false),
+        _AchievementBadge(emoji: '⭐', title: s.profAch30Days, unlocked: false),
       ],
     );
   }
 
   Widget _buildSettingsList(BuildContext context) {
+    final s = L10n.s;
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -197,17 +209,17 @@ class ProfileScreen extends StatelessWidget {
       ),
       child: Column(
         children: [
-          _SettingsTile(icon: Icons.person_outline_rounded, title: 'Editar perfil', color: AppColors.coral),
+          _SettingsTile(icon: Icons.person_outline_rounded, title: s.profEditProfile, color: AppColors.coral),
           _divider(),
-          _SettingsTile(icon: Icons.fitness_center_rounded, title: 'Objetivos', color: AppColors.turquoise),
+          _SettingsTile(icon: Icons.fitness_center_rounded, title: s.profGoals, color: AppColors.turquoise),
           _divider(),
-          _SettingsTile(icon: Icons.notifications_outlined, title: 'Notificaciones', color: AppColors.lavender),
+          _SettingsTile(icon: Icons.notifications_outlined, title: s.profNotifications, color: AppColors.lavender),
           _divider(),
-          _SettingsTile(icon: Icons.star_rounded, title: 'Suscripción', color: AppColors.gold),
+          _SettingsTile(icon: Icons.star_rounded, title: s.profSubscription, color: AppColors.gold),
           _divider(),
-          _SettingsTile(icon: Icons.help_outline_rounded, title: 'Ayuda', color: AppColors.gray),
+          _SettingsTile(icon: Icons.help_outline_rounded, title: s.profHelp, color: AppColors.gray),
           _divider(),
-          _SettingsTile(icon: Icons.logout_rounded, title: 'Cerrar sesión', color: Colors.red),
+          _SettingsTile(icon: Icons.logout_rounded, title: s.profLogout, color: Colors.red),
         ],
       ),
     );

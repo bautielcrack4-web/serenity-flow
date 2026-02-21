@@ -68,7 +68,7 @@ class _RoutineCardState extends State<RoutineCard> with TickerProviderStateMixin
     });
 
     // Gyroscope Effect
-    _sensorSubscription = userAccelerometerEvents.listen((UserAccelerometerEvent event) {
+    _sensorSubscription = userAccelerometerEventStream().listen((UserAccelerometerEvent event) {
       if (!mounted) return;
       setState(() {
         // Smoothly interpolate the tilt values
@@ -124,7 +124,7 @@ class _RoutineCardState extends State<RoutineCard> with TickerProviderStateMixin
                 gradient: widget.routine.themeGradient,
                 borderRadius: BorderRadius.circular(24),
                 boxShadow: AppShadows.card,
-                border: Border.all(color: Colors.white.withOpacity(0.5), width: 1.5),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.5), width: 1.5),
               ),
               child: Stack(
                 children: [
@@ -135,7 +135,7 @@ class _RoutineCardState extends State<RoutineCard> with TickerProviderStateMixin
                       width: 140, height: 140,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: Colors.white.withOpacity(0.15),
+                        color: Colors.white.withValues(alpha: 0.15),
                       ),
                     ),
                   ),
@@ -151,10 +151,10 @@ class _RoutineCardState extends State<RoutineCard> with TickerProviderStateMixin
                             width: 100, height: 100,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: Colors.white.withOpacity(0.3),
+                              color: Colors.white.withValues(alpha: 0.3),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.05),
+                                  color: Colors.black.withValues(alpha: 0.05),
                                   blurRadius: 10,
                                   offset: const Offset(0, 4),
                                 )
@@ -188,7 +188,7 @@ class _RoutineCardState extends State<RoutineCard> with TickerProviderStateMixin
                                 widget.routine.description,
                                 style: TextStyle(
                                   fontSize: 14,
-                                  color: AppColors.dark.withOpacity(0.6),
+                                  color: AppColors.dark.withValues(alpha: 0.6),
                                   fontWeight: FontWeight.w500,
                                 ),
                                 maxLines: 2,
@@ -216,7 +216,7 @@ class _RoutineCardState extends State<RoutineCard> with TickerProviderStateMixin
                     top: 16, right: 16,
                     child: Icon(
                       widget.routine.isFavorite ? Icons.favorite_rounded : Icons.favorite_border_rounded,
-                      color: widget.routine.isFavorite ? AppColors.coral : AppColors.dark.withOpacity(0.2),
+                      color: widget.routine.isFavorite ? AppColors.coral : AppColors.dark.withValues(alpha: 0.2),
                       size: 24,
                     ),
                   ),
@@ -234,19 +234,19 @@ class _RoutineCardState extends State<RoutineCard> with TickerProviderStateMixin
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.4),
+        color: Colors.white.withValues(alpha: 0.4),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         children: [
-          Icon(icon, size: 14, color: AppColors.dark.withOpacity(0.7)),
+          Icon(icon, size: 14, color: AppColors.dark.withValues(alpha: 0.7)),
           const SizedBox(width: 4),
           Text(
             text,
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.bold,
-              color: AppColors.dark.withOpacity(0.7),
+              color: AppColors.dark.withValues(alpha: 0.7),
             ),
           ),
         ],

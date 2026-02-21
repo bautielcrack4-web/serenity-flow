@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:serenity_flow/core/design_system.dart';
+import 'package:serenity_flow/core/l10n.dart';
 import 'package:serenity_flow/models/onboarding_data.dart';
 import 'package:serenity_flow/services/revenue_cat_service.dart';
 import 'package:serenity_flow/services/supabase_service.dart';
@@ -129,7 +130,7 @@ class _PersonalizedPaywallState extends State<_PersonalizedPaywall> {
         widget.onPurchaseSuccess();
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No se encontraron compras anteriores')),
+          const SnackBar(content: Text('No previous purchases found')),
         );
       }
     }
@@ -137,11 +138,11 @@ class _PersonalizedPaywallState extends State<_PersonalizedPaywall> {
 
   List<String> _buildPlanFeatures() {
     final features = <String>[];
-    if ((widget.data.stressLevel ?? 5) >= 6) features.add('Anti-estrés');
-    if (widget.data.emotionalEating != null && widget.data.emotionalEating != 'nunca') features.add('Control emocional');
-    if (widget.data.dietaryRestrictions.isNotEmpty) features.add('Recetas adaptadas');
-    features.add('Yoga + Meditación');
-    if (features.length < 4) features.add('Tracking inteligente');
+    if ((widget.data.stressLevel ?? 5) >= 6) features.add(L10n.s.p7FeatureAntiStress);
+    if (widget.data.emotionalEating != null && widget.data.emotionalEating != 'nunca') features.add(L10n.s.p7FeatureEmotionalControl);
+    if (widget.data.dietaryRestrictions.isNotEmpty) features.add(L10n.s.p7FeatureAdaptedRecipes);
+    features.add(L10n.s.p7FeatureYogaMeditation);
+    if (features.length < 4) features.add(L10n.s.p7FeatureSmartTracking);
     return features.take(4).toList();
   }
 
@@ -180,7 +181,7 @@ class _PersonalizedPaywallState extends State<_PersonalizedPaywall> {
               // Personalized header
               FadeSlideIn(
                 child: Text(
-                  name.isNotEmpty ? '$name, tu plan de $weeks semanas está listo' : 'Tu plan de $weeks semanas está listo',
+                  name.isNotEmpty ? L10n.s.p7PlanReadyNamed.replaceAll('{name}', name).replaceAll('{weeks}', '$weeks') : L10n.s.p7PlanReady.replaceAll('{weeks}', '$weeks'),
                   textAlign: TextAlign.center,
                   style: const TextStyle(fontFamily: 'Outfit', fontSize: 26, fontWeight: FontWeight.w800, color: AppColors.dark, height: 1.2),
                 ),
@@ -253,7 +254,7 @@ class _PersonalizedPaywallState extends State<_PersonalizedPaywall> {
                       ),
                       child: _isPurchasing
                           ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3))
-                          : const Text('Activar mi plan',
+                          : Text(L10n.s.p7ActivateBtn,
                               style: TextStyle(fontFamily: 'Outfit', fontSize: 18, fontWeight: FontWeight.w700)),
                     ),
                   ),
@@ -262,19 +263,19 @@ class _PersonalizedPaywallState extends State<_PersonalizedPaywall> {
               const SizedBox(height: 10),
               FadeSlideIn(
                 delay: const Duration(milliseconds: 700),
-                child: Text('7 días de prueba gratis · Cancelá cuando quieras',
+                child: Text(L10n.s.p7TrialInfo,
                     style: TextStyle(fontFamily: 'Outfit', fontSize: 13, color: AppColors.dark.withValues(alpha: 0.4))),
               ),
               const SizedBox(height: 12),
               Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                 TextButton(
-                  child: Text('Restaurar compra', style: TextStyle(fontFamily: 'Outfit', fontSize: 12, color: AppColors.dark.withValues(alpha: 0.3))),
                   onPressed: _handleRestore,
+                  child: Text(L10n.s.p7RestoreBtn, style: TextStyle(fontFamily: 'Outfit', fontSize: 12, color: AppColors.dark.withValues(alpha: 0.3))),
                 ),
                 Text(' · ', style: TextStyle(color: AppColors.dark.withValues(alpha: 0.2))),
-                TextButton(child: Text('Términos', style: TextStyle(fontFamily: 'Outfit', fontSize: 12, color: AppColors.dark.withValues(alpha: 0.3))), onPressed: () {}),
+                TextButton(child: Text(L10n.s.p7TermsBtn, style: TextStyle(fontFamily: 'Outfit', fontSize: 12, color: AppColors.dark.withValues(alpha: 0.3))), onPressed: () {}),
                 Text(' · ', style: TextStyle(color: AppColors.dark.withValues(alpha: 0.2))),
-                TextButton(child: Text('Privacidad', style: TextStyle(fontFamily: 'Outfit', fontSize: 12, color: AppColors.dark.withValues(alpha: 0.3))), onPressed: () {}),
+                TextButton(child: Text(L10n.s.p7PrivacyBtn, style: TextStyle(fontFamily: 'Outfit', fontSize: 12, color: AppColors.dark.withValues(alpha: 0.3))), onPressed: () {}),
               ]),
               const SizedBox(height: 24),
             ],
@@ -310,7 +311,7 @@ class _PersonalizedPaywallState extends State<_PersonalizedPaywall> {
       final isAnnual = pkg.packageType == PackageType.annual;
       final isSelected = _selectedPackage == pkg;
       final monthlyPrice = _getMonthlyPrice(pkg);
-      final title = isAnnual ? 'Plan Anual' : (pkg.packageType == PackageType.threeMonth ? 'Plan Trimestral' : 'Plan Mensual');
+      final title = isAnnual ? L10n.s.p7PlanAnnual : (pkg.packageType == PackageType.threeMonth ? L10n.s.p7PlanQuarterly : L10n.s.p7PlanMonthly);
 
       widgets.add(
         FadeSlideIn(
@@ -323,10 +324,10 @@ class _PersonalizedPaywallState extends State<_PersonalizedPaywall> {
                   child: _PlanCardContent(
                     title: title,
                     price: isAnnual ? monthlyPrice : _getPriceString(pkg),
-                    period: '/mes',
-                    totalPrice: isAnnual ? '${_getPriceString(pkg)}/año' : null,
-                    badge: isAnnual ? 'MEJOR VALOR 🔥' : null,
-                    savings: isAnnual ? 'Ahorrás 72%' : null,
+                    period: L10n.s.p7PerMonth,
+                    totalPrice: isAnnual ? '${_getPriceString(pkg)}${L10n.s.p7PerYear}' : null,
+                    badge: isAnnual ? L10n.s.p7BestValue : null,
+                    savings: isAnnual ? L10n.s.p7Save72 : null,
                     isSelected: true,
                     onTap: () => setState(() => _selectedPackage = pkg),
                   ),
@@ -334,10 +335,10 @@ class _PersonalizedPaywallState extends State<_PersonalizedPaywall> {
               : _PlanCard(
                   title: title,
                   price: isAnnual ? monthlyPrice : _getPriceString(pkg),
-                  period: '/mes',
-                  totalPrice: isAnnual ? '${_getPriceString(pkg)}/año' : (pkg.packageType == PackageType.threeMonth ? '${_getPriceString(pkg)}/trimestre' : null),
-                  badge: isAnnual ? 'MEJOR VALOR 🔥' : null,
-                  savings: isAnnual ? 'Ahorrás 72%' : null,
+                  period: L10n.s.p7PerMonth,
+                  totalPrice: isAnnual ? '${_getPriceString(pkg)}${L10n.s.p7PerYear}' : (pkg.packageType == PackageType.threeMonth ? '${_getPriceString(pkg)}${L10n.s.p7PerQuarter}' : null),
+                  badge: isAnnual ? L10n.s.p7BestValue : null,
+                  savings: isAnnual ? L10n.s.p7Save72 : null,
                   isSelected: isSelected,
                   onTap: () => setState(() => _selectedPackage = pkg),
                 ),
@@ -364,12 +365,12 @@ class _PersonalizedPaywallState extends State<_PersonalizedPaywall> {
           borderWidth: 2.5,
           colors: const [AppColors.coral, Color(0xFFFFD700), AppColors.lavender, AppColors.turquoise],
           child: _PlanCardContent(
-            title: 'Plan Anual',
+            title: L10n.s.p7PlanAnnual,
             price: '\$4.17',
-            period: '/mes',
-            totalPrice: '\$49.99/año',
-            badge: 'MEJOR VALOR 🔥',
-            savings: 'Ahorrás 72%',
+            period: L10n.s.p7PerMonth,
+            totalPrice: '\$49.99${L10n.s.p7PerYear}',
+            badge: L10n.s.p7BestValue,
+            savings: L10n.s.p7Save72,
             isSelected: true,
             onTap: () {},
           ),
@@ -379,9 +380,9 @@ class _PersonalizedPaywallState extends State<_PersonalizedPaywall> {
       FadeSlideIn(
         delay: const Duration(milliseconds: 400),
         child: _PlanCard(
-          title: 'Plan Mensual',
+          title: L10n.s.p7PlanMonthly,
           price: '\$14.99',
-          period: '/mes',
+          period: L10n.s.p7PerMonth,
           isSelected: false,
           onTap: () {},
         ),
@@ -551,14 +552,11 @@ class _GuaranteePage extends StatelessWidget {
             child: Stack(
               alignment: Alignment.center,
               children: [
-                BreathingAura(color: const Color(0xFF4CAF50), size: 180),
-                Container(
-                  width: 110, height: 110,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: const Color(0xFF4CAF50).withValues(alpha: 0.08),
-                  ),
-                  child: const Center(child: Text('🛡️', style: TextStyle(fontSize: 52))),
+                BreathingAura(color: const Color(0xFF4CAF50), size: 220),
+                Image.asset(
+                  'assets/images/onboarding/illust_mindful.png',
+                  width: 200,
+                  height: 200,
                 ),
               ],
             ),
@@ -566,23 +564,23 @@ class _GuaranteePage extends StatelessWidget {
           const SizedBox(height: 32),
           FadeSlideIn(
             delay: const Duration(milliseconds: 500),
-            child: const Text('Garantía sin riesgo', textAlign: TextAlign.center,
-                style: TextStyle(fontFamily: 'Outfit', fontSize: 28, fontWeight: FontWeight.w800, color: AppColors.dark)),
+            child: Text(L10n.s.p7GuaranteeTitle, textAlign: TextAlign.center,
+                style: const TextStyle(fontFamily: 'Outfit', fontSize: 28, fontWeight: FontWeight.w800, color: AppColors.dark)),
           ),
           const SizedBox(height: 16),
           FadeSlideIn(
             delay: const Duration(milliseconds: 700),
             child: Text(
-              '7 días gratis. Cancelá cuando quieras.\nSin compromiso, sin preguntas.',
+              L10n.s.p7GuaranteeSubtitle,
               textAlign: TextAlign.center,
               style: TextStyle(fontFamily: 'Outfit', fontSize: 16, color: AppColors.dark.withValues(alpha: 0.6), height: 1.5),
             ),
           ),
           const SizedBox(height: 32),
           ...[
-            ('✅', 'Prueba gratis de 7 días'),
-            ('✅', 'Cancelación en 1 tap'),
-            ('✅', 'Sin cargos ocultos'),
+            ('✅', L10n.s.p7GuaranteeFreeTrial),
+            ('✅', L10n.s.p7GuaranteeCancelOneTap),
+            ('✅', L10n.s.p7GuaranteeNoHiddenFees),
           ].asMap().entries.map((e) {
             return FadeSlideIn(
               delay: Duration(milliseconds: 900 + e.key * 150),
@@ -601,7 +599,7 @@ class _GuaranteePage extends StatelessWidget {
           const Spacer(flex: 3),
           FadeSlideIn(
             delay: const Duration(milliseconds: 1300),
-            child: PremiumCTAButton(text: 'Continuar', onPressed: onContinue, showGlow: false),
+            child: PremiumCTAButton(text: L10n.s.continueBtn, onPressed: onContinue, showGlow: false),
           ),
           const SizedBox(height: 40),
         ],
@@ -619,10 +617,10 @@ class _PriceComparisonPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final items = [
-      ('🧘', 'App de meditación', '\$12.99/mes'),
-      ('🍽️', 'Nutricionista', '\$5,000/mes'),
-      ('💪', 'App de fitness', '\$14.99/mes'),
-      ('📊', 'Coach personal', '\$8,000/mes'),
+      ('🧘', L10n.s.p7MeditationApp, '\$12.99/mes'),
+      ('🍽️', L10n.s.p7Nutritionist, '\$5,000/mes'),
+      ('💪', L10n.s.p7FitnessApp, '\$14.99/mes'),
+      ('📊', L10n.s.p7PersonalCoach, '\$8,000/mes'),
     ];
 
     final weeks = ((data.currentWeight ?? 70) - (data.targetWeight ?? 60)) > 0
@@ -636,8 +634,8 @@ class _PriceComparisonPage extends StatelessWidget {
         children: [
           const SizedBox(height: 24),
           FadeSlideIn(
-            child: const Text('Todo-en-uno por menos',
-                style: TextStyle(fontFamily: 'Outfit', fontSize: 28, fontWeight: FontWeight.w800, color: AppColors.dark)),
+            child: Text(L10n.s.p7AllInOneTitle,
+                style: const TextStyle(fontFamily: 'Outfit', fontSize: 28, fontWeight: FontWeight.w800, color: AppColors.dark)),
           ),
           const SizedBox(height: 24),
           ...items.asMap().entries.map((e) {
@@ -680,12 +678,12 @@ class _PriceComparisonPage extends StatelessWidget {
                       children: [
                         const Text('🌸', style: TextStyle(fontSize: 24)),
                         const SizedBox(width: 14),
-                        const Expanded(child: Text('Yuna — Tu plan completo', style: TextStyle(fontFamily: 'Outfit', fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.coral))),
-                        const Text('\$4.17/mes', style: TextStyle(fontFamily: 'Outfit', fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.coral)),
+                        Expanded(child: Text(L10n.s.p7YunaCompletePlan, style: const TextStyle(fontFamily: 'Outfit', fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.coral))),
+                        Text('\$4.17${L10n.s.p7PerMonth}', style: const TextStyle(fontFamily: 'Outfit', fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.coral)),
                       ],
                     ),
                     const SizedBox(height: 8),
-                    Text('$weeks semanas personalizadas para vos',
+                    Text(L10n.s.p7PersonalizedWeeks.replaceAll('{weeks}', '$weeks'),
                         style: TextStyle(fontFamily: 'Outfit', fontSize: 12, color: AppColors.dark.withValues(alpha: 0.5))),
                   ],
                 ),
@@ -695,7 +693,7 @@ class _PriceComparisonPage extends StatelessWidget {
           const Spacer(),
           FadeSlideIn(
             delay: const Duration(milliseconds: 1000),
-            child: PremiumCTAButton(text: 'Activar mi plan', onPressed: onContinue),
+            child: PremiumCTAButton(text: L10n.s.p7ActivateBtn, onPressed: onContinue),
           ),
           const SizedBox(height: 40),
         ],
@@ -734,15 +732,11 @@ class _FinalPushPage extends StatelessWidget {
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
-                    BreathingAura(color: AppColors.coral, size: 200),
-                    Container(
-                      width: 120, height: 120,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: AppColors.coralStatusGradient,
-                        boxShadow: [BoxShadow(color: AppColors.coral.withValues(alpha: 0.4), blurRadius: 40, spreadRadius: 10)],
-                      ),
-                      child: const Center(child: Text('🚀', style: TextStyle(fontSize: 56))),
+                    BreathingAura(color: AppColors.coral, size: 240),
+                    Image.asset(
+                      'assets/images/onboarding/illust_plan.png',
+                      width: 200,
+                      height: 200,
                     ),
                   ],
                 ),
@@ -751,7 +745,7 @@ class _FinalPushPage extends StatelessWidget {
               FadeSlideIn(
                 delay: const Duration(milliseconds: 600),
                 child: Text(
-                  name.isNotEmpty ? '¡$name, tu plan está listo!' : '¡Tu plan está listo!',
+                  name.isNotEmpty ? L10n.s.p7FinalReadyNamed.replaceAll('{name}', name) : L10n.s.p7FinalReady,
                   textAlign: TextAlign.center,
                   style: const TextStyle(fontFamily: 'Outfit', fontSize: 30, fontWeight: FontWeight.w800, color: AppColors.dark),
                 ),
@@ -760,7 +754,7 @@ class _FinalPushPage extends StatelessWidget {
               FadeSlideIn(
                 delay: const Duration(milliseconds: 800),
                 child: Text(
-                  'Empezá tu prueba gratuita de 7 días\ny llegá a $target kg con Yuna.',
+                  L10n.s.p7FinalSubtitle.replaceAll('{target}', target),
                   textAlign: TextAlign.center,
                   style: TextStyle(fontFamily: 'Outfit', fontSize: 16, color: AppColors.dark.withValues(alpha: 0.6), height: 1.5),
                 ),
@@ -768,7 +762,7 @@ class _FinalPushPage extends StatelessWidget {
               const Spacer(flex: 3),
               FadeSlideIn(
                 delay: const Duration(milliseconds: 1000),
-                child: PremiumCTAButton(text: 'Activar mi plan 🎉', onPressed: onStart),
+                child: PremiumCTAButton(text: L10n.s.p7ActivatePlanBtn, onPressed: onStart),
               ),
               const SizedBox(height: 40),
             ],
@@ -810,14 +804,14 @@ class _ExitIntentPage extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  const Text('🎁', style: TextStyle(fontSize: 56)),
+                  Image.asset('assets/images/onboarding/illust_unlock.png', width: 120, height: 120),
                   const SizedBox(height: 16),
                   Text(
-                    name.isNotEmpty ? '¡Esperá, $name!' : '¡Esperá!',
+                    name.isNotEmpty ? L10n.s.p7ExitWaitNamed.replaceAll('{name}', name) : L10n.s.p7ExitWait,
                     style: const TextStyle(fontFamily: 'Outfit', fontSize: 28, fontWeight: FontWeight.w800, color: AppColors.dark),
                   ),
                   const SizedBox(height: 8),
-                  Text('Tu plan de $weeks semanas tiene un descuento exclusivo',
+                  Text(L10n.s.p7ExitDiscountMsg.replaceAll('{weeks}', '$weeks'),
                       textAlign: TextAlign.center,
                       style: const TextStyle(fontFamily: 'Outfit', fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.coral)),
                   const SizedBox(height: 16),
@@ -832,7 +826,7 @@ class _ExitIntentPage extends StatelessWidget {
                     child: const Text('50% OFF', style: TextStyle(fontFamily: 'Outfit', fontSize: 28, fontWeight: FontWeight.w800, color: Colors.white)),
                   ),
                   const SizedBox(height: 16),
-                  Text('\$2.08/mes en vez de \$4.17',
+                  Text(L10n.s.p7ExitPriceComparison,
                       style: TextStyle(fontFamily: 'Outfit', fontSize: 15, color: AppColors.dark.withValues(alpha: 0.6))),
                 ],
               ),
@@ -857,8 +851,8 @@ class _ExitIntentPage extends StatelessWidget {
                     shadowColor: AppColors.coral.withValues(alpha: 0.4),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
                   ),
-                  child: const Text('¡Quiero esta oferta!',
-                      style: TextStyle(fontFamily: 'Outfit', fontSize: 18, fontWeight: FontWeight.w700)),
+                  child: Text(L10n.s.p7ExitWantOffer,
+                      style: const TextStyle(fontFamily: 'Outfit', fontSize: 18, fontWeight: FontWeight.w700)),
                 ),
               ),
             ),
@@ -866,7 +860,7 @@ class _ExitIntentPage extends StatelessWidget {
           const SizedBox(height: 12),
           TextButton(
             onPressed: onDecline,
-            child: Text('No, gracias',
+            child: Text(L10n.s.p7ExitDecline,
                 style: TextStyle(fontFamily: 'Outfit', fontSize: 15, color: AppColors.dark.withValues(alpha: 0.35))),
           ),
           const SizedBox(height: 24),
