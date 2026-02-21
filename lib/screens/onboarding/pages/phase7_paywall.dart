@@ -334,7 +334,7 @@ class _PersonalizedPaywallState extends State<_PersonalizedPaywall> {
               const SizedBox(height: 10),
               FadeSlideIn(
                 delay: const Duration(milliseconds: 700),
-                child: Text(L10n.s.p7TrialInfo,
+                child: Text('Cancelá cuando quieras',
                     style: TextStyle(fontFamily: 'Outfit', fontSize: 13, color: AppColors.dark.withValues(alpha: 0.4))),
               ),
               const SizedBox(height: 12),

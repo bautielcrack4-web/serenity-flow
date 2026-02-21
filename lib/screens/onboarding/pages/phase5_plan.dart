@@ -520,8 +520,8 @@ class _PremiumWeightGraphPainter extends CustomPainter {
 
     // Y axis labels (white text on dark background)
     final labelStyle = TextStyle(fontFamily: 'Outfit', fontSize: 11, color: Colors.white.withValues(alpha: 0.5));
-    _drawText(canvas, '${currentWeight.toStringAsFixed(0)} kg', Offset(0, padding * 0.3), labelStyle);
-    _drawText(canvas, '${targetWeight.toStringAsFixed(0)} kg', Offset(0, graphH), TextStyle(fontFamily: 'Outfit', fontSize: 11, fontWeight: FontWeight.w700, color: const Color(0xFF4CAF50).withValues(alpha: 0.9)));
+    _drawText(canvas, '${currentWeight.toStringAsFixed(0)} kg', Offset(0, graphH), labelStyle);
+    _drawText(canvas, '${targetWeight.toStringAsFixed(0)} kg', Offset(0, padding * 0.3), TextStyle(fontFamily: 'Outfit', fontSize: 11, fontWeight: FontWeight.w700, color: const Color(0xFF4CAF50).withValues(alpha: 0.9)));
 
     // X axis labels
     _drawText(canvas, L10n.s.p5Today, Offset(padding, h - 10), labelStyle);
@@ -545,7 +545,7 @@ class _PremiumWeightGraphPainter extends CustomPainter {
       final t = i / totalPoints;
       final x = padding + graphW * t;
       final weightAtT = currentWeight - weightRange * (1 - math.pow(1 - t, 2.2));
-      final y = padding + (graphH - padding) * ((weightAtT - targetWeight) / weightRange).clamp(0, 1);
+      final y = padding + (graphH - padding) * (1 - ((weightAtT - targetWeight) / weightRange)).clamp(0, 1);
 
       if (i == 0) {
         path.moveTo(x, y);
@@ -601,7 +601,7 @@ class _PremiumWeightGraphPainter extends CustomPainter {
         final t = mPoint / totalPoints;
         final mx = padding + graphW * t;
         final mWeight = currentWeight - weightRange * (1 - math.pow(1 - t, 2.2));
-        final my = padding + (graphH - padding) * ((mWeight - targetWeight) / weightRange).clamp(0, 1);
+        final my = padding + (graphH - padding) * (1 - ((mWeight - targetWeight) / weightRange)).clamp(0, 1);
 
         // Dot ring
         canvas.drawCircle(Offset(mx, my), 4, Paint()..color = Colors.white.withValues(alpha: 0.3));
@@ -614,7 +614,7 @@ class _PremiumWeightGraphPainter extends CustomPainter {
       final endT = drawnPoints / totalPoints;
       final endX = padding + graphW * endT;
       final endWeight = currentWeight - weightRange * (1 - math.pow(1 - endT, 2.2));
-      final endY = padding + (graphH - padding) * ((endWeight - targetWeight) / weightRange).clamp(0, 1);
+      final endY = padding + (graphH - padding) * (1 - ((endWeight - targetWeight) / weightRange)).clamp(0, 1);
 
       // Pulse ripple
       canvas.drawCircle(Offset(endX, endY), 12, Paint()
@@ -627,7 +627,7 @@ class _PremiumWeightGraphPainter extends CustomPainter {
     }
 
     // Target line (dashed, green)
-    final targetY = graphH;
+    final targetY = padding;
     final dashPaint = Paint()
       ..color = const Color(0xFF4CAF50).withValues(alpha: 0.35)
       ..strokeWidth = 1.5;
