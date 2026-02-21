@@ -36,9 +36,7 @@ class RevenueCatService {
       
       // Add listener for subscription changes
       Purchases.addCustomerInfoUpdateListener((customerInfo) {
-        // Check both possible IDs to be safe
-        _isPro = (customerInfo.entitlements.all['pro_access']?.isActive ?? false) ||
-                 (customerInfo.entitlements.all['Yuna yoga app Pro']?.isActive ?? false);
+        _isPro = _hasActiveEntitlement(customerInfo);
                  
         // Sync to Supabase whenever RevenueCat detects a change
         SupabaseService().updateProStatus(_isPro);
@@ -56,8 +54,7 @@ class RevenueCatService {
     if (kIsWeb) return;
     try {
       final customerInfo = await Purchases.getCustomerInfo();
-      _isPro = (customerInfo.entitlements.all['pro_access']?.isActive ?? false) ||
-               (customerInfo.entitlements.all['Yuna yoga app Pro']?.isActive ?? false);
+      _isPro = _hasActiveEntitlement(customerInfo);
       
       // Auto-Sync: Keep Supabase source of truth updated with Apple/Google status
       // This removes the need for complex server-side webhooks for the MVP
@@ -85,37 +82,57 @@ class RevenueCatService {
   Future<bool> purchasePackage(Package package) async {
     try {
       CustomerInfo customerInfo = await Purchases.purchasePackage(package);
-      _isPro = (customerInfo.entitlements.all['pro_access']?.isActive ?? false) ||
-               (customerInfo.entitlements.all['Yuna yoga app Pro']?.isActive ?? false);
+      _isPro = _hasActiveEntitlement(customerInfo);
+      debugPrint("✅ Purchase completed. isPro=$_isPro");
+      debugPrint("   Entitlements: ${customerInfo.entitlements.all.keys.toList()}");
+      for (final e in customerInfo.entitlements.all.entries) {
+        debugPrint("   → ${e.key}: isActive=${e.value.isActive}");
+      }
       return _isPro;
     } on PlatformException catch (e) {
       var errorCode = PurchasesErrorHelper.getErrorCode(e);
+      debugPrint("⚠️ Purchase error: $errorCode ($e)");
+
       if (errorCode == PurchasesErrorCode.purchaseCancelledError) {
+        debugPrint("   → User cancelled purchase");
         return false;
       }
-      // User is already subscribed (e.g. "You're already subscribed" dialog)
-      // → re-check entitlements and treat as success
-      if (errorCode == PurchasesErrorCode.productAlreadyPurchasedError) {
-        debugPrint("Product already purchased — re-checking entitlements");
-        try {
-          final info = await Purchases.getCustomerInfo();
-          _isPro = (info.entitlements.all['pro_access']?.isActive ?? false) ||
-                   (info.entitlements.all['Yuna yoga app Pro']?.isActive ?? false);
-          return _isPro;
-        } catch (_) {
-          return false;
+
+      // For ANY other error (already purchased, network issues, etc.)
+      // → always re-check entitlements as a fallback
+      debugPrint("   → Re-checking entitlements as fallback...");
+      try {
+        final info = await Purchases.getCustomerInfo();
+        _isPro = _hasActiveEntitlement(info);
+        debugPrint("   → Fallback check: isPro=$_isPro");
+        debugPrint("   → Entitlements: ${info.entitlements.all.keys.toList()}");
+        for (final e in info.entitlements.all.entries) {
+          debugPrint("   → ${e.key}: isActive=${e.value.isActive}");
         }
+        if (_isPro) return true;
+      } catch (fallbackErr) {
+        debugPrint("   → Fallback entitlement check also failed: $fallbackErr");
       }
-      debugPrint("Error purchasing package: $e");
       return false;
     }
+  }
+
+  /// Check all known entitlement identifiers
+  bool _hasActiveEntitlement(CustomerInfo info) {
+    // Check by specific IDs
+    if (info.entitlements.all['pro_access']?.isActive == true) return true;
+    if (info.entitlements.all['Yuna yoga app Pro']?.isActive == true) return true;
+    // Fallback: if ANY entitlement is active, treat as pro
+    for (final e in info.entitlements.all.values) {
+      if (e.isActive) return true;
+    }
+    return false;
   }
 
   Future<void> restorePurchases() async {
     try {
       CustomerInfo customerInfo = await Purchases.restorePurchases();
-      _isPro = (customerInfo.entitlements.all['pro_access']?.isActive ?? false) ||
-               (customerInfo.entitlements.all['Yuna yoga app Pro']?.isActive ?? false);
+      _isPro = _hasActiveEntitlement(customerInfo);
     } on PlatformException catch (e) {
       debugPrint("Error restoring purchases: $e");
     }
