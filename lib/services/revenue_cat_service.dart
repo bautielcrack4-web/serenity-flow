@@ -19,8 +19,8 @@ class RevenueCatService {
     }
 
     try {
-      // Enable debug logging for development
-      await Purchases.setLogLevel(LogLevel.debug);
+      // Use error-level logging in production
+      await Purchases.setLogLevel(LogLevel.error);
 
       PurchasesConfiguration configuration;
       if (Platform.isAndroid) {

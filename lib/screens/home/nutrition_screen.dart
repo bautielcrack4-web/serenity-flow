@@ -3,6 +3,8 @@ import 'package:serenity_flow/core/design_system.dart';
 import 'package:serenity_flow/core/l10n.dart';
 import 'package:serenity_flow/services/nutrition_service.dart';
 import 'package:serenity_flow/services/sound_service.dart';
+import 'package:serenity_flow/services/revenue_cat_service.dart';
+import 'package:serenity_flow/components/pro_gate.dart';
 
 /// 🍽️ Nutrition Screen — Meal plans, recipes, water tracker
 class NutritionScreen extends StatefulWidget {
@@ -66,6 +68,10 @@ class _NutritionScreenState extends State<NutritionScreen> {
   }
 
   void _onToggleMeal(MealData meal) {
+    if (!RevenueCatService().isPro) {
+      showProGate(context);
+      return;
+    }
     final newCompleted = !meal.isCompleted;
     setState(() {
       _meals = _meals.map((m) => m.mealType == meal.mealType

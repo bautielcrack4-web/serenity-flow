@@ -325,11 +325,18 @@ abstract class Strings {
   String get p7PlanAnnual;
   String get p7PlanQuarterly;
   String get p7PlanMonthly;
+  String get p7PlanWeekly;
   String get p7PerMonth;
+  String get p7PerWeek;
   String get p7PerYear;
   String get p7PerQuarter;
   String get p7BestValue;
   String get p7Save72;
+  String get p7Save86;
+  String get p7SocialProof;
+  String get p7IntroPrice;
+  String get p7TrustedBy;
+  String get p7ValueStack;
 
   String get p7GuaranteeTitle;
   String get p7GuaranteeSubtitle;
@@ -350,10 +357,13 @@ abstract class Strings {
   String get p7FinalSubtitle;
   String get p7ActivatePlanBtn;
 
+  String get p7WelcomeTitle;
+  String get p7WelcomeSubtitle;
   String get p7ExitWaitNamed;
   String get p7ExitWait;
-  String get p7ExitDiscountMsg;
-  String get p7ExitPriceComparison;
+  String get p7ExitExclusive;
+  String get p7ExitMonthlyOffer;
+  String get p7ExitOriginalPrice;
   String get p7ExitWantOffer;
   String get p7ExitDecline;
 
@@ -461,6 +471,27 @@ abstract class Strings {
   String get profSubscription;
   String get profHelp;
   String get profLogout;
+  String get profLogoutConfirmTitle;
+  String get profLogoutConfirmMsg;
+  String get profLogoutCancel;
+  String get profLogoutConfirm;
+  String get profActiveSubscription;
+  String get profFreeUser;
+  String get profSignInApple;
+  String get profSignInDesc;
+  String get profTerms;
+  String get profPrivacy;
+  String get profDeleteAccount;
+  String get profDeleteConfirmTitle;
+  String get profDeleteConfirmMsg;
+  String get profDeleteCancel;
+  String get profDeleteConfirm;
+  // ── PRO GATE ──────────────────────────────────────────────────────
+  String get proGateTitle;
+  String get proGateSubtitle;
+  String get proGateUnlock;
+  String get proGateSessionsUsed;
+  String get proGateFreeSessionsBanner;
 
   // ── SETTINGS ─────────────────────────────────────────────────────
   String get setTitle;
@@ -857,11 +888,18 @@ class _EnStrings extends Strings {
   @override String get p7PlanAnnual => 'Annual Plan';
   @override String get p7PlanQuarterly => 'Quarterly Plan';
   @override String get p7PlanMonthly => 'Monthly Plan';
+  @override String get p7PlanWeekly => 'Weekly Plan';
   @override String get p7PerMonth => '/month';
+  @override String get p7PerWeek => '/week';
   @override String get p7PerYear => '/year';
   @override String get p7PerQuarter => '/quarter';
   @override String get p7BestValue => 'BEST VALUE 🔥';
   @override String get p7Save72 => 'Save 72%';
+  @override String get p7Save86 => 'Save 86%';
+  @override String get p7SocialProof => '47,000+ users transformed';
+  @override String get p7IntroPrice => 'Introductory Price';
+  @override String get p7TrustedBy => 'Trusted by thousands';
+  @override String get p7ValueStack => 'Everything included in YOUR plan';
 
   @override String get p7GuaranteeTitle => 'Risk-free guarantee';
   @override String get p7GuaranteeSubtitle => '7 days free. Cancel anytime.\nNo commitment, no questions asked.';
@@ -882,12 +920,15 @@ class _EnStrings extends Strings {
   @override String get p7FinalSubtitle => 'Start your 7-day free trial\nand reach {target} kg with Yuna.';
   @override String get p7ActivatePlanBtn => 'Activate my plan 🎉';
 
+  @override String get p7WelcomeTitle => '¡Welcome!';
+  @override String get p7WelcomeSubtitle => 'Your transformation starts now ✨';
   @override String get p7ExitWaitNamed => 'Wait, {name}!';
   @override String get p7ExitWait => 'Wait!';
-  @override String get p7ExitDiscountMsg => 'Your {weeks}-week plan has an exclusive discount';
-  @override String get p7ExitPriceComparison => '\$2.08/month instead of \$4.17';
+  @override String get p7ExitExclusive => 'Exclusive offer just for you';
+  @override String get p7ExitMonthlyOffer => 'Monthly plan';
+  @override String get p7ExitOriginalPrice => '\$9.99/month';
   @override String get p7ExitWantOffer => 'I want this offer!';
-  @override String get p7ExitDecline => 'No, thanks';
+  @override String get p7ExitDecline => 'No thanks, continue for free';
 
   // DASHBOARD
   @override String get dashGoodMorning => 'Good morning';
@@ -993,6 +1034,26 @@ class _EnStrings extends Strings {
   @override String get profSubscription => 'Subscription';
   @override String get profHelp => 'Help';
   @override String get profLogout => 'Log out';
+  @override String get profLogoutConfirmTitle => 'Log Out';
+  @override String get profLogoutConfirmMsg => 'Are you sure you want to log out?';
+  @override String get profLogoutCancel => 'Cancel';
+  @override String get profLogoutConfirm => 'Log Out';
+  @override String get profActiveSubscription => 'Active ✨';
+  @override String get profFreeUser => 'Free plan';
+  @override String get profSignInApple => 'Sign in with Apple';
+  @override String get profSignInDesc => 'Save your progress to the cloud';
+  @override String get profTerms => 'Terms of Service';
+  @override String get profPrivacy => 'Privacy Policy';
+  @override String get profDeleteAccount => 'Delete Account';
+  @override String get profDeleteConfirmTitle => 'Delete Account';
+  @override String get profDeleteConfirmMsg => 'This action is irreversible. All your data will be permanently deleted.';
+  @override String get profDeleteCancel => 'Cancel';
+  @override String get profDeleteConfirm => 'Delete';
+  @override String get proGateTitle => 'PRO Feature';
+  @override String get proGateSubtitle => 'Unlock unlimited access to all features';
+  @override String get proGateUnlock => 'Unlock PRO ✨';
+  @override String get proGateSessionsUsed => 'of 3 free sessions used';
+  @override String get proGateFreeSessionsBanner => 'free sessions remaining';
 
   // SETTINGS
   @override String get setTitle => 'Settings';
@@ -1380,11 +1441,18 @@ class _EsStrings extends Strings {
   @override String get p7PlanAnnual => 'Plan Anual';
   @override String get p7PlanQuarterly => 'Plan Trimestral';
   @override String get p7PlanMonthly => 'Plan Mensual';
+  @override String get p7PlanWeekly => 'Plan Semanal';
   @override String get p7PerMonth => '/mes';
+  @override String get p7PerWeek => '/sem';
   @override String get p7PerYear => '/año';
   @override String get p7PerQuarter => '/trimestre';
   @override String get p7BestValue => 'MEJOR VALOR 🔥';
   @override String get p7Save72 => 'Ahorrás 72%';
+  @override String get p7Save86 => 'Ahorrás 86%';
+  @override String get p7SocialProof => '47,000+ personas transformadas';
+  @override String get p7IntroPrice => 'Precio de lanzamiento';
+  @override String get p7TrustedBy => 'Miles de personas confían en Yuna';
+  @override String get p7ValueStack => 'Todo incluido en TU plan';
 
   @override String get p7GuaranteeTitle => 'Garantía sin riesgo';
   @override String get p7GuaranteeSubtitle => '7 días gratis. Cancelá cuando quieras.\nSin compromiso, sin preguntas.';
@@ -1405,12 +1473,15 @@ class _EsStrings extends Strings {
   @override String get p7FinalSubtitle => 'Empezá tu prueba gratuita de 7 días\ny llegá a {target} kg con Yuna.';
   @override String get p7ActivatePlanBtn => 'Activar mi plan 🎉';
 
+  @override String get p7WelcomeTitle => '¡Bienvenida!';
+  @override String get p7WelcomeSubtitle => 'Tu transformación comienza ahora ✨';
   @override String get p7ExitWaitNamed => '¡Esperá, {name}!';
   @override String get p7ExitWait => '¡Esperá!';
-  @override String get p7ExitDiscountMsg => 'Tu plan de {weeks} semanas tiene un descuento exclusivo';
-  @override String get p7ExitPriceComparison => '\$2.08/mes en vez de \$4.17';
+  @override String get p7ExitExclusive => 'Oferta exclusiva solo para vos';
+  @override String get p7ExitMonthlyOffer => 'Plan Mensual';
+  @override String get p7ExitOriginalPrice => '\$9.99/mes';
   @override String get p7ExitWantOffer => '¡Quiero esta oferta!';
-  @override String get p7ExitDecline => 'No, gracias';
+  @override String get p7ExitDecline => 'No gracias, continuar gratis';
 
   // DASHBOARD
   @override String get dashGoodMorning => 'Buenos días';
@@ -1516,6 +1587,26 @@ class _EsStrings extends Strings {
   @override String get profSubscription => 'Suscripción';
   @override String get profHelp => 'Ayuda';
   @override String get profLogout => 'Cerrar sesión';
+  @override String get profLogoutConfirmTitle => 'Cerrar sesión';
+  @override String get profLogoutConfirmMsg => '¿Estás segura de que querés cerrar sesión?';
+  @override String get profLogoutCancel => 'Cancelar';
+  @override String get profLogoutConfirm => 'Cerrar sesión';
+  @override String get profActiveSubscription => 'Activa ✨';
+  @override String get profFreeUser => 'Plan gratuito';
+  @override String get profSignInApple => 'Iniciar sesión con Apple';
+  @override String get profSignInDesc => 'Guardá tu progreso en la nube';
+  @override String get profTerms => 'Términos de servicio';
+  @override String get profPrivacy => 'Política de privacidad';
+  @override String get profDeleteAccount => 'Eliminar cuenta';
+  @override String get profDeleteConfirmTitle => 'Eliminar cuenta';
+  @override String get profDeleteConfirmMsg => 'Esta acción es irreversible. Todos tus datos serán eliminados permanentemente.';
+  @override String get profDeleteCancel => 'Cancelar';
+  @override String get profDeleteConfirm => 'Eliminar';
+  @override String get proGateTitle => 'Función PRO';
+  @override String get proGateSubtitle => 'Desbloquea acceso ilimitado a todas las funciones';
+  @override String get proGateUnlock => 'Desbloquear PRO ✨';
+  @override String get proGateSessionsUsed => 'de 3 sesiones gratis usadas';
+  @override String get proGateFreeSessionsBanner => 'sesiones gratis restantes';
 
   // SETTINGS
   @override String get setTitle => 'Ajustes';

@@ -367,48 +367,77 @@ class _ProjectionGraphPageState extends State<_ProjectionGraphPage>
               style: TextStyle(fontFamily: 'Outfit', fontSize: 15, color: AppColors.coral, fontWeight: FontWeight.w600),
             ),
           ),
-          const SizedBox(height: 32),
-          // Animated graph
+          const SizedBox(height: 28),
+          // Premium dark gradient graph card
           FadeSlideIn(
             delay: const Duration(milliseconds: 300),
             child: Container(
-              height: 220,
+              height: 240,
               width: double.infinity,
-              padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(24),
-                boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 20)],
+                borderRadius: BorderRadius.circular(28),
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Color(0xFF1A1A2E), Color(0xFF16213E), Color(0xFF0F3460)],
+                ),
+                boxShadow: [
+                  BoxShadow(color: const Color(0xFF0F3460).withValues(alpha: 0.4), blurRadius: 30, offset: const Offset(0, 12)),
+                  BoxShadow(color: AppColors.coral.withValues(alpha: 0.08), blurRadius: 40),
+                ],
               ),
-              child: AnimatedBuilder(
-                animation: _controller,
-                builder: (context, _) {
-                  return CustomPaint(
-                    painter: _WeightGraphPainter(
-                      progress: Curves.easeOutCubic.transform(_controller.value),
-                      currentWeight: _currentWeight,
-                      targetWeight: _targetWeight,
-                      weeks: _weeks,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(28),
+                child: Stack(
+                  children: [
+                    // Subtle radial glow behind the graph
+                    Positioned(
+                      top: -20, right: -20,
+                      child: Container(
+                        width: 160, height: 160,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: RadialGradient(
+                            colors: [AppColors.coral.withValues(alpha: 0.12), Colors.transparent],
+                          ),
+                        ),
+                      ),
                     ),
-                    size: Size.infinite,
-                  );
-                },
+                    Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: AnimatedBuilder(
+                        animation: _controller,
+                        builder: (context, _) {
+                          return CustomPaint(
+                            painter: _PremiumWeightGraphPainter(
+                              progress: Curves.easeOutCubic.transform(_controller.value),
+                              currentWeight: _currentWeight,
+                              targetWeight: _targetWeight,
+                              weeks: _weeks,
+                            ),
+                            size: Size.infinite,
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
-          const SizedBox(height: 24),
-          // Milestones
+          const SizedBox(height: 20),
+          // Milestones with glassmorphic cards
           FadeSlideIn(
             delay: const Duration(milliseconds: 800),
-            child: _Milestone('🌱', L10n.s.p5Week2Milestone, L10n.s.p5Week2Desc),
+            child: _MilestoneCard('🌱', L10n.s.p5Week2Milestone, L10n.s.p5Week2Desc),
           ),
           FadeSlideIn(
             delay: const Duration(milliseconds: 1000),
-            child: _Milestone('🔥', '${L10n.s.p5WeekLabel} ${(_weeks * 0.5).round()}', L10n.s.p5HalfwayMilestoneDesc),
+            child: _MilestoneCard('🔥', '${L10n.s.p5WeekLabel} ${(_weeks * 0.5).round()}', L10n.s.p5HalfwayMilestoneDesc),
           ),
           FadeSlideIn(
             delay: const Duration(milliseconds: 1200),
-            child: _Milestone('🎯', '${L10n.s.p5WeekLabel} $_weeks', '${_targetWeight.toStringAsFixed(1)} kg — ${L10n.s.p5GoalMilestoneDesc}'),
+            child: _MilestoneCard('🎯', '${L10n.s.p5WeekLabel} $_weeks', '${_targetWeight.toStringAsFixed(1)} kg — ${L10n.s.p5GoalMilestoneDesc}'),
           ),
           const Spacer(),
           FadeSlideIn(
@@ -422,34 +451,58 @@ class _ProjectionGraphPageState extends State<_ProjectionGraphPage>
   }
 }
 
-class _Milestone extends StatelessWidget {
+class _MilestoneCard extends StatelessWidget {
   final String emoji, title, desc;
-  const _Milestone(this.emoji, this.title, this.desc);
+  const _MilestoneCard(this.emoji, this.title, this.desc);
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Row(
-        children: [
-          Text(emoji, style: const TextStyle(fontSize: 20)),
-          const SizedBox(width: 12),
-          Text(title, style: const TextStyle(fontFamily: 'Outfit', fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.coral)),
-          const SizedBox(width: 8),
-          Expanded(child: Text(desc, style: TextStyle(fontFamily: 'Outfit', fontSize: 14, color: AppColors.dark.withValues(alpha: 0.6)))),
-        ],
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.coral.withValues(alpha: 0.08)),
+          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 10)],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 36, height: 36,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [AppColors.coral.withValues(alpha: 0.12), AppColors.lavender.withValues(alpha: 0.12)],
+                ),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Center(child: Text(emoji, style: const TextStyle(fontSize: 18))),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Row(
+                children: [
+                  Text(title, style: const TextStyle(fontFamily: 'Outfit', fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.coral)),
+                  const SizedBox(width: 8),
+                  Expanded(child: Text(desc, style: TextStyle(fontFamily: 'Outfit', fontSize: 13, color: AppColors.dark.withValues(alpha: 0.55)))),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
-class _WeightGraphPainter extends CustomPainter {
+class _PremiumWeightGraphPainter extends CustomPainter {
   final double progress;
   final double currentWeight;
   final double targetWeight;
   final int weeks;
 
-  _WeightGraphPainter({
+  _PremiumWeightGraphPainter({
     required this.progress,
     required this.currentWeight,
     required this.targetWeight,
@@ -463,19 +516,20 @@ class _WeightGraphPainter extends CustomPainter {
     final padding = 40.0;
     final graphW = w - padding * 2;
     final graphH = h - padding;
+    final weightRange = currentWeight - targetWeight;
 
-    // Y axis labels
-    final textStyle = TextStyle(fontFamily: 'Outfit', fontSize: 11, color: Colors.grey.withValues(alpha: 0.6));
-    _drawText(canvas, '${currentWeight.toStringAsFixed(0)} kg', Offset(0, padding * 0.3), textStyle);
-    _drawText(canvas, '${targetWeight.toStringAsFixed(0)} kg', Offset(0, graphH), textStyle);
+    // Y axis labels (white text on dark background)
+    final labelStyle = TextStyle(fontFamily: 'Outfit', fontSize: 11, color: Colors.white.withValues(alpha: 0.5));
+    _drawText(canvas, '${currentWeight.toStringAsFixed(0)} kg', Offset(0, padding * 0.3), labelStyle);
+    _drawText(canvas, '${targetWeight.toStringAsFixed(0)} kg', Offset(0, graphH), TextStyle(fontFamily: 'Outfit', fontSize: 11, fontWeight: FontWeight.w700, color: const Color(0xFF4CAF50).withValues(alpha: 0.9)));
 
     // X axis labels
-    _drawText(canvas, L10n.s.p5Today, Offset(padding, h - 10), textStyle);
-    _drawText(canvas, '${L10n.s.p5WeekLabel} $weeks', Offset(w - padding - 30, h - 10), textStyle);
+    _drawText(canvas, L10n.s.p5Today, Offset(padding, h - 10), labelStyle);
+    _drawText(canvas, '${L10n.s.p5WeekLabel} $weeks', Offset(w - padding - 30, h - 10), labelStyle);
 
-    // Grid lines
+    // Subtle grid lines
     final gridPaint = Paint()
-      ..color = Colors.grey.withValues(alpha: 0.08)
+      ..color = Colors.white.withValues(alpha: 0.05)
       ..strokeWidth = 1;
     for (var i = 0; i < 4; i++) {
       final y = padding + (graphH - padding) * i / 3;
@@ -486,12 +540,10 @@ class _WeightGraphPainter extends CustomPainter {
     final path = Path();
     final totalPoints = 50;
     final drawnPoints = (totalPoints * progress).round();
-    final weightRange = currentWeight - targetWeight;
 
     for (var i = 0; i <= drawnPoints; i++) {
       final t = i / totalPoints;
       final x = padding + graphW * t;
-      // Exponential decay curve — fast start, plateau at end
       final weightAtT = currentWeight - weightRange * (1 - math.pow(1 - t, 2.2));
       final y = padding + (graphH - padding) * ((weightAtT - targetWeight) / weightRange).clamp(0, 1);
 
@@ -502,7 +554,7 @@ class _WeightGraphPainter extends CustomPainter {
       }
     }
 
-    // Gradient fill under curve
+    // Gradient fill under curve (higher opacity)
     if (drawnPoints > 0) {
       final fillPath = Path.from(path);
       final lastX = padding + graphW * (drawnPoints / totalPoints);
@@ -514,36 +566,70 @@ class _WeightGraphPainter extends CustomPainter {
         ..shader = LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [AppColors.coral.withValues(alpha: 0.15), AppColors.coral.withValues(alpha: 0.01)],
+          colors: [AppColors.coral.withValues(alpha: 0.3), const Color(0xFFFFD700).withValues(alpha: 0.05), Colors.transparent],
+          stops: const [0.0, 0.5, 1.0],
         ).createShader(Rect.fromLTWH(0, 0, w, h));
       canvas.drawPath(fillPath, fillPaint);
     }
 
-    // Line
+    // Glow line (thick, blurred)
     canvas.drawPath(path, Paint()
-      ..color = AppColors.coral
+      ..color = AppColors.coral.withValues(alpha: 0.3)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 3
+      ..strokeWidth = 8
       ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round);
+      ..strokeJoin = StrokeJoin.round
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6));
 
-    // Endpoint dot with glow
+    // Main neon gradient line
+    if (drawnPoints > 0) {
+      final lastX = padding + graphW * (drawnPoints / totalPoints);
+      canvas.drawPath(path, Paint()
+        ..shader = LinearGradient(
+          colors: [AppColors.coral, const Color(0xFFFFD700)],
+        ).createShader(Rect.fromLTWH(padding, 0, lastX - padding, h))
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 3.5
+        ..strokeCap = StrokeCap.round
+        ..strokeJoin = StrokeJoin.round);
+    }
+
+    // Milestone dots on curve (15%, 50%, 100%)
+    for (final milestone in [0.15, 0.5, 1.0]) {
+      final mPoint = (totalPoints * milestone).round();
+      if (mPoint <= drawnPoints) {
+        final t = mPoint / totalPoints;
+        final mx = padding + graphW * t;
+        final mWeight = currentWeight - weightRange * (1 - math.pow(1 - t, 2.2));
+        final my = padding + (graphH - padding) * ((mWeight - targetWeight) / weightRange).clamp(0, 1);
+
+        // Dot ring
+        canvas.drawCircle(Offset(mx, my), 4, Paint()..color = Colors.white.withValues(alpha: 0.3));
+        canvas.drawCircle(Offset(mx, my), 2.5, Paint()..color = Colors.white);
+      }
+    }
+
+    // Endpoint dot with animated pulse
     if (drawnPoints > 0) {
       final endT = drawnPoints / totalPoints;
       final endX = padding + graphW * endT;
       final endWeight = currentWeight - weightRange * (1 - math.pow(1 - endT, 2.2));
       final endY = padding + (graphH - padding) * ((endWeight - targetWeight) / weightRange).clamp(0, 1);
 
-      canvas.drawCircle(Offset(endX, endY), 8, Paint()
-        ..color = AppColors.coral.withValues(alpha: 0.2));
+      // Pulse ripple
+      canvas.drawCircle(Offset(endX, endY), 12, Paint()
+        ..color = AppColors.coral.withValues(alpha: 0.15)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4));
+      canvas.drawCircle(Offset(endX, endY), 7, Paint()
+        ..color = AppColors.coral.withValues(alpha: 0.3));
       canvas.drawCircle(Offset(endX, endY), 5, Paint()..color = AppColors.coral);
       canvas.drawCircle(Offset(endX, endY), 3, Paint()..color = Colors.white);
     }
 
-    // Target line (dashed)
+    // Target line (dashed, green)
     final targetY = graphH;
     final dashPaint = Paint()
-      ..color = const Color(0xFF4CAF50).withValues(alpha: 0.4)
+      ..color = const Color(0xFF4CAF50).withValues(alpha: 0.35)
       ..strokeWidth = 1.5;
     for (var x = padding; x < w - padding; x += 8) {
       canvas.drawLine(Offset(x, targetY), Offset(x + 4, targetY), dashPaint);
@@ -559,7 +645,7 @@ class _WeightGraphPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _WeightGraphPainter old) => old.progress != progress;
+  bool shouldRepaint(covariant _PremiumWeightGraphPainter old) => old.progress != progress;
 }
 
 /// 🪞 DATA ECHO — Personalized Plan Summary
@@ -967,7 +1053,7 @@ class _CompareColumn extends StatelessWidget {
   }
 }
 
-/// 🧩 IKEA EFFECT — "Confirm YOUR plan"
+/// 🧩 IKEA EFFECT — "Confirm YOUR plan" — Premium Redesign
 class _ConfirmPlanPage extends StatefulWidget {
   final OnboardingData data;
   final VoidCallback onConfirm;
@@ -994,88 +1080,198 @@ class _ConfirmPlanPageState extends State<_ConfirmPlanPage> {
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
-            children: [
-              const SizedBox(height: 32),
-              FadeSlideIn(
-                child: ScaleReveal(
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      BreathingAura(color: AppColors.coral, size: 140),
-                      Container(
-                        width: 90, height: 90,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: AppColors.coralStatusGradient,
-                          boxShadow: [BoxShadow(color: AppColors.coral.withValues(alpha: 0.3), blurRadius: 20)],
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                const SizedBox(height: 28),
+                // Premium animated seal
+                FadeSlideIn(
+                  child: ScaleReveal(
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        BreathingAura(color: AppColors.coral, size: 130),
+                        AnimatedContainer(
+                          duration: const Duration(milliseconds: 600),
+                          width: 85, height: 85,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: _confirmed
+                                ? const LinearGradient(colors: [Color(0xFF4CAF50), Color(0xFF66BB6A)])
+                                : AppColors.coralStatusGradient,
+                            boxShadow: [BoxShadow(
+                              color: (_confirmed ? const Color(0xFF4CAF50) : AppColors.coral).withValues(alpha: 0.35),
+                              blurRadius: 24,
+                            )],
+                          ),
+                          child: Center(
+                            child: AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 400),
+                              child: _confirmed
+                                  ? const Icon(Icons.check_rounded, key: ValueKey('check'), size: 44, color: Colors.white)
+                                  : const Text('✨', key: ValueKey('sparkle'), style: TextStyle(fontSize: 38)),
+                            ),
+                          ),
                         ),
-                        child: const Center(child: Text('📋', style: TextStyle(fontSize: 40))),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                FadeSlideIn(
+                  delay: const Duration(milliseconds: 200),
+                  child: Text(L10n.s.p5ConfirmReady, textAlign: TextAlign.center,
+                      style: const TextStyle(fontFamily: 'Outfit', fontSize: 26, fontWeight: FontWeight.w800, color: AppColors.dark)),
+                ),
+                const SizedBox(height: 6),
+                // Endowed progress badge
+                FadeSlideIn(
+                  delay: const Duration(milliseconds: 300),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [AppColors.coral.withValues(alpha: 0.08), AppColors.lavender.withValues(alpha: 0.08)],
                       ),
-                    ],
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.auto_awesome, size: 14, color: AppColors.coral.withValues(alpha: 0.7)),
+                        const SizedBox(width: 6),
+                        Text('Personalizado con tus 36 respuestas',
+                          style: TextStyle(fontFamily: 'Outfit', fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.coral.withValues(alpha: 0.8))),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 28),
-              FadeSlideIn(
-                delay: const Duration(milliseconds: 200),
-                child: Text(L10n.s.p5ConfirmReady, textAlign: TextAlign.center,
-                    style: const TextStyle(fontFamily: 'Outfit', fontSize: 28, fontWeight: FontWeight.w800, color: AppColors.dark)),
-              ),
-              const SizedBox(height: 16),
-              // Blueprint summary
-              FadeSlideIn(
-                delay: const Duration(milliseconds: 400),
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: AppColors.coral.withValues(alpha: 0.15)),
-                    boxShadow: [BoxShadow(color: AppColors.coral.withValues(alpha: 0.06), blurRadius: 20)],
-                  ),
-                  child: Column(
-                    children: [
-                      _BlueprintRow('🎯', L10n.s.p5BlueprintGoal, '${widget.data.currentWeight?.toStringAsFixed(0) ?? "--"} → ${widget.data.targetWeight?.toStringAsFixed(0) ?? "--"} kg'),
-                      _BlueprintRow('📅', L10n.s.p5BlueprintDuration, '$weeks ${L10n.s.p5BlueprintWeeks}'),
-                      _BlueprintRow('🧘', L10n.s.p5BlueprintIncludes, L10n.s.p5BlueprintIncludesValue),
-                      _BlueprintRow('🔥', L10n.s.p5BlueprintIntensity, widget.data.activityLevel == 'sedentary' ? L10n.s.p5BlueprintIntensityGradual : L10n.s.p5BlueprintIntensityModerate),
-                      if ((widget.data.stressLevel ?? 5) >= 7)
-                        _BlueprintRow('😌', L10n.s.p5BlueprintExtra, L10n.s.p5BlueprintAntiStress),
-                    ],
+                const SizedBox(height: 16),
+                // Premium blueprint card
+                FadeSlideIn(
+                  delay: const Duration(milliseconds: 400),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(18),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(22),
+                      border: Border.all(color: AppColors.coral.withValues(alpha: 0.1)),
+                      boxShadow: [
+                        BoxShadow(color: AppColors.coral.withValues(alpha: 0.06), blurRadius: 24),
+                        BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 8),
+                      ],
+                    ),
+                    child: Column(
+                      children: [
+                        _BlueprintRow('🎯', L10n.s.p5BlueprintGoal, '${widget.data.currentWeight?.toStringAsFixed(0) ?? "--"} → ${widget.data.targetWeight?.toStringAsFixed(0) ?? "--"} kg'),
+                        _BlueprintRow('📅', L10n.s.p5BlueprintDuration, '$weeks ${L10n.s.p5BlueprintWeeks}'),
+                        _BlueprintRow('🧘', L10n.s.p5BlueprintIncludes, L10n.s.p5BlueprintIncludesValue),
+                        _BlueprintRow('🔥', L10n.s.p5BlueprintIntensity, widget.data.activityLevel == 'sedentary' ? L10n.s.p5BlueprintIntensityGradual : L10n.s.p5BlueprintIntensityModerate),
+                        if ((widget.data.stressLevel ?? 5) >= 7)
+                          _BlueprintRow('😌', L10n.s.p5BlueprintExtra, L10n.s.p5BlueprintAntiStress),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              const Spacer(),
-              FadeSlideIn(
-                delay: const Duration(milliseconds: 700),
-                child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 400),
-                  child: _confirmed
-                      ? PremiumCTAButton(
-                          key: const ValueKey('continue'),
-                          text: L10n.s.p5ConfirmContinueBtn,
-                          onPressed: widget.onConfirm,
-                        )
-                      : PremiumCTAButton(
-                          key: const ValueKey('confirm'),
-                          text: L10n.s.p5ConfirmBtn,
-                          onPressed: () {
-                            HapticFeedback.heavyImpact();
-                            setState(() => _confirmed = true);
-                            Future.delayed(const Duration(milliseconds: 1200), () {
-                              if (mounted) widget.onConfirm();
-                            });
-                          },
+                const SizedBox(height: 14),
+                // Value stacking section
+                FadeSlideIn(
+                  delay: const Duration(milliseconds: 550),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(18),
+                      boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 10)],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(L10n.s.p7ValueStack,
+                          style: const TextStyle(fontFamily: 'Outfit', fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.dark)),
+                        const SizedBox(height: 10),
+                        _ValueStackRow('🍎', 'Nutricionista', '\$80.000/mes'),
+                        _ValueStackRow('🧘', 'App de meditación', '\$8.99/mes'),
+                        _ValueStackRow('💪', 'App de fitness', '\$12.99/mes'),
+                        _ValueStackRow('🧠', 'Coach personal', '\$120.000/mes'),
+                        const SizedBox(height: 8),
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [AppColors.coral.withValues(alpha: 0.06), AppColors.lavender.withValues(alpha: 0.06)],
+                            ),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Center(
+                            child: Text('Yuna = Todo incluido ✨',
+                              style: TextStyle(fontFamily: 'Outfit', fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.coral)),
+                          ),
                         ),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 40),
-            ],
+                const SizedBox(height: 24),
+                FadeSlideIn(
+                  delay: const Duration(milliseconds: 700),
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 400),
+                    child: _confirmed
+                        ? PremiumCTAButton(
+                            key: const ValueKey('continue'),
+                            text: L10n.s.p5ConfirmContinueBtn,
+                            onPressed: widget.onConfirm,
+                          )
+                        : PremiumCTAButton(
+                            key: const ValueKey('confirm'),
+                            text: L10n.s.p5ConfirmBtn,
+                            onPressed: () {
+                              HapticFeedback.heavyImpact();
+                              setState(() => _confirmed = true);
+                              Future.delayed(const Duration(milliseconds: 1200), () {
+                                if (mounted) widget.onConfirm();
+                              });
+                            },
+                          ),
+                  ),
+                ),
+                const SizedBox(height: 40),
+              ],
+            ),
           ),
         ),
       ],
+    );
+  }
+}
+
+class _ValueStackRow extends StatelessWidget {
+  final String emoji, service, price;
+  const _ValueStackRow(this.emoji, this.service, this.price);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Row(
+        children: [
+          Text(emoji, style: const TextStyle(fontSize: 14)),
+          const SizedBox(width: 8),
+          Text(service, style: TextStyle(fontFamily: 'Outfit', fontSize: 13, color: AppColors.dark.withValues(alpha: 0.6))),
+          const Spacer(),
+          Text(price,
+            style: TextStyle(
+              fontFamily: 'Outfit', fontSize: 13,
+              color: AppColors.dark.withValues(alpha: 0.3),
+              decoration: TextDecoration.lineThrough,
+              decorationColor: AppColors.dark.withValues(alpha: 0.3),
+            )),
+        ],
+      ),
     );
   }
 }
@@ -1087,14 +1283,21 @@ class _BlueprintRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: 10),
       child: Row(
         children: [
-          Text(emoji, style: const TextStyle(fontSize: 18)),
-          const SizedBox(width: 12),
-          Text(label, style: TextStyle(fontFamily: 'Outfit', fontSize: 14, color: AppColors.dark.withValues(alpha: 0.5))),
+          Container(
+            width: 30, height: 30,
+            decoration: BoxDecoration(
+              color: AppColors.coral.withValues(alpha: 0.06),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Center(child: Text(emoji, style: const TextStyle(fontSize: 15))),
+          ),
+          const SizedBox(width: 10),
+          Text(label, style: TextStyle(fontFamily: 'Outfit', fontSize: 13, color: AppColors.dark.withValues(alpha: 0.5))),
           const Spacer(),
-          Text(value, style: const TextStyle(fontFamily: 'Outfit', fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.dark)),
+          Text(value, style: const TextStyle(fontFamily: 'Outfit', fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.dark)),
         ],
       ),
     );

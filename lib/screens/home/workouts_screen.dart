@@ -7,6 +7,8 @@ import 'package:serenity_flow/models/workout_model.dart';
 import 'package:serenity_flow/screens/session/pre_session_screen.dart';
 import 'package:serenity_flow/screens/workout/workout_detail_screen.dart';
 import 'package:serenity_flow/services/user_profile_provider.dart';
+import 'package:serenity_flow/services/revenue_cat_service.dart';
+import 'package:serenity_flow/components/pro_gate.dart';
 
 /// 💪 Workouts Screen — Personalized based on onboarding exercise preference
 class WorkoutsScreen extends StatefulWidget {
@@ -18,6 +20,7 @@ class WorkoutsScreen extends StatefulWidget {
 
 class _WorkoutsScreenState extends State<WorkoutsScreen> {
   String _selectedCategory = 'all';
+  int _freeSessionsUsed = 0;
 
   String get _preferredExercise => UserProfileProvider.instance.preferredExercise;
 
@@ -79,6 +82,11 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                 _isYogaUser ? L10n.s.dashPlanBreathing : L10n.s.dashPlanHiit,
                 style: TextStyle(fontFamily: 'Outfit', fontSize: 15, color: AppColors.dark.withValues(alpha: 0.5)),
               ),
+              const SizedBox(height: 16),
+
+              // Free sessions banner
+              FreeSessionsBanner(used: _freeSessionsUsed),
+
               const SizedBox(height: 24),
 
               // Featured card
@@ -164,7 +172,12 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
   }
 
   void _openRoutine(Routine routine) {
+    if (!RevenueCatService().isPro && _freeSessionsUsed >= 3) {
+      showProGate(context);
+      return;
+    }
     HapticFeedback.lightImpact();
+    setState(() => _freeSessionsUsed++);
     Navigator.push(context, MaterialPageRoute(builder: (_) => PreSessionScreen(routine: routine)));
   }
 
@@ -223,7 +236,12 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
   }
 
   void _openWorkout(Workout workout) {
+    if (!RevenueCatService().isPro && _freeSessionsUsed >= 3) {
+      showProGate(context);
+      return;
+    }
     HapticFeedback.lightImpact();
+    setState(() => _freeSessionsUsed++);
     Navigator.push(context, MaterialPageRoute(builder: (_) => WorkoutDetailScreen(workout: workout)));
   }
 

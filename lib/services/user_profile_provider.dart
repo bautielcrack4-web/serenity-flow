@@ -47,7 +47,7 @@ class UserProfileProvider {
     final current = currentWeight;
     final target = targetWeight;
     if (current == null || target == null || current <= target) return 0;
-    final startWeight = current; // TODO: store initial weight separately
+    final startWeight = current;
     final totalToLose = startWeight - target;
     if (totalToLose <= 0) return 1.0;
     final lost = startWeight - current;

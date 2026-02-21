@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:serenity_flow/core/design_system.dart';
 import 'package:serenity_flow/core/l10n.dart';
+import 'package:serenity_flow/services/revenue_cat_service.dart';
+import 'package:serenity_flow/components/pro_gate.dart';
 
 /// 🧘 Mindfulness Screen — Breathing, meditation, sleep routines
 class MindfulnessScreen extends StatelessWidget {
@@ -277,17 +279,28 @@ class _MeditationCard extends StatelessWidget {
   final bool isPremium;
   const _MeditationCard({required this.emoji, required this.title, required this.subtitle, required this.duration, required this.color, this.isPremium = false});
 
+  int _parseDurationMinutes() {
+    final match = RegExp(r'(\d+)').firstMatch(duration);
+    return match != null ? int.parse(match.group(1)!) : 5;
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
         HapticFeedback.lightImpact();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('$title — coming soon! 🧘'),
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            duration: const Duration(seconds: 2),
+        if (isPremium && !RevenueCatService().isPro) {
+          showProGate(context);
+          return;
+        }
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (_) => _MeditationPlayerDialog(
+            title: title,
+            emoji: emoji,
+            color: color,
+            durationMinutes: _parseDurationMinutes(),
           ),
         );
       },
@@ -340,6 +353,201 @@ class _MeditationCard extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// 🧘 Meditation Player Dialog — Guided timer with breathing animation
+class _MeditationPlayerDialog extends StatefulWidget {
+  final String title, emoji;
+  final Color color;
+  final int durationMinutes;
+
+  const _MeditationPlayerDialog({
+    required this.title,
+    required this.emoji,
+    required this.color,
+    required this.durationMinutes,
+  });
+
+  @override
+  State<_MeditationPlayerDialog> createState() => _MeditationPlayerDialogState();
+}
+
+class _MeditationPlayerDialogState extends State<_MeditationPlayerDialog> with TickerProviderStateMixin {
+  late AnimationController _timerController;
+  late AnimationController _breathController;
+  bool _isRunning = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _timerController = AnimationController(
+      vsync: this,
+      duration: Duration(minutes: widget.durationMinutes),
+    );
+    _breathController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 8),
+    )..repeat(reverse: true);
+
+    _timerController.forward();
+    _timerController.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        HapticFeedback.heavyImpact();
+        setState(() => _isRunning = false);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timerController.dispose();
+    _breathController.dispose();
+    super.dispose();
+  }
+
+  String _formatTime(int totalSeconds) {
+    final m = totalSeconds ~/ 60;
+    final s = totalSeconds % 60;
+    return '${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDone = !_isRunning;
+
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      child: AnimatedBuilder(
+        animation: Listenable.merge([_timerController, _breathController]),
+        builder: (context, child) {
+          final totalSeconds = widget.durationMinutes * 60;
+          final remaining = ((1.0 - _timerController.value) * totalSeconds).ceil();
+          final breathScale = 0.8 + (_breathController.value * 0.4);
+
+          return Container(
+            padding: const EdgeInsets.all(32),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [widget.color, widget.color.withValues(alpha: 0.7)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(28),
+              boxShadow: [BoxShadow(color: widget.color.withValues(alpha: 0.4), blurRadius: 30, offset: const Offset(0, 10))],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(widget.emoji, style: const TextStyle(fontSize: 36)),
+                const SizedBox(height: 8),
+                Text(widget.title, style: const TextStyle(fontFamily: 'Outfit', fontSize: 18, fontWeight: FontWeight.w800, color: Colors.white), textAlign: TextAlign.center),
+                const SizedBox(height: 28),
+
+                // Animated breathing circle with timer
+                Transform.scale(
+                  scale: isDone ? 1.0 : breathScale,
+                  child: Container(
+                    width: 150, height: 150,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white.withValues(alpha: 0.15),
+                      border: Border.all(color: Colors.white.withValues(alpha: 0.5), width: 3),
+                      boxShadow: [BoxShadow(color: Colors.white.withValues(alpha: 0.1 + _breathController.value * 0.15), blurRadius: 20 + _breathController.value * 20, spreadRadius: 5)],
+                    ),
+                    child: Center(
+                      child: isDone
+                        ? const Text('✨', style: TextStyle(fontSize: 48))
+                        : Text(
+                            _formatTime(remaining),
+                            style: const TextStyle(fontFamily: 'Outfit', fontSize: 36, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 2),
+                          ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                // Breathing guide
+                Text(
+                  isDone ? '¡Sesión completa! 🎉' : (_breathController.value < 0.5 ? 'Inhala...' : 'Exhala...'),
+                  style: TextStyle(fontFamily: 'Outfit', fontSize: 20, fontWeight: FontWeight.w600, color: Colors.white.withValues(alpha: 0.9)),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  isDone ? 'Namaste 🙏' : '${widget.durationMinutes} min',
+                  style: TextStyle(fontFamily: 'Outfit', fontSize: 13, color: Colors.white.withValues(alpha: 0.6)),
+                ),
+
+                const SizedBox(height: 12),
+                // Progress bar
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: LinearProgressIndicator(
+                    value: _timerController.value,
+                    backgroundColor: Colors.white.withValues(alpha: 0.2),
+                    valueColor: const AlwaysStoppedAnimation(Colors.white),
+                    minHeight: 4,
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    if (!isDone) ...[
+                      Expanded(
+                        child: SizedBox(
+                          height: 48,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              HapticFeedback.lightImpact();
+                              setState(() {
+                                if (_timerController.isAnimating) {
+                                  _timerController.stop();
+                                  _breathController.stop();
+                                } else {
+                                  _timerController.forward();
+                                  _breathController.repeat(reverse: true);
+                                }
+                              });
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white.withValues(alpha: 0.2),
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                            ),
+                            child: Icon(_timerController.isAnimating ? Icons.pause_rounded : Icons.play_arrow_rounded, size: 24),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                    ],
+                    Expanded(
+                      child: SizedBox(
+                        height: 48,
+                        child: ElevatedButton(
+                          onPressed: () => Navigator.pop(context),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: widget.color,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          ),
+                          child: Text(
+                            isDone ? 'Cerrar' : 'Salir',
+                            style: const TextStyle(fontFamily: 'Outfit', fontSize: 16, fontWeight: FontWeight.w700),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
