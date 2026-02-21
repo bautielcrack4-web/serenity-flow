@@ -14,6 +14,10 @@ class UserProfileProvider {
   bool _loading = false;
   bool get loading => _loading;
 
+  /// The user's weight at the very first weight log (their starting point)
+  double? _startWeight;
+  double? get startWeight => _startWeight;
+
   /// Load profile from Supabase. Safe to call multiple times — skips if
   /// already loaded unless [force] is true.
   Future<void> load({bool force = false}) async {
@@ -26,6 +30,12 @@ class UserProfileProvider {
       if (data != null) {
         _profile = UserProfile.fromMap(data);
         debugPrint('✅ UserProfile loaded: ${_profile!.displayName}, exercise=${_profile!.preferredExercise}');
+      }
+      // Load the oldest weight log as the starting weight reference
+      final logs = await SupabaseService().getWeightLogs(limit: 100);
+      if (logs.isNotEmpty) {
+        // logs are newest-first, so last element is the oldest
+        _startWeight = (logs.last['weight'] as num).toDouble();
       }
     } catch (e) {
       debugPrint('❌ UserProfile load error: $e');
@@ -46,16 +56,24 @@ class UserProfileProvider {
   double get progressPercent {
     final current = currentWeight;
     final target = targetWeight;
-    if (current == null || target == null || current <= target) return 0;
-    final startWeight = current;
-    final totalToLose = startWeight - target;
-    if (totalToLose <= 0) return 1.0;
-    final lost = startWeight - current;
+    final start = _startWeight;
+    // Need start weight, current weight, and target. Start must be > target for weight-loss.
+    if (current == null || target == null || start == null) return 0;
+    final totalToLose = start - target;
+    if (totalToLose <= 0) return 0; // not a weight-loss goal or bad data
+    final lost = start - current;
+    if (lost <= 0) return 0; // haven't lost any weight yet
     return (lost / totalToLose).clamp(0.0, 1.0);
+  }
+
+  /// Update weight in memory (after logging a new weight entry)
+  Future<void> setCurrentWeight(double weight) async {
+    await load(force: true);
   }
 
   /// Clear profile on logout
   void clear() {
     _profile = null;
+    _startWeight = null;
   }
 }

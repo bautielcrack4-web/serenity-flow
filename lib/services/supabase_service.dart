@@ -421,4 +421,45 @@ class SupabaseService {
       }
     }
   }
+
+  // ── WEIGHT LOGS ──────────────────────────────────────────────────────
+
+  /// Get the last [limit] weight logs for the current user, newest first
+  Future<List<Map<String, dynamic>>> getWeightLogs({int limit = 8}) async {
+    final userId = _supabase.auth.currentUser?.id;
+    if (userId == null) return [];
+    try {
+      final data = await _supabase
+          .from('weight_logs')
+          .select()
+          .eq('user_id', userId)
+          .order('logged_at', ascending: false)
+          .limit(limit);
+      return List<Map<String, dynamic>>.from(data);
+    } catch (e) {
+      debugPrint('Error fetching weight logs: $e');
+      return [];
+    }
+  }
+
+  /// Log a new weight entry and update the profile's current_weight
+  Future<bool> logWeight(double weight) async {
+    final userId = _supabase.auth.currentUser?.id;
+    if (userId == null) return false;
+    try {
+      await _supabase.from('weight_logs').insert({
+        'user_id': userId,
+        'weight': weight,
+        'logged_at': DateTime.now().toIso8601String(),
+      });
+      // Also update profile's current weight
+      await _supabase.from('profiles').update({
+        'current_weight': weight,
+      }).eq('id', userId);
+      return true;
+    } catch (e) {
+      debugPrint('Error logging weight: $e');
+      return false;
+    }
+  }
 }

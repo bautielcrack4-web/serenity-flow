@@ -90,9 +90,23 @@ class RevenueCatService {
       return _isPro;
     } on PlatformException catch (e) {
       var errorCode = PurchasesErrorHelper.getErrorCode(e);
-      if (errorCode != PurchasesErrorCode.purchaseCancelledError) {
-        debugPrint("Error purchasing package: $e");
+      if (errorCode == PurchasesErrorCode.purchaseCancelledError) {
+        return false;
       }
+      // User is already subscribed (e.g. "You're already subscribed" dialog)
+      // → re-check entitlements and treat as success
+      if (errorCode == PurchasesErrorCode.productAlreadyPurchasedError) {
+        debugPrint("Product already purchased — re-checking entitlements");
+        try {
+          final info = await Purchases.getCustomerInfo();
+          _isPro = (info.entitlements.all['pro_access']?.isActive ?? false) ||
+                   (info.entitlements.all['Yuna yoga app Pro']?.isActive ?? false);
+          return _isPro;
+        } catch (_) {
+          return false;
+        }
+      }
+      debugPrint("Error purchasing package: $e");
       return false;
     }
   }

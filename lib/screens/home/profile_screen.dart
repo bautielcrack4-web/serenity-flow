@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'dart:math' as math;
 import 'package:serenity_flow/core/design_system.dart';
 import 'package:serenity_flow/core/l10n.dart';
 import 'package:serenity_flow/services/user_profile_provider.dart';
@@ -25,6 +26,8 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   bool _isPro = false;
   bool _isAnonymous = true;
+  List<Map<String, dynamic>> _weightLogs = [];
+  bool _isLoadingWeights = true;
 
   @override
   void initState() {
@@ -32,6 +35,59 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _isPro = RevenueCatService().isPro;
     final user = Supabase.instance.client.auth.currentUser;
     _isAnonymous = user?.isAnonymous ?? true;
+    _loadWeightLogs();
+  }
+
+  Future<void> _loadWeightLogs() async {
+    final logs = await SupabaseService().getWeightLogs(limit: 8);
+    if (mounted) setState(() { _weightLogs = logs; _isLoadingWeights = false; });
+  }
+
+  void _showLogWeightDialog() {
+    final controller = TextEditingController(
+      text: UserProfileProvider.instance.currentWeight?.toStringAsFixed(1) ?? '',
+    );
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text('Registrar peso', style: TextStyle(fontFamily: 'Outfit', fontWeight: FontWeight.w700)),
+        content: TextField(
+          controller: controller,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          autofocus: true,
+          decoration: InputDecoration(
+            suffixText: 'kg',
+            hintText: '65.0',
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text('Cancelar', style: TextStyle(color: AppColors.gray)),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final weight = double.tryParse(controller.text.replaceAll(',', '.'));
+              if (weight == null || weight < 20 || weight > 300) return;
+              Navigator.pop(ctx);
+              final ok = await SupabaseService().logWeight(weight);
+              if (ok && mounted) {
+                HapticFeedback.mediumImpact();
+                UserProfileProvider.instance.setCurrentWeight(weight);
+                _loadWeightLogs();
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.coral,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            child: const Text('Guardar', style: TextStyle(color: Colors.white, fontFamily: 'Outfit', fontWeight: FontWeight.w600)),
+          ),
+        ],
+      ),
+    );
   }
 
   // ── ACTIONS ──────────────────────────────────────────────────────────
@@ -355,12 +411,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _buildWeightChart(UserProfileProvider up) {
     final s = L10n.s;
-    final cw = up.currentWeight ?? 68.0;
-    final weights = List.generate(8, (i) => cw + (7 - i) * 0.5);
-
-    final maxW = weights.reduce((a, b) => a > b ? a : b) + 1;
-    final minW = weights.reduce((a, b) => a < b ? a : b) - 1;
-    final totalLost = weights.first - weights.last;
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -376,52 +426,111 @@ class _ProfileScreenState extends State<ProfileScreen> {
             children: [
               Text(s.profWeightProgress, style: const TextStyle(fontFamily: 'Outfit', fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.dark)),
               const Spacer(),
-              Text(s.profLast8Weeks, style: const TextStyle(fontFamily: 'Outfit', fontSize: 12, color: AppColors.gray)),
+              GestureDetector(
+                onTap: _showLogWeightDialog,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: AppColors.coral.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.add_rounded, size: 16, color: AppColors.coral),
+                      const SizedBox(width: 4),
+                      Text('Registrar', style: TextStyle(fontFamily: 'Outfit', fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.coral)),
+                    ],
+                  ),
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 16),
-          SizedBox(
-            height: 120,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: weights.asMap().entries.map((entry) {
-                final i = entry.key;
-                final w = entry.value;
-                final range = maxW - minW;
-                final height = range > 0 ? ((maxW - w) / range) * 100 + 20 : 60.0;
-                final isLast = i == weights.length - 1;
-                return Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 3),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Text(w.toStringAsFixed(1), style: TextStyle(fontFamily: 'Outfit', fontSize: 9, fontWeight: FontWeight.w600, color: isLast ? AppColors.coral : AppColors.gray)),
-                        const SizedBox(height: 4),
-                        Container(
-                          height: height,
-                          decoration: BoxDecoration(
-                            color: isLast ? AppColors.coral : AppColors.coral.withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                        ),
-                      ],
-                    ),
+          if (_isLoadingWeights)
+            const SizedBox(
+              height: 140,
+              child: Center(child: CircularProgressIndicator(color: AppColors.coral, strokeWidth: 2)),
+            )
+          else if (_weightLogs.isEmpty)
+            // Empty state — inviting CTA
+            GestureDetector(
+              onTap: _showLogWeightDialog,
+              child: Container(
+                height: 140,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  gradient: LinearGradient(
+                    colors: [AppColors.coral.withValues(alpha: 0.04), AppColors.lavender.withValues(alpha: 0.06)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
-                );
-              }).toList(),
-            ),
-          ),
-          const SizedBox(height: 12),
-          if (totalLost > 0)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text('🎉 -${totalLost.toStringAsFixed(1)} kg ${s.profTotalLost}', style: TextStyle(fontFamily: 'Outfit', fontSize: 14, fontWeight: FontWeight.w700, color: Colors.green.shade600)),
-              ],
-            ),
+                  border: Border.all(color: AppColors.coral.withValues(alpha: 0.1)),
+                ),
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.monitor_weight_outlined, size: 36, color: AppColors.coral.withValues(alpha: 0.5)),
+                      const SizedBox(height: 10),
+                      Text('Registrá tu peso para ver tu progreso',
+                        style: TextStyle(fontFamily: 'Outfit', fontSize: 14, fontWeight: FontWeight.w500, color: AppColors.dark.withValues(alpha: 0.5))),
+                      const SizedBox(height: 4),
+                      Text('Tocá para empezar ✨',
+                        style: TextStyle(fontFamily: 'Outfit', fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.coral)),
+                    ],
+                  ),
+                ),
+              ),
+            )
+          else
+            // Real data — premium line chart
+            _buildRealWeightChart(),
         ],
       ),
+    );
+  }
+
+  Widget _buildRealWeightChart() {
+    // Reverse so oldest is first (left) → newest last (right)
+    final sorted = _weightLogs.reversed.toList();
+    final weights = sorted.map((l) => (l['weight'] as num).toDouble()).toList();
+    final maxW = weights.reduce(math.max) + 0.5;
+    final minW = weights.reduce(math.min) - 0.5;
+    final totalChange = weights.first - weights.last;
+    final targetW = UserProfileProvider.instance.targetWeight;
+
+    return Column(
+      children: [
+        SizedBox(
+          height: 160,
+          child: CustomPaint(
+            painter: _WeightLineChartPainter(
+              weights: weights,
+              maxW: maxW,
+              minW: minW,
+              targetWeight: targetW,
+            ),
+            size: Size.infinite,
+          ),
+        ),
+        const SizedBox(height: 12),
+        if (totalChange.abs() > 0.1)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                totalChange > 0
+                    ? '📉 -${totalChange.toStringAsFixed(1)} kg perdidos'
+                    : '📈 +${totalChange.abs().toStringAsFixed(1)} kg ganados',
+                style: TextStyle(
+                  fontFamily: 'Outfit', fontSize: 14, fontWeight: FontWeight.w700,
+                  color: totalChange > 0 ? Colors.green.shade600 : AppColors.coral,
+                ),
+              ),
+            ],
+          ),
+      ],
     );
   }
 
@@ -679,4 +788,137 @@ class _SettingsTile extends StatelessWidget {
       ),
     );
   }
+}
+
+// ── PREMIUM LINE CHART PAINTER ────────────────────────────────────────
+
+class _WeightLineChartPainter extends CustomPainter {
+  final List<double> weights;
+  final double maxW, minW;
+  final double? targetWeight;
+
+  _WeightLineChartPainter({
+    required this.weights,
+    required this.maxW,
+    required this.minW,
+    this.targetWeight,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (weights.isEmpty) return;
+    final w = size.width;
+    final h = size.height;
+    final padding = 36.0;
+    final graphW = w - padding - 8;
+    final graphH = h - 24;
+    final range = maxW - minW;
+
+    // Y-axis labels
+    final labelStyle = TextStyle(fontFamily: 'Outfit', fontSize: 10, color: const Color(0xFF999999));
+    _drawText(canvas, maxW.toStringAsFixed(0), Offset(0, 2), labelStyle);
+    _drawText(canvas, minW.toStringAsFixed(0), Offset(0, graphH - 4), labelStyle);
+
+    // Subtle grid lines
+    final gridPaint = Paint()
+      ..color = const Color(0xFFEEEEEE)
+      ..strokeWidth = 0.5;
+    for (var i = 0; i < 4; i++) {
+      final y = 8.0 + graphH * i / 3;
+      canvas.drawLine(Offset(padding, y), Offset(w, y), gridPaint);
+    }
+
+    // Target weight dashed line
+    if (targetWeight != null && targetWeight! >= minW && targetWeight! <= maxW) {
+      final targetY = 8.0 + graphH * (1 - (targetWeight! - minW) / range);
+      final dashPaint = Paint()
+        ..color = const Color(0xFF4CAF50).withValues(alpha: 0.4)
+        ..strokeWidth = 1.5;
+      for (var x = padding; x < w; x += 8) {
+        canvas.drawLine(Offset(x, targetY), Offset(x + 4, targetY), dashPaint);
+      }
+      _drawText(canvas, '🎯', Offset(padding - 18, targetY - 8), const TextStyle(fontSize: 12));
+    }
+
+    // Build path
+    final path = Path();
+    final points = <Offset>[];
+    for (var i = 0; i < weights.length; i++) {
+      final t = weights.length == 1 ? 0.5 : i / (weights.length - 1);
+      final x = padding + graphW * t;
+      final y = 8.0 + graphH * (1 - (weights[i] - minW) / range);
+      points.add(Offset(x, y));
+      if (i == 0) {
+        path.moveTo(x, y);
+      } else {
+        // Smooth curve
+        final prev = points[i - 1];
+        final cpX = (prev.dx + x) / 2;
+        path.cubicTo(cpX, prev.dy, cpX, y, x, y);
+      }
+    }
+
+    // Gradient fill below line
+    if (points.length > 1) {
+      final fillPath = Path.from(path);
+      fillPath.lineTo(points.last.dx, graphH + 8);
+      fillPath.lineTo(points.first.dx, graphH + 8);
+      fillPath.close();
+      final fillPaint = Paint()
+        ..shader = const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0x30FF6B6B), Color(0x05FF6B6B)],
+        ).createShader(Rect.fromLTWH(0, 0, w, h));
+      canvas.drawPath(fillPath, fillPaint);
+    }
+
+    // Glow line
+    canvas.drawPath(path, Paint()
+      ..color = AppColors.coral.withValues(alpha: 0.2)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 8
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4));
+
+    // Main gradient line
+    canvas.drawPath(path, Paint()
+      ..shader = const LinearGradient(
+        colors: [Color(0xFFFF6B6B), Color(0xFFFFD700)],
+      ).createShader(Rect.fromLTWH(padding, 0, graphW, h))
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round);
+
+    // Data points
+    for (var i = 0; i < points.length; i++) {
+      final p = points[i];
+      final isLast = i == points.length - 1;
+      // Outer ring
+      canvas.drawCircle(p, isLast ? 6 : 4, Paint()..color = Colors.white);
+      canvas.drawCircle(p, isLast ? 5 : 3, Paint()..color = AppColors.coral);
+      if (isLast) {
+        canvas.drawCircle(p, 3, Paint()..color = Colors.white);
+      }
+      // Weight label
+      final label = weights[i].toStringAsFixed(1);
+      _drawText(canvas, label, Offset(p.dx - 14, p.dy - 18),
+          TextStyle(fontFamily: 'Outfit', fontSize: 9, fontWeight: FontWeight.w600,
+              color: isLast ? AppColors.coral : const Color(0xFF999999)));
+    }
+  }
+
+  void _drawText(Canvas canvas, String text, Offset offset, TextStyle style) {
+    final tp = TextPainter(
+      text: TextSpan(text: text, style: style),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    tp.paint(canvas, offset);
+  }
+
+  @override
+  bool shouldRepaint(covariant _WeightLineChartPainter old) =>
+      old.weights != weights || old.maxW != maxW || old.minW != minW;
 }
